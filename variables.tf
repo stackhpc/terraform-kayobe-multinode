@@ -1,6 +1,5 @@
 variable "owner" {
   type = string
-  default = "grzegorzkoper"
 }
 variable "cephOSD_count" {
   type    = string
@@ -8,7 +7,6 @@ variable "cephOSD_count" {
 
 variable "repo_name" {
   type = string
-  default = "stackhpc/stackhpc-kayobe-config"
 }
 
 variable "ssh_private_key" {
@@ -21,7 +19,6 @@ variable "ssh_public_key" {
 
 variable "seed_vm_name" {
   type    = string
-  default = "kayobe-seed"
 }
 
 variable "prefix" {
@@ -39,12 +36,10 @@ variable "controller_count" {
 
 variable "seed_vm_image" {
   type    = string
-  default = "CentOS-stream8"
 }
 
 variable "multinode_image" {
   type    = string
-  default = "CentOS-stream8"
 }
 variable "multinode_keypair" {
   type = string
@@ -56,7 +51,6 @@ variable "seed_vm_flavor" {
 
 variable "multinode_flavor" {
   type = string
-  default = "general.v1.tiny"
 }
 
 variable "seed_vm_network" {

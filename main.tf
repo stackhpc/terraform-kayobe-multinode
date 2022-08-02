@@ -38,9 +38,6 @@ resource "openstack_compute_instance_v2" "kayobe-seed" {
     connection {
       type        = "ssh"
       host        = self.access_ip_v4
-      bastion_host = "bastion-sms"
-      bastion_user = "gkoper"
-      bastion_private_key = file(var.ssh_private_key)
       user        = "centos"
       agent       = true
       private_key = file(var.ssh_private_key)
@@ -55,9 +52,6 @@ resource "openstack_compute_instance_v2" "kayobe-seed" {
     connection {
       type        = "ssh"
       host        = self.access_ip_v4
-      bastion_host = "bastion-sms"
-      bastion_user = "gkoper"
-      bastion_private_key = file(var.ssh_private_key)
       user        = "centos"
       agent       = true
       private_key = file(var.ssh_private_key)

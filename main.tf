@@ -4,7 +4,7 @@ data "openstack_images_image_v2" "image" {
 }
 
 data "openstack_networking_subnet_v2" "network" {
-  name = var.seed_vm_subnet
+  name = var.multinode_vm_network
 }
 
 resource "openstack_compute_keypair_v2" "keypair" {
@@ -19,7 +19,7 @@ resource "openstack_compute_instance_v2" "kayobe-seed" {
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
   network {
-    name = var.seed_vm_network
+    name = var.multinode_vm_network
   }
 
   block_device {
@@ -68,7 +68,7 @@ resource "openstack_compute_instance_v2" "compute" {
   user_data    = file("templates/userdata.cfg.tpl")
   count        = var.compute_count
   network {
-    name = var.seed_vm_network
+    name = var.multinode_vm_network
   }
 }
 resource "openstack_compute_instance_v2" "controller" {
@@ -80,7 +80,7 @@ resource "openstack_compute_instance_v2" "controller" {
   user_data    = file("templates/userdata.cfg.tpl")
   count        = var.controller_count
   network {
-    name = var.seed_vm_network
+    name = var.multinode_vm_network
   }
 }
 
@@ -93,7 +93,7 @@ resource "openstack_compute_instance_v2" "Ceph-OSD" {
   user_data    = file("templates/userdata.cfg.tpl")
   count        = var.cephOSD_count
   network {
-    name = var.seed_vm_network
+    name = var.multinode_vm_network
   }
 }
 

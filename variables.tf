@@ -53,10 +53,10 @@ variable "multinode_flavor" {
   type = string
 }
 
-variable "seed_vm_network" {
+variable "multinode_vm_network" {
   type = string
 }
 
-variable "seed_vm_subnet" {
+variable "multinode_vm_subnet" {
   type = string
 }

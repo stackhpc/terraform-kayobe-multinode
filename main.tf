@@ -4,7 +4,7 @@ data "openstack_images_image_v2" "image" {
 }
 
 data "openstack_networking_subnet_v2" "network" {
-  name = var.multinode_vm_network
+  name = var.multinode_vm_subnet
 }
 
 resource "openstack_compute_keypair_v2" "keypair" {

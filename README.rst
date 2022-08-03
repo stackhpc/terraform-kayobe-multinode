@@ -2,7 +2,7 @@
 Terraform Kayobe Multinode
 ==========================
 
-This Terraform configuration deploys a single VM on an OpenStack cloud, to be
+This Terraform configuration deploys a requested amount of Instances on an OpenStack cloud, to be
 used as a Multinode Kayobe test environment.
 
 Usage
@@ -20,7 +20,7 @@ Install Terraform:
    wget -qO - terraform.gpg https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/terraform-archive-keyring.gpg
    sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/terraform-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/terraform.list
    sudo apt update
-   sudo apt install docker.io terraform
+   sudo apt install terraform
 
 Clone and initialise the Kayobe config:
 
@@ -74,12 +74,14 @@ Generate Terraform variables:
    cat << EOF > terraform.tfvars
    ssh_private_key = "id_rsa"
    ssh_public_key = "id_rsa.pub"
-   aio_vm_name = "kayobe-aio"
-   aio_vm_image = "CentOS-stream8"
-   aio_vm_keypair = "kayobe-aio"
-   aio_vm_flavor = "general.v1.medium"
-   aio_vm_network = "stackhpc-ipv4-geneve"
-   aio_vm_subnet = "stackhpc-ipv4-geneve-subnet"
+   seed_vm_name = "kayobe-seed"
+   seed_vm_image = "CentOS-stream8"
+   multinode_keypair = "multinode_keypair"
+   seed_vm_flavor = "general.v1.tiny"
+   multinode_vm_network = "stackhpc-ipv4-geneve"
+   multinode_vm_subnet = "stackhpc-ipv4-geneve-subnet"
+   multinode_image = "CentOS-stream8"
+   multinode_flavor = "general.v1.tiny"
    EOF
 
 Generate a plan:
@@ -94,3 +96,4 @@ Apply the changes:
 
    terraform apply -auto-approve
 
+You should have requested number of resources spawned on Openstack, and ansible_inventory file produced as output for Kayobe.

@@ -1,12 +1,5 @@
-variable "owner" {
-  type = string
-}
 variable "cephOSD_count" {
   type    = string
-}
-
-variable "repo_name" {
-  type = string
 }
 
 variable "ssh_private_key" {

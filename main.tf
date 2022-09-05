@@ -32,8 +32,8 @@ resource "openstack_compute_instance_v2" "kayobe-seed" {
   }
 
   provisioner "file" {
-    source      = "scripts/hello.sh"
-    destination = "/home/centos/hello.sh"
+    source      = "scripts/configure-local-networking.sh"
+    destination = "/home/centos/configure-local-networking.sh"
 
     connection {
       type        = "ssh"
@@ -46,7 +46,7 @@ resource "openstack_compute_instance_v2" "kayobe-seed" {
 
   provisioner "remote-exec" {
     inline = [
-      "bash /home/centos/hello.sh"
+      "bash /home/centos/configure-local-networking.sh"
     ]
 
     connection {

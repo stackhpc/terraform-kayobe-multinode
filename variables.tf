@@ -16,7 +16,7 @@ variable "seed_vm_name" {
 
 variable "prefix" {
   type    = string
-  default = "kayobe"
+  default = "kayobe-multinode"
 }
 
 variable "compute_count" {

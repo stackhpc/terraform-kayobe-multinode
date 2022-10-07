@@ -84,9 +84,9 @@ resource "openstack_compute_instance_v2" "controller" {
   }
 }
 
-resource "openstack_blockstorage_volume_v2" "volumes" {
-  count = 3
-  name = format("%s-osd-%02d-%02d", var.prefix, count.index +1)
+resource "openstack_blockstorage_volume_v3" "volumes" {
+  count = var.cephOSD_count
+  name = format("%s-osd-%02d", var.prefix, count.index +1)
   size = 20
 }
 
@@ -101,11 +101,19 @@ resource "openstack_compute_instance_v2" "Ceph-OSD" {
   network {
     name = var.multinode_vm_network
   }
+  block_device {
+    uuid                  = data.openstack_images_image_v2.image.id
+    source_type           = "image"
+    volume_size           = 30
+    boot_index            = 0
+    destination_type      = "volume"
+    delete_on_termination = true
+  }  
 }
 
 resource "openstack_compute_volume_attach_v2" "attachments" {
-  count = 3
+  count = var.cephOSD_count
   instance_id = openstack_compute_instance_v2.Ceph-OSD.*.id[count.index]
-  volume_id = openstack_blockstorage_volume_v2.volumes.*.id[count.index]
+  volume_id = openstack_blockstorage_volume_v3.volumes.*.id[count.index]
 }
 

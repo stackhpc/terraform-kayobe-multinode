@@ -86,7 +86,7 @@ resource "openstack_compute_instance_v2" "controller" {
 
 resource "openstack_blockstorage_volume_v2" "volumes" {
   count = 3
-  name = format("%s-osd-%02d-%02d", var.prefix  count.index +1)
+  name = format("%s-osd-%02d-%02d", var.prefix, count.index +1)
   size = 20
 }
 

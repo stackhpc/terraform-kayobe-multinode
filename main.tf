@@ -86,7 +86,7 @@ resource "openstack_compute_instance_v2" "controller" {
 
 resource "openstack_compute_instance_v2" "Ceph-OSD" {
   name         = format("%s-cephOSD-%02d", var.prefix, count.index +1)
-  flavor_name  = var.multinode_flavor
+  flavor_name  = var.ceph_flavor
   key_pair     = var.multinode_keypair
   image_name   = var.multinode_image
   config_drive = true

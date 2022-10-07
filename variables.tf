@@ -34,6 +34,7 @@ variable "seed_vm_image" {
 variable "multinode_image" {
   type    = string
 }
+
 variable "multinode_keypair" {
   type = string
 }
@@ -43,6 +44,10 @@ variable "seed_vm_flavor" {
 }
 
 variable "multinode_flavor" {
+  type = string
+}
+
+variable "ceph_flavor" {
   type = string
 }
 

@@ -108,7 +108,7 @@ resource "openstack_compute_instance_v2" "Ceph-OSD" {
     boot_index            = 0
     destination_type      = "volume"
     delete_on_termination = true
-  }  
+  }
 }
 
 resource "openstack_compute_volume_attach_v2" "attachments" {

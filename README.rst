@@ -72,6 +72,9 @@ Generate Terraform variables:
 .. code-block:: console
 
    cat << EOF > terraform.tfvars
+   compute_count = "2"
+   controller_count = "3"
+   storage_count = "3"
    ssh_private_key = "id_rsa"
    ssh_public_key = "id_rsa.pub"
    ansible-control_vm_name = "kayobe-mn-ansible-control"
@@ -83,6 +86,7 @@ Generate Terraform variables:
    multinode_image = "CentOS-stream8-lvm"
    multinode_flavor = "baremetal-32"
    storage_flavor = "general.v1.small"
+   prefix = "kayobe-mn"
    EOF
 
 Generate a plan:

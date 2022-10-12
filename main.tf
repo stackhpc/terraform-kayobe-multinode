@@ -30,35 +30,8 @@ resource "openstack_compute_instance_v2" "kayobe-seed" {
     destination_type      = "volume"
     delete_on_termination = true
   }
-
-  provisioner "file" {
-    source      = "scripts/hello.sh"
-    destination = "/home/centos/hello.sh"
-
-    connection {
-      type        = "ssh"
-      host        = self.access_ip_v4
-      user        = "centos"
-      agent       = true
-      private_key = file(var.ssh_private_key)
-    }
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "bash /home/centos/hello.sh"
-    ]
-
-    connection {
-      type        = "ssh"
-      host        = self.access_ip_v4
-      user        = "centos"
-      agent       = true
-      private_key = file(var.ssh_private_key)
-    }
-
-  }
 }
+
 resource "openstack_compute_instance_v2" "compute" {
   name         = format("%s-compute-%02d", var.prefix, count.index +1)
   flavor_name  = var.multinode_flavor

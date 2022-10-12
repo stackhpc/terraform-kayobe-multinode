@@ -1,5 +1,5 @@
 data "openstack_images_image_v2" "image" {
-  name        = var.seed_vm_image
+  name        = var.ansible-control_vm_image
   most_recent = true
 }
 
@@ -12,9 +12,9 @@ resource "openstack_compute_keypair_v2" "keypair" {
   public_key = file(var.ssh_public_key)
 }
 
-resource "openstack_compute_instance_v2" "kayobe-seed" {
-  name         = var.seed_vm_name
-  flavor_name  = var.seed_vm_flavor
+resource "openstack_compute_instance_v2" "ansible-control" {
+  name         = var.ansible-control_vm_name
+  flavor_name  = var.ansible-control_vm_flavor
   key_pair     = var.multinode_keypair
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
@@ -58,19 +58,19 @@ resource "openstack_compute_instance_v2" "controller" {
 }
 
 resource "openstack_blockstorage_volume_v3" "volumes" {
-  count = var.cephOSD_count
+  count = var.storage_count
   name = format("%s-osd-%02d", var.prefix, count.index +1)
   size = 20
 }
 
-resource "openstack_compute_instance_v2" "Ceph-OSD" {
-  name         = format("%s-cephOSD-%02d", var.prefix, count.index +1)
-  flavor_name  = var.ceph_flavor
+resource "openstack_compute_instance_v2" "storage" {
+  name         = format("%s-storage-%02d", var.prefix, count.index +1)
+  flavor_name  = var.storage_flavor
   key_pair     = var.multinode_keypair
   image_name   = var.multinode_image
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
-  count        = var.cephOSD_count
+  count        = var.storage_count
   network {
     name = var.multinode_vm_network
   }
@@ -85,8 +85,8 @@ resource "openstack_compute_instance_v2" "Ceph-OSD" {
 }
 
 resource "openstack_compute_volume_attach_v2" "attachments" {
-  count = var.cephOSD_count
-  instance_id = openstack_compute_instance_v2.Ceph-OSD.*.id[count.index]
+  count = var.storage_count
+  instance_id = openstack_compute_instance_v2.storage.*.id[count.index]
   volume_id = openstack_blockstorage_volume_v3.volumes.*.id[count.index]
 }
 

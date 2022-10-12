@@ -1,4 +1,4 @@
-variable "cephOSD_count" {
+variable "storage_count" {
   type    = string
 }
 
@@ -10,13 +10,13 @@ variable "ssh_public_key" {
   type = string
 }
 
-variable "seed_vm_name" {
+variable "ansible-control_vm_name" {
   type    = string
 }
 
 variable "prefix" {
   type    = string
-  default = "kayobe-multinode"
+  default = "kayobe-mn"
 }
 
 variable "compute_count" {
@@ -27,7 +27,7 @@ variable "controller_count" {
   type    = string
 }
 
-variable "seed_vm_image" {
+variable "ansible-control_vm_image" {
   type    = string
 }
 
@@ -39,7 +39,7 @@ variable "multinode_keypair" {
   type = string
 }
 
-variable "seed_vm_flavor" {
+variable "ansible-control_vm_flavor" {
   type = string
 }
 
@@ -47,7 +47,7 @@ variable "multinode_flavor" {
   type = string
 }
 
-variable "ceph_flavor" {
+variable "storage_flavor" {
   type = string
 }
 

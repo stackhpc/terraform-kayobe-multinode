@@ -74,9 +74,9 @@ Generate Terraform variables:
    cat << EOF > terraform.tfvars
    ssh_private_key = "id_rsa"
    ssh_public_key = "id_rsa.pub"
-   ansible-control_vm_name = "kayobe-ml-ansible-control"
+   ansible-control_vm_name = "kayobe-mn-ansible-control"
    ansible-control_vm_image = "CentOS-stream8-lvm"
-   multinode_keypair = "wallaby_ml_keypair2"
+   multinode_keypair = "wallaby_mn_keypair2"
    ansible-control_vm_flavor = "general.v1.small"
    multinode_vm_network = "stackhpc-ipv4-vlan-v2"
    multinode_vm_subnet = "stackhpc-ipv4-vlan-subnet-v2"

@@ -74,14 +74,15 @@ Generate Terraform variables:
    cat << EOF > terraform.tfvars
    ssh_private_key = "id_rsa"
    ssh_public_key = "id_rsa.pub"
-   seed_vm_name = "kayobe-seed"
-   seed_vm_image = "CentOS-stream8"
-   multinode_keypair = "multinode_keypair"
-   seed_vm_flavor = "general.v1.tiny"
-   multinode_vm_network = "stackhpc-ipv4-geneve"
-   multinode_vm_subnet = "stackhpc-ipv4-geneve-subnet"
-   multinode_image = "CentOS-stream8"
-   multinode_flavor = "general.v1.tiny"
+   ansible-control_vm_name = "kayobe-ml-ansible-control"
+   ansible-control_vm_image = "CentOS-stream8-lvm"
+   multinode_keypair = "wallaby_ml_keypair2"
+   ansible-control_vm_flavor = "general.v1.small"
+   multinode_vm_network = "stackhpc-ipv4-vlan-v2"
+   multinode_vm_subnet = "stackhpc-ipv4-vlan-subnet-v2"
+   multinode_image = "CentOS-stream8-lvm"
+   multinode_flavor = "baremetal-32"
+   storage_flavor = "general.v1.small"
    EOF
 
 Generate a plan:

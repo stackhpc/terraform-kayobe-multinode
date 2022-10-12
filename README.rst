@@ -103,4 +103,4 @@ Apply the changes:
 
 You should have requested number of resources spawned on Openstack, and ansible_inventory file produced as output for Kayobe.
 
-Copy your generated id_rsa and id_rsa.pub to ~/.ssh/ on control host if you want Kayobe to automatically pick them up during bootstrap.
+Copy your generated id_rsa and id_rsa.pub to ~/.ssh/ on Ansible control host if you want Kayobe to automatically pick them up during bootstrap.

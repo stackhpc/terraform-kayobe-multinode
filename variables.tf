@@ -16,7 +16,7 @@ variable "ansible-control_vm_name" {
 
 variable "prefix" {
   type    = string
-  default = "kayobe-multinode"
+  default = "kayobe-mn"
 }
 
 variable "compute_count" {

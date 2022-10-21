@@ -1,6 +1,6 @@
-resource "openstack_compute_instance_v2" "ansible-control" {
-  name         = var.ansible-control_vm_name
-  flavor_name  = var.ansible-control_vm_flavor
+resource "openstack_compute_instance_v2" "ansible_control" {
+  name         = var.ansible_control_vm_name
+  flavor_name  = var.ansible_control_vm_flavor
   key_pair     = var.multinode_keypair
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")

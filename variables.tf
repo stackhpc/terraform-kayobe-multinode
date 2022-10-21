@@ -10,7 +10,7 @@ variable "ssh_public_key" {
   type = string
 }
 
-variable "ansible-control_vm_name" {
+variable "ansible_control_vm_name" {
   type = string
 }
 
@@ -27,7 +27,7 @@ variable "controller_count" {
   type = string
 }
 
-variable "ansible-control_vm_image" {
+variable "ansible_control_vm_image" {
   type = string
 }
 
@@ -39,7 +39,7 @@ variable "multinode_keypair" {
   type = string
 }
 
-variable "ansible-control_vm_flavor" {
+variable "ansible_control_vm_flavor" {
   type = string
 }
 

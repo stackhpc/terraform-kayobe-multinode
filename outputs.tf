@@ -1,5 +1,5 @@
-output "ansible-control_access_ip_v4" {
-  value = openstack_compute_instance_v2.ansible-control.access_ip_v4
+output "ansible_control_access_ip_v4" {
+  value = openstack_compute_instance_v2.ansible_control.access_ip_v4
 }
 
 output "access_cidr" {

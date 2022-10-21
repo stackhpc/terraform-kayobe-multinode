@@ -1,5 +1,5 @@
 variable "storage_count" {
-  type    = string
+  type = string
 }
 
 variable "ssh_private_key" {
@@ -11,7 +11,7 @@ variable "ssh_public_key" {
 }
 
 variable "ansible-control_vm_name" {
-  type    = string
+  type = string
 }
 
 variable "prefix" {
@@ -20,19 +20,19 @@ variable "prefix" {
 }
 
 variable "compute_count" {
-  type    = string
+  type = string
 }
 
 variable "controller_count" {
-  type    = string
+  type = string
 }
 
 variable "ansible-control_vm_image" {
-  type    = string
+  type = string
 }
 
 variable "multinode_image" {
-  type    = string
+  type = string
 }
 
 variable "multinode_keypair" {

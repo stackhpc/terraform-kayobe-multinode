@@ -8,7 +8,7 @@ data "openstack_networking_subnet_v2" "network" {
 }
 
 resource "openstack_compute_keypair_v2" "keypair" {
-  name = var.multinode_keypair
+  name       = var.multinode_keypair
   public_key = file(var.ssh_public_key)
 }
 
@@ -33,7 +33,7 @@ resource "openstack_compute_instance_v2" "ansible-control" {
 }
 
 resource "openstack_compute_instance_v2" "compute" {
-  name         = format("%s-compute-%02d", var.prefix, count.index +1)
+  name         = format("%s-compute-%02d", var.prefix, count.index + 1)
   flavor_name  = var.multinode_flavor
   key_pair     = var.multinode_keypair
   image_name   = var.multinode_image
@@ -45,7 +45,7 @@ resource "openstack_compute_instance_v2" "compute" {
   }
 }
 resource "openstack_compute_instance_v2" "controller" {
-  name         = format("%s-controller-%02d", var.prefix, count.index +1)
+  name         = format("%s-controller-%02d", var.prefix, count.index + 1)
   flavor_name  = var.multinode_flavor
   key_pair     = var.multinode_keypair
   image_name   = var.multinode_image
@@ -59,12 +59,12 @@ resource "openstack_compute_instance_v2" "controller" {
 
 resource "openstack_blockstorage_volume_v3" "volumes" {
   count = var.storage_count
-  name = format("%s-osd-%02d", var.prefix, count.index +1)
-  size = 20
+  name  = format("%s-osd-%02d", var.prefix, count.index + 1)
+  size  = 20
 }
 
 resource "openstack_compute_instance_v2" "storage" {
-  name         = format("%s-storage-%02d", var.prefix, count.index +1)
+  name         = format("%s-storage-%02d", var.prefix, count.index + 1)
   flavor_name  = var.storage_flavor
   key_pair     = var.multinode_keypair
   image_name   = var.multinode_image
@@ -85,8 +85,8 @@ resource "openstack_compute_instance_v2" "storage" {
 }
 
 resource "openstack_compute_volume_attach_v2" "attachments" {
-  count = var.storage_count
+  count       = var.storage_count
   instance_id = openstack_compute_instance_v2.storage.*.id[count.index]
-  volume_id = openstack_blockstorage_volume_v3.volumes.*.id[count.index]
+  volume_id   = openstack_blockstorage_volume_v3.volumes.*.id[count.index]
 }
 

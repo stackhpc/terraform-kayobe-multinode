@@ -16,6 +16,9 @@ resource "openstack_compute_instance_v2" "ansible_control" {
     destination_type      = "volume"
     delete_on_termination = true
   }
+  timeouts {
+    create = "90m"
+  }
 }
 
 resource "openstack_compute_instance_v2" "seed" {
@@ -36,6 +39,9 @@ resource "openstack_compute_instance_v2" "seed" {
     destination_type      = "volume"
     delete_on_termination = true
   }
+  timeouts {
+    create = "90m"
+  }
 }
 
 resource "openstack_compute_instance_v2" "compute" {
@@ -49,6 +55,9 @@ resource "openstack_compute_instance_v2" "compute" {
   network {
     name = var.multinode_vm_network
   }
+  timeouts {
+    create = "90m"
+  }
 }
 resource "openstack_compute_instance_v2" "controller" {
   name         = format("%s-controller-%02d", var.prefix, count.index + 1)
@@ -60,6 +69,9 @@ resource "openstack_compute_instance_v2" "controller" {
   count        = var.controller_count
   network {
     name = var.multinode_vm_network
+  }
+  timeouts {
+    create = "90m"
   }
 }
 
@@ -81,5 +93,8 @@ resource "openstack_compute_instance_v2" "storage" {
     boot_index            = 0
     destination_type      = "volume"
     delete_on_termination = true
+  }
+  timeouts {
+    create = "90m"
   }
 }

@@ -1,5 +1,5 @@
 [seed]
-
+${seed}
 [compute]
 %{ for index, ip in compute ~}
 ${compute_hostname[index]}

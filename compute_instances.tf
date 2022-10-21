@@ -22,6 +22,8 @@ resource "openstack_compute_instance_v2" "seed" {
   name         = format("%s-seed", var.prefix)
   flavor_name  = var.seed_vm_flavor
   key_pair     = var.multinode_keypair
+  config_drive = true
+  user_data    = file("templates/userdata.cfg.tpl")
   network {
     name = var.multinode_vm_network
   }

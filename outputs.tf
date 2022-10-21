@@ -30,12 +30,14 @@ resource "local_file" "inventory" {
       prefix                   = "kayobe"
       compute_hostname         = openstack_compute_instance_v2.compute.*.name
       controller_hostname      = openstack_compute_instance_v2.controller.*.name
-      ansible-control_hostname = openstack_compute_instance_v2.ansible-control.name
-      ansible-control          = openstack_compute_instance_v2.ansible-control.access_ip_v4
+      ansible_control_hostname = openstack_compute_instance_v2.ansible_control.name
+      ansible_control          = openstack_compute_instance_v2.ansible_control.access_ip_v4
       compute                  = openstack_compute_instance_v2.compute.*.access_ip_v4
       controllers              = openstack_compute_instance_v2.controller.*.access_ip_v4
       storage_hostname         = openstack_compute_instance_v2.storage.*.name
       storage                  = openstack_compute_instance_v2.storage.*.access_ip_v4
+      seed_hostname = openstack_compute_instance_v2.seed.name
+      seed          = openstack_compute_instance_v2.seed.access_ip_v4
     }
   )
   filename = "ansible_inventory"

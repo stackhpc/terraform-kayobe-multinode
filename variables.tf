@@ -10,6 +10,14 @@ variable "ansible_control_vm_name" {
   type = string
 }
 
+variable "seed_vm_flavor" {
+  type = string
+}
+
+variable "seed_vm_image" {
+  type = string
+}
+
 variable "prefix" {
   type    = string
   default = "kayobe-mn"

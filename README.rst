@@ -67,6 +67,33 @@ Export environment variables to use the correct cloud and provide a password:
    read -p OS_PASSWORD -s OS_PASSWORD
    export OS_PASSWORD
 
+Or you can source the provided `.init.sh` script which shall initialise terraform and export two variables.
+`OS_CLOUD` is a variable which is used by Terraform and must match an entry within `clouds.yml`.
+`OS_PASSWORD` is the password used to authenticate when signing into OpenStack.
+
+.. code-block:: console
+   source ./init.sh
+
+   Initializing the backend...
+
+   Initializing provider plugins...
+   - Reusing previous version of terraform-provider-openstack/openstack from the dependency lock file
+   - Reusing previous version of hashicorp/local from the dependency lock file
+   - Using previously-installed terraform-provider-openstack/openstack v1.48.0
+   - Using previously-installed hashicorp/local v2.2.3
+
+   Terraform has been successfully initialized!
+
+   You may now begin working with Terraform. Try running "terraform plan" to see
+   any changes that are required for your infrastructure. All Terraform commands
+   should now work.
+
+   If you ever set or change modules or backend configuration for Terraform,
+   rerun this command to reinitialize your working directory. If you forget, other
+   commands will detect it and remind you to do so if necessary.
+   OpenStack Cloud Name: sms-lab
+   Password:
+
 Generate Terraform variables:
 
 .. code-block:: console

@@ -36,8 +36,8 @@ resource "local_file" "inventory" {
       controllers              = openstack_compute_instance_v2.controller.*.access_ip_v4
       storage_hostname         = openstack_compute_instance_v2.storage.*.name
       storage                  = openstack_compute_instance_v2.storage.*.access_ip_v4
-      seed_hostname = openstack_compute_instance_v2.seed.name
-      seed          = openstack_compute_instance_v2.seed.access_ip_v4
+      seed_hostname            = openstack_compute_instance_v2.seed.name
+      seed                     = openstack_compute_instance_v2.seed.access_ip_v4
     }
   )
   filename = "ansible_inventory"

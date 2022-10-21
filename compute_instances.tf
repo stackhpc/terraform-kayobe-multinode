@@ -9,7 +9,7 @@ resource "openstack_compute_instance_v2" "ansible_control" {
   }
 
   block_device {
-    uuid                  = data.openstack_images_image_v2.ansible_image.id
+    uuid                  = data.openstack_images_image_v2.multinode_image.id
     source_type           = "image"
     volume_size           = 100
     boot_index            = 0
@@ -29,7 +29,7 @@ resource "openstack_compute_instance_v2" "seed" {
   }
 
   block_device {
-    uuid                  = data.openstack_images_image_v2.seed_image.id
+    uuid                  = data.openstack_images_image_v2.multinode_image.id
     source_type           = "image"
     volume_size           = 100
     boot_index            = 0
@@ -75,7 +75,7 @@ resource "openstack_compute_instance_v2" "storage" {
     name = var.multinode_vm_network
   }
   block_device {
-    uuid                  = data.openstack_images_image_v2.image.id
+    uuid                  = data.openstack_images_image_v2.multinode_image.id
     source_type           = "image"
     volume_size           = 30
     boot_index            = 0

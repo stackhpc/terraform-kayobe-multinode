@@ -14,10 +14,6 @@ variable "seed_vm_flavor" {
   type = string
 }
 
-variable "seed_vm_image" {
-  type = string
-}
-
 variable "prefix" {
   type    = string
   default = "kayobe-mn"
@@ -28,10 +24,6 @@ variable "compute_count" {
 }
 
 variable "controller_count" {
-  type = string
-}
-
-variable "ansible_control_vm_image" {
   type = string
 }
 

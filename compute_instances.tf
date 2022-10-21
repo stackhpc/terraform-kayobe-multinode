@@ -1,5 +1,5 @@
 resource "openstack_compute_instance_v2" "ansible_control" {
-  name         = var.ansible_control_vm_name
+  name         = format("%s-%s", var.prefix, var.ansible_control_vm_name)
   flavor_name  = var.ansible_control_vm_flavor
   key_pair     = var.multinode_keypair
   config_drive = true

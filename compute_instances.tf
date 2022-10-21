@@ -1,17 +1,3 @@
-data "openstack_images_image_v2" "image" {
-  name        = var.ansible-control_vm_image
-  most_recent = true
-}
-
-data "openstack_networking_subnet_v2" "network" {
-  name = var.multinode_vm_subnet
-}
-
-resource "openstack_compute_keypair_v2" "keypair" {
-  name       = var.multinode_keypair
-  public_key = file(var.ssh_public_key)
-}
-
 resource "openstack_compute_instance_v2" "ansible-control" {
   name         = var.ansible-control_vm_name
   flavor_name  = var.ansible-control_vm_flavor
@@ -57,12 +43,6 @@ resource "openstack_compute_instance_v2" "controller" {
   }
 }
 
-resource "openstack_blockstorage_volume_v3" "volumes" {
-  count = var.storage_count
-  name  = format("%s-osd-%02d", var.prefix, count.index + 1)
-  size  = 20
-}
-
 resource "openstack_compute_instance_v2" "storage" {
   name         = format("%s-storage-%02d", var.prefix, count.index + 1)
   flavor_name  = var.storage_flavor
@@ -83,10 +63,3 @@ resource "openstack_compute_instance_v2" "storage" {
     delete_on_termination = true
   }
 }
-
-resource "openstack_compute_volume_attach_v2" "attachments" {
-  count       = var.storage_count
-  instance_id = openstack_compute_instance_v2.storage.*.id[count.index]
-  volume_id   = openstack_blockstorage_volume_v3.volumes.*.id[count.index]
-}
-

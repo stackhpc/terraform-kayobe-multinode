@@ -23,16 +23,16 @@ rgws
 [mons]
 %{ for element in storage_hostname ~}
 ${ element }
-%{endfor ~}
+%{ endfor ~}
 
 [mgsr]
 %{ for element in storage_hostname ~}
 ${ element }
-%{endfor ~}
+%{ endfor ~}
 
 [osds]
 %{ for element in storage_hostname ~}
 ${ element }
-%{endfor ~}
+%{ endfor ~}
 
 [rgws]

@@ -26,8 +26,21 @@ resource "local_file" "hosts" {
   content = templatefile(
     "${path.module}/templates/hosts.tpl",
     {
-      user                     = "centos"
-      prefix                   = "kayobe"
+      compute_hostname         = openstack_compute_instance_v2.compute.*.name
+      controller_hostname      = openstack_compute_instance_v2.controller.*.name
+      ansible_control_hostname = openstack_compute_instance_v2.ansible_control.name
+      storage_hostname         = openstack_compute_instance_v2.storage.*.name
+      seed_hostname            = openstack_compute_instance_v2.seed.name
+    }
+  )
+  filename = "hosts"
+}
+
+resource "local_file" "admin_networks" {
+  content = templatefile(
+    "${path.module}/templates/admin-oc-networks.tpl",
+    {
+      access_cidr = data.openstack_networking_subnet_v2.network.cidr
       compute_hostname         = openstack_compute_instance_v2.compute.*.name
       controller_hostname      = openstack_compute_instance_v2.controller.*.name
       ansible_control_hostname = openstack_compute_instance_v2.ansible_control.name
@@ -40,5 +53,5 @@ resource "local_file" "hosts" {
       seed                     = openstack_compute_instance_v2.seed.access_ip_v4
     }
   )
-  filename = "hosts"
+  filename = "admin-oc-networks.yml"
 }

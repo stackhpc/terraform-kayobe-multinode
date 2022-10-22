@@ -22,9 +22,9 @@ output "storage_ips" {
   value = join("\n", formatlist("%s: %s", openstack_compute_instance_v2.storage.*.name, openstack_compute_instance_v2.storage.*.access_ip_v4))
 }
 
-resource "local_file" "inventory" {
+resource "local_file" "hosts" {
   content = templatefile(
-    "${path.module}/templates/ansible_inventory.tpl",
+    "${path.module}/templates/hosts.tpl",
     {
       user                     = "centos"
       prefix                   = "kayobe"
@@ -40,5 +40,5 @@ resource "local_file" "inventory" {
       seed                     = openstack_compute_instance_v2.seed.access_ip_v4
     }
   )
-  filename = "ansible_inventory"
+  filename = "hosts"
 }

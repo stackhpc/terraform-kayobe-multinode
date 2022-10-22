@@ -1,14 +1,38 @@
+[controllers]
+%{ for element in controller_hostname ~}
+${ element }
+%{ endfor ~}
+
+[compute]
+%{ for element in compute_hostname ~}
+${ element }
+%{ endfor ~}
+
 [seed]
 ${seed_hostname}
-[compute]
-%{ for index, ip in compute ~}
-${compute_hostname[index]}
-%{ endfor ~}
-[controllers]
-%{ for index, ip in controllers ~}
-${controller_hostname[index]}
-%{ endfor ~}
-[storage]
-%{ for index, ip in storage ~}
-${storage_hostname[index]}
+
+[storage:children]
+ceph
+
+[ceph:children]
+mons
+mgrs
+osds
+rgws
+
+[mons]
+%{ for element in storage_hostname ~}
+${ element }
 %{endfor ~}
+
+[mgsr]
+%{ for element in storage_hostname ~}
+${ element }
+%{endfor ~}
+
+[osds]
+%{ for element in storage_hostname ~}
+${ element }
+%{endfor ~}
+
+[rgws]

@@ -34,6 +34,7 @@ resource "local_file" "hosts" {
     }
   )
   filename = "hosts"
+  file_permission = "0644"
 }
 
 resource "local_file" "admin_networks" {
@@ -54,4 +55,5 @@ resource "local_file" "admin_networks" {
     }
   )
   filename = "admin-oc-networks.yml"
+  file_permission = "0644"
 }

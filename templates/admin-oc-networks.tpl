@@ -6,12 +6,12 @@ admin_oc_bootproto: dhcp
 
 admin_oc_ips:
 %{ for hostname, addr in zipmap(controller_hostname, controllers) ~}
-    ${ hostname }: ${ addr }
+  ${ hostname }: ${ addr }
 %{ endfor ~}
 %{ for hostname, addr in zipmap(compute_hostname, compute) ~}
-    ${ hostname }: ${ addr }
+  ${ hostname }: ${ addr }
 %{ endfor ~}
-    ${seed_hostname}: ${seed}
+  ${seed_hostname}: ${seed}
 %{ for hostname, addr in zipmap(storage_hostname, storage) ~}
-    ${ hostname }: ${ addr }
+  ${ hostname }: ${ addr }
 %{ endfor ~}

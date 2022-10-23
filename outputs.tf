@@ -33,7 +33,7 @@ resource "local_file" "hosts" {
       seed_hostname            = openstack_compute_instance_v2.seed.name
     }
   )
-  filename        = "hosts"
+  filename        = "out/hosts"
   file_permission = "0644"
 }
 
@@ -54,6 +54,6 @@ resource "local_file" "admin_networks" {
       seed                     = openstack_compute_instance_v2.seed.access_ip_v4
     }
   )
-  filename        = "admin-oc-networks.yml"
+  filename        = "out/admin-oc-networks.yml"
   file_permission = "0644"
 }

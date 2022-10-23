@@ -25,7 +25,7 @@ rgws
 ${ element }
 %{ endfor ~}
 
-[mgsr]
+[mgrs]
 %{ for element in storage_hostname ~}
 ${ element }
 %{ endfor ~}

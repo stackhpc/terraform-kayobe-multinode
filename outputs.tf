@@ -33,7 +33,7 @@ resource "local_file" "hosts" {
       seed_hostname            = openstack_compute_instance_v2.seed.name
     }
   )
-  filename = "hosts"
+  filename        = "hosts"
   file_permission = "0644"
 }
 
@@ -41,7 +41,7 @@ resource "local_file" "admin_networks" {
   content = templatefile(
     "${path.module}/templates/admin-oc-networks.tpl",
     {
-      access_cidr = data.openstack_networking_subnet_v2.network.cidr
+      access_cidr              = data.openstack_networking_subnet_v2.network.cidr
       compute_hostname         = openstack_compute_instance_v2.compute.*.name
       controller_hostname      = openstack_compute_instance_v2.controller.*.name
       ansible_control_hostname = openstack_compute_instance_v2.ansible_control.name
@@ -54,6 +54,6 @@ resource "local_file" "admin_networks" {
       seed                     = openstack_compute_instance_v2.seed.access_ip_v4
     }
   )
-  filename = "admin-oc-networks.yml"
+  filename        = "admin-oc-networks.yml"
   file_permission = "0644"
 }

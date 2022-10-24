@@ -4,3 +4,6 @@ mounts:
   - [/dev/vdb, null]
 packages:
   - openssh-clients
+  - git
+  - vim
+  - tmux

@@ -1,0 +1,68 @@
+---
+- name: Deploy OpenStack Configuration
+  hosts: all
+  gather_facts: true
+  vars_files:
+    - vars/defaults.yml
+  roles:
+    - { name: mrlesmithjr.manage-lvm, become: true }
+  tasks:
+    - name: Ensure hosts are reachable
+      ansible.builtin.command:
+        cmd: "ping -c 1 -w 2 {{ item.key }}"
+      loop: "{{ (lookup('file', '../out/admin-oc-networks.yml') | from_yaml).admin_oc_ips | dict2items }}"
+      changed_when: false
+
+    - name: Ensure python3-virtualenv is present
+      ansible.builtin.package:
+        name: python3-virtualenv
+        state: present
+      become: true
+
+    - name: Ensure git is present
+      ansible.builtin.package:
+        name: git
+        state: present
+      become: true
+
+    - name: Ensure `source` directory exists
+      ansible.builtin.file:
+        path: "~/source"
+        state: directory
+        mode: "0755"
+
+    - name: Ensure Kayobe Config repository is present
+      ansible.builtin.git:
+        repo: "{{ kayobe_config_src }}"
+        version: "{{ kayobe_config_branch }}"
+        dest: "~/source/{{ kayobe_config_name }}"
+
+    - name: Ensure Admin Overcloud Network file is present
+      ansible.builtin.copy:
+        src: "../out/admin-oc-networks.yml"
+        dest: "~/source/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/admin-oc-networks.yml"
+        mode: "0644"
+
+    - name: Ensure Hosts file is present
+      ansible.builtin.copy:
+        src: "../out/hosts"
+        dest: "~/source/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/inventory/hosts"
+        mode: "0644"
+
+    - name: Ensure Kayobe repository is present
+      ansible.builtin.git:
+        repo: "{{ kayobe_src }}"
+        version: "{{ kayobe_branch }}"
+        dest: "~/source/{{ kayobe_name }}"
+
+    - name: Ensure `venvs` directory exists
+      ansible.builtin.file:
+        path: "~/venvs"
+        state: directory
+        mode: "0755"
+
+    - name: Ensure `kayobe` virtual environment exists
+      ansible.builtin.pip:
+        virtualenv: "~/venvs/kayobe"
+        requirements: "~/source/{{ kayobe_name }}/requirements.txt"
+        state: present

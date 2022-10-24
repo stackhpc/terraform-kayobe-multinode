@@ -1,0 +1,62 @@
+---
+kayobe_config_src: https://github.com/stackhpc/stackhpc-kayobe-config.git
+kayobe_config_branch: multiple-networks
+kayobe_config_name: kayobe-config
+kayobe_config_environment: ci-multinode
+
+kayobe_src: https://github.com/stackhpc/kayobe.git
+kayobe_branch: stackhpc/wallaby
+kayobe_name: kayobe
+
+lvm_groups:
+  - vgname: rootvg
+    disks:
+      - /dev/vda3
+    create: true
+    lvnames:
+      - lvname: lv_root
+        size: 15g
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /
+      - lvname: lv_tmp
+        size: 15g
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /tmp
+      - lvname: lv_var
+        size: 15g
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /var
+      - lvname: lv_var_tmp
+        size: 15g
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /var/tmp
+      - lvname: lv_log
+        size: 5g
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /var/log
+      - lvname: lv_audit
+        size: 5g
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /var/log/audit
+      - lvname: lv_home
+        size: 20G
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /home
+
+manage_lvm: true
+
+pvresize_to_max: true

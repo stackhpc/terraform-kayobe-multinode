@@ -99,21 +99,20 @@ Generate Terraform variables:
 .. code-block:: console
 
    cat << EOF > terraform.tfvars
-   compute_count = "2"
+   ansible_control_vm_flavor = "general.v1.small"
+   ansible_control_vm_name   = "ansible-control"
+   compute_count    = "2"
    controller_count = "3"
-   storage_count = "3"
-   ssh_private_key = "id_rsa"
-   ssh_public_key = "id_rsa.pub"
-   ansible-control_vm_name = "kayobe-mn-ansible-control"
-   ansible-control_vm_image = "CentOS-stream8-lvm"
-   multinode_keypair = "wallaby_mn_keypair2"
-   ansible-control_vm_flavor = "general.v1.small"
+   multinode_flavor     = "baremetal"
+   multinode_image      = "CentOS-stream8-lvm"
+   multinode_keypair    = "changeme"
    multinode_vm_network = "stackhpc-ipv4-vlan-v2"
-   multinode_vm_subnet = "stackhpc-ipv4-vlan-subnet-v2"
-   multinode_image = "CentOS-stream8-lvm"
-   multinode_flavor = "baremetal-32"
+   multinode_vm_subnet  = "stackhpc-ipv4-vlan-subnet-v2"
+   prefix = "changeme"
+   seed_vm_flavor = "general.v1.small"
+   ssh_public_key = "~/.ssh/changeme.pub"
+   storage_count  = "3"
    storage_flavor = "general.v1.small"
-   prefix = "kayobe-mn"
    EOF
 
 Generate a plan:
@@ -131,3 +130,14 @@ Apply the changes:
 You should have requested number of resources spawned on Openstack, and ansible_inventory file produced as output for Kayobe.
 
 Copy your generated id_rsa and id_rsa.pub to ~/.ssh/ on Ansible control host if you want Kayobe to automatically pick them up during bootstrap.
+
+Configure Ansible Control Host
+
+Using the `deploy-oc-networks.yml` playbook you can setup the ansible control host to include the kayobe/kayobe-config repositories with `hosts` and `admin-oc-networks`.
+It shall also setup the kayobe virtual environment, allowing for imediate configure and deployment of OpenStack.
+
+You must first run
+
+.. code-block:: console
+   ansible-galaxy install -r ansible/requirements.yml
+   ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=centos

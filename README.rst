@@ -67,7 +67,7 @@ Export environment variables to use the correct cloud and provide a password:
    read -p OS_PASSWORD -s OS_PASSWORD
    export OS_PASSWORD
 
-Or you can source the provided `.init.sh` script which shall initialise terraform and export two variables.
+Or you can source the provided `init.sh` script which shall initialise terraform and export two variables.
 `OS_CLOUD` is a variable which is used by Terraform and must match an entry within `clouds.yml`.
 `OS_PASSWORD` is the password used to authenticate when signing into OpenStack.
 
@@ -103,7 +103,7 @@ Generate Terraform variables:
    ansible_control_vm_name   = "ansible-control"
    compute_count    = "2"
    controller_count = "3"
-   multinode_flavor     = "baremetal"
+   multinode_flavor     = "changeme"
    multinode_image      = "CentOS-stream8-lvm"
    multinode_keypair    = "changeme"
    multinode_vm_network = "stackhpc-ipv4-vlan-v2"
@@ -134,10 +134,11 @@ Copy your generated id_rsa and id_rsa.pub to ~/.ssh/ on Ansible control host if 
 Configure Ansible Control Host
 
 Using the `deploy-oc-networks.yml` playbook you can setup the ansible control host to include the kayobe/kayobe-config repositories with `hosts` and `admin-oc-networks`.
-It shall also setup the kayobe virtual environment, allowing for imediate configure and deployment of OpenStack.
+It shall also setup the kayobe virtual environment, allowing for immediate configure and deployment of OpenStack.
 
 You must first run
 
 .. code-block:: console
+
    ansible-galaxy install -r ansible/requirements.yml
    ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=centos

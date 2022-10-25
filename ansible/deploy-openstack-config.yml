@@ -75,7 +75,7 @@
 
     - name: Ensure vault password is present
       ansible.builtin.copy:
-        src: "{{ kayobe_vault_path }}"
+        src: "{{ vault_password_path }}"
         dest: "{{ ansible_env.HOME }}/vault.pw"
         mode: "0644"
 

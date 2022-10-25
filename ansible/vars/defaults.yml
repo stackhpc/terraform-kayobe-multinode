@@ -10,6 +10,11 @@ kayobe_src: https://github.com/stackhpc/kayobe.git
 kayobe_branch: stackhpc/wallaby
 kayobe_name: kayobe
 
+vault_password_path: "~/vault.pw"
+
+public_key_path: "~/.ssh/stackhpc.pub"
+private_key_path: "~/.ssh/stackhpc"
+
 lvm_groups:
   - vgname: rootvg
     disks:

@@ -27,7 +27,7 @@
 
     - name: Ensure `source` directory exists
       ansible.builtin.file:
-        path: "~/source"
+        path: "{{ src_directory }}"
         state: directory
         mode: "0755"
 
@@ -35,34 +35,58 @@
       ansible.builtin.git:
         repo: "{{ kayobe_config_src }}"
         version: "{{ kayobe_config_branch }}"
-        dest: "~/source/{{ kayobe_config_name }}"
+        dest: "{{ src_directory }}/{{ kayobe_config_name }}"
 
     - name: Ensure Admin Overcloud Network file is present
       ansible.builtin.copy:
         src: "../out/admin-oc-networks.yml"
-        dest: "~/source/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/admin-oc-networks.yml"
+        dest: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/admin-oc-networks.yml"
         mode: "0644"
 
     - name: Ensure Hosts file is present
       ansible.builtin.copy:
         src: "../out/hosts"
-        dest: "~/source/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/inventory/hosts"
+        dest: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/inventory/hosts"
         mode: "0644"
 
     - name: Ensure Kayobe repository is present
       ansible.builtin.git:
         repo: "{{ kayobe_src }}"
         version: "{{ kayobe_branch }}"
-        dest: "~/source/{{ kayobe_name }}"
+        dest: "{{ src_directory }}/{{ kayobe_name }}"
 
     - name: Ensure `venvs` directory exists
       ansible.builtin.file:
-        path: "~/venvs"
+        path: "{{ ansible_env.HOME }}/venvs"
         state: directory
         mode: "0755"
 
-    - name: Ensure `kayobe` virtual environment exists
+    - name: Ensure `kayobe` virtual environment exists with requirements
       ansible.builtin.pip:
-        virtualenv: "~/venvs/kayobe"
-        requirements: "~/source/{{ kayobe_name }}/requirements.txt"
+        virtualenv: "{{ ansible_env.HOME }}/venvs/kayobe"
+        requirements: "{{ src_directory }}/{{ kayobe_name }}/requirements.txt"
         state: present
+
+    - name: Ensure `kayobe` is present
+      ansible.builtin.pip:
+        name: "{{ src_directory }}/{{ kayobe_name }}/"
+        virtualenv: "{{ ansible_env.HOME }}/venvs/kayobe"
+        state: present
+
+    - name: Ensure vault password is present
+      ansible.builtin.copy:
+        src: "{{ kayobe_vault_path }}"
+        dest: "{{ ansible_env.HOME }}/vault.pw"
+        mode: "0644"
+
+    - name: Ensure public key is present
+      ansible.builtin.copy:
+        src: "{{ public_key_path }}"
+        dest: "{{ ansible_env.HOME }}/.ssh/{{ public_key_path | basename }}"
+        mode: "0644"
+
+    - name: Ensure private key is present
+      ansible.builtin.copy:
+        src: "{{ private_key_path }}"
+        dest: "{{ ansible_env.HOME }}/.ssh/{{ private_key_path | basename }}"
+        mode: "0600"

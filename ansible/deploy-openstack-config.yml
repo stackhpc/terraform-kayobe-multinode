@@ -33,8 +33,8 @@
 
     - name: Ensure Kayobe Config repository is present
       ansible.builtin.git:
-        repo: "{{ kayobe_config_src }}"
-        version: "{{ kayobe_config_branch }}"
+        repo: "{{ kayobe_config_repo }}"
+        version: "{{ kayobe_config_version }}"
         dest: "{{ src_directory }}/{{ kayobe_config_name }}"
 
     - name: Ensure Admin Overcloud Network file is present
@@ -51,8 +51,8 @@
 
     - name: Ensure Kayobe repository is present
       ansible.builtin.git:
-        repo: "{{ kayobe_src }}"
-        version: "{{ kayobe_branch }}"
+        repo: "{{ kayobe_repo }}"
+        version: "{{ kayobe_version }}"
         dest: "{{ src_directory }}/{{ kayobe_name }}"
 
     - name: Ensure `venvs` directory exists
@@ -90,3 +90,35 @@
         src: "{{ private_key_path }}"
         dest: "{{ ansible_env.HOME }}/.ssh/{{ private_key_path | basename }}"
         mode: "0600"
+
+    - name: Ensure OpenStack Config repository is present
+      ansible.builtin.git:
+        repo: "{{ openstack_config_repo }}"
+        dest: "{{ src_directory }}/{{ openstack_config_name }}"
+        version: "{{ openstack_config_version }}"
+
+    - name: Ensure `openstack` virtualenv is present
+      ansible.builtin.pip:
+        requirements: "{{ src_directory }}/{{ openstack_config_name }}/requirements.txt"
+        virtualenv: "{{ ansible_env.HOME }}/venvs/openstack"
+        state: present
+
+    - name: Ensure `openstack` ansible role requirements are present
+      community.general.ansible_galaxy_install:
+        dest: "{{ src_directory }}/{{ openstack_config_name }}/ansible/roles"
+        requirements_file: "{{ src_directory }}/{{ openstack_config_name }}/requirements.yml"
+        type: role
+      vars:
+        - ansible_python_interpreter: "{{ ansible_env.HOME }}/venvs/openstack/bin/python3"
+      environment:
+        - PATH: "{{ ansible_env.HOME }}/venvs/openstack/bin/:{{ ansible_env.PATH }}"
+
+    - name: Ensure `openstack` ansible collection requirements are present
+      community.general.ansible_galaxy_install:
+        dest: "{{ src_directory }}/{{ openstack_config_name }}/ansible/collections"
+        requirements_file: "{{ src_directory }}/{{ openstack_config_name }}/requirements.yml"
+        type: collection
+      vars:
+        - ansible_python_interpreter: "{{ ansible_env.HOME }}/venvs/openstack/bin/python3"
+      environment:
+        - PATH: "{{ ansible_env.HOME }}/venvs/openstack/bin/:{{ ansible_env.PATH }}"

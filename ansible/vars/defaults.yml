@@ -1,14 +1,18 @@
 ---
 src_directory: "{{ ansible_env.HOME }}/src"
 
-kayobe_config_src: https://github.com/stackhpc/stackhpc-kayobe-config.git
-kayobe_config_branch: multiple-networks
+kayobe_config_repo: https://github.com/stackhpc/stackhpc-kayobe-config.git
+kayobe_config_version: multiple-networks
 kayobe_config_name: kayobe-config
 kayobe_config_environment: ci-multinode
 
-kayobe_src: https://github.com/stackhpc/kayobe.git
-kayobe_branch: stackhpc/wallaby
+kayobe_repo: https://github.com/stackhpc/kayobe.git
+kayobe_version: stackhpc/wallaby
 kayobe_name: kayobe
+
+openstack_config_repo: https://github.com/stackhpc/openstack-config-multinode
+openstack_config_version: openstack-network
+openstack_config_name: openstack-config
 
 vault_password_path: "~/vault.pw"
 

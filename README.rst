@@ -136,7 +136,29 @@ Configure Ansible Control Host
 Using the `deploy-oc-networks.yml` playbook you can setup the ansible control host to include the kayobe/kayobe-config repositories with `hosts` and `admin-oc-networks`.
 It shall also setup the kayobe virtual environment, allowing for immediate configure and deployment of OpenStack.
 
-You must first run
+First you must ensure that you have `Ansible installed <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`_ on your local machine.
+
+.. code-block:: console
+
+   pip install ansible
+
+Secondly if the machines are behind an SSH bastion you must ensure that your ssh config is setup appropriately with a proxy jump
+
+.. code-block:: console
+
+   Host lab-bastion
+   HostName BastionIPAddr
+   User username
+   IdentityFile ~/.ssh/key
+
+   Host 10.*
+   ProxyJump=lab-bastion
+   ForwardAgent no
+   IdentityFile ~/.ssh/key
+   UserKnownHostsFile /dev/null
+   StrictHostKeyChecking no
+
+Finally, install requirements and run the playbook
 
 .. code-block:: console
 

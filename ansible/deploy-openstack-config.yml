@@ -36,6 +36,7 @@
         repo: "{{ kayobe_config_repo }}"
         version: "{{ kayobe_config_version }}"
         dest: "{{ src_directory }}/{{ kayobe_config_name }}"
+        update: false
 
     - name: Ensure Admin Overcloud Network file is present
       ansible.builtin.copy:
@@ -54,6 +55,7 @@
         repo: "{{ kayobe_repo }}"
         version: "{{ kayobe_version }}"
         dest: "{{ src_directory }}/{{ kayobe_name }}"
+        update: false
 
     - name: Ensure `venvs` directory exists
       ansible.builtin.file:
@@ -76,19 +78,19 @@
     - name: Ensure vault password is present
       ansible.builtin.copy:
         src: "{{ vault_password_path }}"
-        dest: "{{ ansible_env.HOME }}/vault.pw"
-        mode: "0644"
+        dest: "{{ ansible_env.HOME }}/vault-pw"
+        mode: "0600"
 
     - name: Ensure public key is present
       ansible.builtin.copy:
         src: "{{ public_key_path }}"
-        dest: "{{ ansible_env.HOME }}/.ssh/{{ public_key_path | basename }}"
+        dest: "{{ ansible_env.HOME }}/.ssh/id_rsa.pub"
         mode: "0644"
 
     - name: Ensure private key is present
       ansible.builtin.copy:
         src: "{{ private_key_path }}"
-        dest: "{{ ansible_env.HOME }}/.ssh/{{ private_key_path | basename }}"
+        dest: "{{ ansible_env.HOME }}/.ssh/id_rsa"
         mode: "0600"
 
     - name: Ensure OpenStack Config repository is present
@@ -100,7 +102,7 @@
     - name: Ensure `openstack` virtualenv is present
       ansible.builtin.pip:
         requirements: "{{ src_directory }}/{{ openstack_config_name }}/requirements.txt"
-        virtualenv: "{{ ansible_env.HOME }}/venvs/openstack"
+        virtualenv: "{{ src_directory }}/{{ openstack_config_name }}/ansible/openstack-config-venv"
         state: present
 
     - name: Ensure `openstack` ansible role requirements are present
@@ -109,7 +111,7 @@
         requirements_file: "{{ src_directory }}/{{ openstack_config_name }}/requirements.yml"
         type: role
       vars:
-        - ansible_python_interpreter: "{{ ansible_env.HOME }}/venvs/openstack/bin/python3"
+        - ansible_python_interpreter: "{{ src_directory }}/{{ openstack_config_name }}/ansible/openstack-config-venv/bin/python3"
       environment:
         - PATH: "{{ ansible_env.HOME }}/venvs/openstack/bin/:{{ ansible_env.PATH }}"
 
@@ -122,3 +124,10 @@
         - ansible_python_interpreter: "{{ ansible_env.HOME }}/venvs/openstack/bin/python3"
       environment:
         - PATH: "{{ ansible_env.HOME }}/venvs/openstack/bin/:{{ ansible_env.PATH }}"
+
+    - name: Ensure `deploy-openstack.sh` script is present
+      ansible.builtin.copy:
+        src: "files/deploy-openstack.sh"
+        dest: "{{ ansible_env.HOME }}/deploy-openstack.sh"
+        mode: "744"
+      tags: deploy-openstack

@@ -57,3 +57,14 @@ resource "local_file" "admin_networks" {
   filename        = "out/admin-oc-networks.yml"
   file_permission = "0644"
 }
+
+resource "local_file" "openstack_inventory" {
+  content = templatefile(
+    "${path.module}/templates/openstack-inventory.tpl",
+    {
+      seed_addr   = openstack_compute_instance_v2.seed.access_ip_v4
+    }
+  )
+  filename        = "out/openstack-inventory.yml"
+  file_permission = "0644"
+}

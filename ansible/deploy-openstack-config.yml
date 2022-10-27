@@ -125,6 +125,12 @@
       environment:
         - PATH: "{{ ansible_env.HOME }}/venvs/openstack/bin/:{{ ansible_env.PATH }}"
 
+    - name: Ensure modified openstack config inventory exists
+      ansible.builtin.copy:
+        src: ../out/openstack-inventory
+        dest: "{{ src_directory }}/{{ openstack_config_name }}/ansible/inventory"
+        mode: 0644
+
     - name: Ensure `deploy-openstack.sh` script is present
       ansible.builtin.copy:
         src: "files/deploy-openstack.sh"

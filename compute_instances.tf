@@ -1,7 +1,7 @@
 resource "openstack_compute_instance_v2" "ansible_control" {
   name         = format("%s-%s", var.prefix, var.ansible_control_vm_name)
   flavor_name  = var.ansible_control_vm_flavor
-  key_pair     = var.multinode_keypair
+  key_pair     = resource.openstack_compute_keypair_v2.keypair.name
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
   network {
@@ -19,12 +19,17 @@ resource "openstack_compute_instance_v2" "ansible_control" {
   timeouts {
     create = "90m"
   }
+  lifecycle {
+    ignore_changes = [
+      user_data
+    ]
+  }
 }
 
 resource "openstack_compute_instance_v2" "seed" {
   name         = format("%s-seed", var.prefix)
   flavor_name  = var.seed_vm_flavor
-  key_pair     = var.multinode_keypair
+  key_pair     = resource.openstack_compute_keypair_v2.keypair.name
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
   network {
@@ -47,7 +52,7 @@ resource "openstack_compute_instance_v2" "seed" {
 resource "openstack_compute_instance_v2" "compute" {
   name         = format("%s-compute-%02d", var.prefix, count.index + 1)
   flavor_name  = var.multinode_flavor
-  key_pair     = var.multinode_keypair
+  key_pair     = resource.openstack_compute_keypair_v2.keypair.name
   image_name   = var.multinode_image
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
@@ -62,7 +67,7 @@ resource "openstack_compute_instance_v2" "compute" {
 resource "openstack_compute_instance_v2" "controller" {
   name         = format("%s-controller-%02d", var.prefix, count.index + 1)
   flavor_name  = var.multinode_flavor
-  key_pair     = var.multinode_keypair
+  key_pair     = resource.openstack_compute_keypair_v2.keypair.name
   image_name   = var.multinode_image
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
@@ -78,7 +83,7 @@ resource "openstack_compute_instance_v2" "controller" {
 resource "openstack_compute_instance_v2" "storage" {
   name         = format("%s-storage-%02d", var.prefix, count.index + 1)
   flavor_name  = var.storage_flavor
-  key_pair     = var.multinode_keypair
+  key_pair     = resource.openstack_compute_keypair_v2.keypair.name
   image_name   = var.multinode_image
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
@@ -89,7 +94,7 @@ resource "openstack_compute_instance_v2" "storage" {
   block_device {
     uuid                  = data.openstack_images_image_v2.multinode_image.id
     source_type           = "image"
-    volume_size           = 30
+    volume_size           = 50
     boot_index            = 0
     destination_type      = "volume"
     delete_on_termination = true

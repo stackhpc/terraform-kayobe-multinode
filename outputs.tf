@@ -33,7 +33,7 @@ resource "local_file" "hosts" {
       seed_hostname            = openstack_compute_instance_v2.seed.name
     }
   )
-  filename        = "out/hosts"
+  filename        = "ansible/files/hosts"
   file_permission = "0644"
 }
 
@@ -54,7 +54,7 @@ resource "local_file" "admin_networks" {
       seed                     = openstack_compute_instance_v2.seed.access_ip_v4
     }
   )
-  filename        = "out/admin-oc-networks.yml"
+  filename        = "ansible/files/admin-oc-networks.yml"
   file_permission = "0644"
 }
 
@@ -65,6 +65,17 @@ resource "local_file" "openstack_inventory" {
       seed_addr   = openstack_compute_instance_v2.seed.access_ip_v4
     }
   )
-  filename        = "out/openstack-inventory.yml"
+  filename        = "ansible/files/openstack-inventory"
   file_permission = "0644"
+}
+
+resource "local_file" "deploy_openstack" {
+  content = templatefile(
+    "${path.module}/templates/deploy-openstack.tpl",
+    {
+      seed_addr   = openstack_compute_instance_v2.seed.access_ip_v4
+    }
+  )
+  filename        = "ansible/files/deploy-openstack.sh"
+  file_permission = "0744"
 }

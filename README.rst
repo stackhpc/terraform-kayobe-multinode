@@ -147,16 +147,16 @@ Secondly if the machines are behind an SSH bastion you must ensure that your ssh
 .. code-block:: console
 
    Host lab-bastion
-   HostName BastionIPAddr
-   User username
-   IdentityFile ~/.ssh/key
+      HostName BastionIPAddr
+      User username
+      IdentityFile ~/.ssh/key
 
    Host 10.*
-   ProxyJump=lab-bastion
-   ForwardAgent no
-   IdentityFile ~/.ssh/key
-   UserKnownHostsFile /dev/null
-   StrictHostKeyChecking no
+      ProxyJump=lab-bastion
+      ForwardAgent no
+      IdentityFile ~/.ssh/key
+      UserKnownHostsFile /dev/null
+      StrictHostKeyChecking no
 
 Finally, install requirements and run the playbook
 

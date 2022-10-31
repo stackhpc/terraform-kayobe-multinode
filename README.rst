@@ -163,4 +163,6 @@ Finally, install requirements and run the playbook
 .. code-block:: console
 
    ansible-galaxy install -r ansible/requirements.yml
-   ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=centos
+   ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=centos --tags=lvm
+
+If you are running the playbook again or don't require LVMs to be resized then omit the `lvm` tag

@@ -140,7 +140,7 @@ First you must ensure that you have `Ansible installed <https://docs.ansible.com
 
 .. code-block:: console
 
-   pip install ansible
+   pip install --user ansible
 
 Secondly if the machines are behind an SSH bastion you must ensure that your ssh config is setup appropriately with a proxy jump
 

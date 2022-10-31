@@ -10,7 +10,7 @@
     - name: Ensure hosts are reachable
       ansible.builtin.command:
         cmd: "ping -c 1 -w 2 {{ item.key }}"
-      loop: "{{ (lookup('file', '../out/admin-oc-networks.yml') | from_yaml).admin_oc_ips | dict2items }}"
+      loop: "{{ (lookup('file', 'files/admin-oc-networks.yml') | from_yaml).admin_oc_ips | dict2items }}"
       changed_when: false
 
     - name: Ensure python3-virtualenv is present
@@ -38,15 +38,38 @@
         dest: "{{ src_directory }}/{{ kayobe_config_name }}"
         update: false
 
+    - name: Ensure hooks directory are present
+      ansible.builtin.file:
+        dest: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/hooks/{{ item }}"
+        state: directory
+        mode: "0700"
+      loop:
+        - overcloud-host-configure/pre.d/
+        - seed-host-configure/pre.d/
+
+    - name: Ensure Kayobe hooks are present
+      ansible.builtin.file:
+        src: '{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/ansible/{{ item.src }}'
+        dest: '{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/hooks/{{ item.dest }}'
+        state: link
+      loop:
+        - { src: growroot.yml, dest: overcloud-host-configure/pre.d/5-growroot.yml }
+        - { src: fix-hostname.yml, dest: overcloud-host-configure/pre.d/10-fix-hostname.yml }
+        - { src: fix-networking.yml, dest: overcloud-host-configure/pre.d/15-fix-networking.yml }
+        - { src: configure-vxlan.yml, dest: overcloud-host-configure/pre.d/20-configure-vxlan.yml }
+        - { src: fix-networking.yml, dest: seed-host-configure/pre.d/15-fix-networking.yml }
+        - { src: configure-vxlan.yml, dest: seed-host-configure/pre.d/20-configure-vxlan.yml }
+
+
     - name: Ensure Admin Overcloud Network file is present
       ansible.builtin.copy:
-        src: "../out/admin-oc-networks.yml"
+        src: "files/admin-oc-networks.yml"
         dest: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/admin-oc-networks.yml"
         mode: "0644"
 
     - name: Ensure Hosts file is present
       ansible.builtin.copy:
-        src: "../out/hosts"
+        src: "files/hosts"
         dest: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/inventory/hosts"
         mode: "0644"
 
@@ -128,7 +151,7 @@
 
     - name: Ensure modified openstack config inventory exists
       ansible.builtin.copy:
-        src: ../out/openstack-inventory
+        src: files/openstack-inventory
         dest: "{{ src_directory }}/{{ openstack_config_name }}/ansible/inventory"
         mode: 0644
 

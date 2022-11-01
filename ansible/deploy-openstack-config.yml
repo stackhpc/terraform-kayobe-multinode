@@ -86,12 +86,6 @@
         state: directory
         mode: "0755"
 
-    - name: Ensure `kayobe` virtual environment exists with requirements
-      ansible.builtin.pip:
-        virtualenv: "{{ ansible_env.HOME }}/venvs/kayobe"
-        requirements: "{{ src_directory }}/{{ kayobe_name }}/requirements.txt"
-        state: present
-
     - name: Ensure `kayobe` is present
       ansible.builtin.pip:
         name: "{{ src_directory }}/{{ kayobe_name }}/"

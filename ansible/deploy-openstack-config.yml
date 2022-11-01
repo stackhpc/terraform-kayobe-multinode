@@ -151,7 +151,7 @@
       ansible.builtin.copy:
         src: "files/deploy-openstack.sh"
         dest: "{{ ansible_env.HOME }}/deploy-openstack.sh"
-        mode: "744"
+        mode: "755"
       tags: deploy-openstack
 
     - name: Ensure docker repository is present

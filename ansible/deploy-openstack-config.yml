@@ -127,9 +127,9 @@
         requirements_file: "{{ src_directory }}/{{ openstack_config_name }}/requirements.yml"
         type: role
       vars:
-        - ansible_python_interpreter: "{{ src_directory }}/{{ openstack_config_name }}/ansible/openstack-config-venv/bin/python3"
+        ansible_python_interpreter: "{{ src_directory }}/{{ openstack_config_name }}/ansible/openstack-config-venv/bin/python3"
       environment:
-        - PATH: "{{ ansible_env.HOME }}/venvs/openstack/bin/:{{ ansible_env.PATH }}"
+        PATH: "{{ ansible_env.HOME }}/venvs/openstack/bin/:{{ ansible_env.PATH }}"
 
     - name: Ensure `openstack` ansible collection requirements are present
       community.general.ansible_galaxy_install:
@@ -137,9 +137,9 @@
         requirements_file: "{{ src_directory }}/{{ openstack_config_name }}/requirements.yml"
         type: collection
       vars:
-        - ansible_python_interpreter: "{{ ansible_env.HOME }}/venvs/openstack/bin/python3"
+        ansible_python_interpreter: "{{ ansible_env.HOME }}/venvs/openstack/bin/python3"
       environment:
-        - PATH: "{{ ansible_env.HOME }}/venvs/openstack/bin/:{{ ansible_env.PATH }}"
+        PATH: "{{ ansible_env.HOME }}/venvs/openstack/bin/:{{ ansible_env.PATH }}"
 
     - name: Ensure modified openstack config inventory exists
       ansible.builtin.copy:

@@ -1,4 +1,16 @@
 #!/usr/bin/sh
+# This script is responsible for deploying OpenStack.
+# It is intended that you run this script from an Ansible control host that has
+# network access to the various nodes you intend to form your openstack environment.
+# The Ansible control host must also have the following;
+# - Kayobe config
+# - OpenStack config
+# - Virtual environments
+#   -- kayobe
+#   -- openstack
+# - Vault password
+# - Docker
+# - RSA keypair which is authorised on the nodes
 set -euxo pipefail
 
 declare -A virtual_environments=(

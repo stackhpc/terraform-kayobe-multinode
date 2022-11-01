@@ -35,6 +35,7 @@ kayobe seed host configure
 kayobe overcloud host configure
 
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm-deploy.yml
+sleep 30
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm.yml
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm-gather-keys.yml
 

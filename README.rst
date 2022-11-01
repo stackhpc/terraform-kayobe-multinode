@@ -158,11 +158,17 @@ Secondly if the machines are behind an SSH bastion you must ensure that your ssh
       UserKnownHostsFile /dev/null
       StrictHostKeyChecking no
 
-Finally, install requirements and run the playbook
+Install the ansible requirements.
 
 .. code-block:: console
 
    ansible-galaxy install -r ansible/requirements.yml
-   ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=centos --tags=lvm
 
-If you are running the playbook again or don't require LVMs to be resized then omit the `lvm` tag
+Finally run the ansible playbooks. 
+You may need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
+If not you can skip that playbook and proceed onto `deploy-openstack-config` which shall configure your Ansible control host in preparation for deployment.
+
+.. code-block:: console
+
+   ansible-playbook -i ${ansible_ip}, ansible/grow-control-host.yml -e ansible_user=centos
+   ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=centos

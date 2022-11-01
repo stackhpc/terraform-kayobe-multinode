@@ -4,8 +4,6 @@
   gather_facts: true
   vars_files:
     - vars/defaults.yml
-  roles:
-    - { name: mrlesmithjr.manage-lvm, become: true, tags: [never, lvm] }
   tasks:
     - name: Ensure hosts are reachable
       ansible.builtin.command:

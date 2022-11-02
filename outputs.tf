@@ -57,5 +57,5 @@ resource "local_file" "deploy_openstack" {
     }
   )
   filename        = "ansible/files/deploy-openstack.sh"
-  file_permission = "0744"
+  file_permission = "0755"
 }

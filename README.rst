@@ -131,9 +131,9 @@ You should have requested number of resources spawned on Openstack, and ansible_
 
 Copy your generated id_rsa and id_rsa.pub to ~/.ssh/ on Ansible control host if you want Kayobe to automatically pick them up during bootstrap.
 
-Configure Ansible Control Host
+Configure Ansible control host
 
-Using the `deploy-openstack-config.yml` playbook you can setup the ansible control host to include the kayobe/kayobe-config repositories with `hosts` and `admin-oc-networks`.
+Using the `deploy-openstack-config.yml` playbook you can setup the Ansible control host to include the kayobe/kayobe-config repositories with `hosts` and `admin-oc-networks`.
 It shall also setup the kayobe virtual environment, allowing for immediate configure and deployment of OpenStack.
 
 First you must ensure that you have `Ansible installed <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`_ on your local machine.
@@ -173,11 +173,14 @@ If not you can skip that playbook and proceed onto `deploy-openstack-config` whi
    ansible-playbook -i ${ansible_ip}, ansible/grow-control-host.yml -e ansible_user=centos
    ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=centos
 
-Once the Ansible Control Host has been configured with a Kayobe/OpenStack config present you can then begin the process of deploying OpenStack.
-This can be achieved by either manually running the various commands to configures the hosts and deploy the services or automated by using `deploy-openstack.sh`,
-which should be available within the homedir on your Ansible Control Host provided you ran `deploy-openstack-config.yml` earlier.
+Deploy OpenStack
+----------------
 
-If you choose to opt for automated method you must first SSH into your Ansible Control Host and then run the `deploy-openstack.sh` script
+Once the Ansible control host has been configured with a Kayobe/OpenStack config present you can then begin the process of deploying OpenStack.
+This can be achieved by either manually running the various commands to configures the hosts and deploy the services or automated by using `deploy-openstack.sh`,
+which should be available within the homedir on your Ansible control host provided you ran `deploy-openstack-config.yml` earlier.
+
+If you choose to opt for automated method you must first SSH into your Ansible control host and then run the `deploy-openstack.sh` script
 
 .. code-block:: console
 
@@ -193,7 +196,10 @@ This script will go through the process of performing the following tasks
    * openstack configuration
    * tempest testing
 
-After you are finished with the multinode environment please destroy the nodes to free up resources for others.
-This can acomplished by using the provided `scripts/tear-down.sh` which will destroy your controllers, compute, seed and storage nodes whilst leaving your Ansible Control Host and keypair intact.
+Tear Down
+---------
 
-If you would like to delete your Ansible Control Host then you can pass the `-a` flag however if you would also like to remove your keypair then pass `-a -k`
+After you are finished with the multinode environment please destroy the nodes to free up resources for others.
+This can acomplished by using the provided `scripts/tear-down.sh` which will destroy your controllers, compute, seed and storage nodes whilst leaving your Ansible control host and keypair intact.
+
+If you would like to delete your Ansible control host then you can pass the `-a` flag however if you would also like to remove your keypair then pass `-a -k`

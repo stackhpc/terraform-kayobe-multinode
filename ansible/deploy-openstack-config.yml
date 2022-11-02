@@ -1,15 +1,24 @@
 ---
 - name: Deploy OpenStack Configuration
   hosts: all
-  gather_facts: true
+  gather_facts: false
   vars_files:
     - vars/defaults.yml
   tasks:
+    - name: Ensure Ansible host is reachable
+      ansible.builtin.wait_for_connection:
+
+    - name: Gather facts about the host
+      ansible.builtin.setup:
+
     - name: Ensure hosts are reachable
       ansible.builtin.command:
         cmd: "ping -c 1 -w 2 {{ item.key }}"
       loop: "{{ (lookup('file', 'files/admin-oc-networks.yml') | from_yaml).admin_oc_ips | dict2items }}"
       changed_when: false
+      register: ping_results
+      retries: 3
+      until: ping_results is succeeded
 
     - name: Ensure python3-virtualenv is present
       ansible.builtin.package:

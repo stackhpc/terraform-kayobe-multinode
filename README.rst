@@ -172,3 +172,28 @@ If not you can skip that playbook and proceed onto `deploy-openstack-config` whi
 
    ansible-playbook -i ${ansible_ip}, ansible/grow-control-host.yml -e ansible_user=centos
    ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=centos
+
+Once the Ansible Control Host has been configured with a Kayobe/OpenStack config present you can then begin the process of deploying OpenStack.
+This can be achieved by either manually running the various commands to configures the hosts and deploy the services or automated by using `deploy-openstack.sh`,
+which should be available within the homedir on your Ansible Control Host provided you ran `deploy-openstack-config.yml` earlier.
+
+If you choose to opt for automated method you must first SSH into your Ansible Control Host and then run the `deploy-openstack.sh` script
+
+.. code-block:: console
+
+   ssh centos@${ansible_ip}
+   ~/deploy-openstack.sh
+
+This script will go through the process of performing the following tasks
+   * kayobe control host bootstrap
+   * kayobe seed host configure
+   * kayobe overcloud host configure
+   * cephadm deployment
+   * kayobe overcloud service deploy
+   * openstack configuration
+   * tempest testing
+
+After you are finished with the multinode environment please destroy the nodes to free up resources for others.
+This can acomplished by using the provided `scripts/tear-down.sh` which will destroy your controllers, compute, seed and storage nodes whilst leaving your Ansible Control Host and keypair intact.
+
+If you would like to delete your Ansible Control Host then you can pass the `-a` flag however if you would also like to remove your keypair then pass `-a -k`

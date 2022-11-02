@@ -15,7 +15,7 @@ set -euxo pipefail
 
 declare -A virtual_environments=(
   ["kayobe"]="$HOME/venvs/kayobe/bin/activate"
-  ["openstack"]="$HOME/src/openstack-config/ansible/openstack-config-venv/bin/activate"
+  ["openstack"]="$HOME/src/openstack-config/venv/bin/activate"
 )
 
 declare -A config_directories=(

@@ -133,7 +133,7 @@ Copy your generated id_rsa and id_rsa.pub to ~/.ssh/ on Ansible control host if 
 
 Configure Ansible Control Host
 
-Using the `deploy-oc-networks.yml` playbook you can setup the ansible control host to include the kayobe/kayobe-config repositories with `hosts` and `admin-oc-networks`.
+Using the `deploy-openstack-config.yml` playbook you can setup the ansible control host to include the kayobe/kayobe-config repositories with `hosts` and `admin-oc-networks`.
 It shall also setup the kayobe virtual environment, allowing for immediate configure and deployment of OpenStack.
 
 First you must ensure that you have `Ansible installed <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`_ on your local machine.

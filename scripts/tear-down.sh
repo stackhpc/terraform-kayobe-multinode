@@ -1,4 +1,15 @@
 #!/bin/sh
+# This script is capable of destroying your multinode environment via Terraform in targeted manner.
+# As Terraform lacks a skip flag when destroying resources it means that you can only delete
+# everything or resources explicitly mentioned with the target flag.
+#
+# This is less than ideal within the multinode environment as we will want to keep intact the Ansible Control Host and keypair.
+# So to solve this issue this script provides an easy way to delete everything but those two resources. 
+# However, if you so desire you can delete the Ansible Control and Key with the appropriate flag.
+#
+# ./tear_down.sh (Deletes everything but key/ansible control host)
+# ./tear_down.sh -a (Deletes everything including ansible control host yet leaves key)
+# ./tear_down.sh -a -k (Deletes everything including ansible control host and key)
 set -euxo pipefail
 
 ALL=false

@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/bash
 # This script is responsible for deploying OpenStack.
 # It is intended that you run this script from an Ansible control host that has
 # network access to the various nodes you intend to form your openstack environment.

@@ -1,4 +1,4 @@
-#!/bin/shell
+#!/bin/bash
 # This script is capable of destroying your multinode environment via Terraform in targeted manner.
 # As Terraform lacks a skip flag when destroying resources it means that you can only delete
 # everything or resources explicitly mentioned with the target flag.

@@ -1,0 +1,8 @@
+---
+- name: Grow Control Host
+  hosts: all
+  gather_facts: true
+  vars_files:
+    - vars/defaults.yml
+  roles:
+    - { name: mrlesmithjr.manage-lvm, become: true }

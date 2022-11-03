@@ -1,0 +1,73 @@
+---
+src_directory: "{{ ansible_env.HOME }}/src"
+
+kayobe_config_repo: https://github.com/stackhpc/stackhpc-kayobe-config.git
+kayobe_config_version: multinode-env
+kayobe_config_name: kayobe-config
+kayobe_config_environment: ci-multinode
+
+kayobe_repo: https://github.com/stackhpc/kayobe.git
+kayobe_version: stackhpc/wallaby
+kayobe_name: kayobe
+
+openstack_config_repo: https://github.com/stackhpc/openstack-config-multinode
+openstack_config_version: main
+openstack_config_name: openstack-config
+
+vault_password_path: "~/vault.pw"
+
+public_key_path: "~/.ssh/stackhpc.pub"
+private_key_path: "~/.ssh/stackhpc"
+
+lvm_groups:
+  - vgname: rootvg
+    disks:
+      - /dev/vda3
+    create: true
+    lvnames:
+      - lvname: lv_root
+        size: 15g
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /
+      - lvname: lv_tmp
+        size: 15g
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /tmp
+      - lvname: lv_var
+        size: 15g
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /var
+      - lvname: lv_var_tmp
+        size: 15g
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /var/tmp
+      - lvname: lv_log
+        size: 5g
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /var/log
+      - lvname: lv_audit
+        size: 5g
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /var/log/audit
+      - lvname: lv_home
+        size: 20G
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /home
+
+manage_lvm: true
+
+pvresize_to_max: true

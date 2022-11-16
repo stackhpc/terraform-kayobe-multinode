@@ -170,8 +170,8 @@ If not you can skip that playbook and proceed onto `deploy-openstack-config` whi
 
 .. code-block:: console
 
-   ansible-playbook -i ${ansible_ip}, ansible/grow-control-host.yml -e ansible_user=centos
-   ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=centos
+   ansible-playbook -i ${ansible_ip}, ansible/grow-control-host.yml -e ansible_user=cloud-user
+   ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=cloud-user
 
 Deploy OpenStack
 ----------------

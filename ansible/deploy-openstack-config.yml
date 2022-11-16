@@ -64,6 +64,7 @@
         - { src: fix-hostname.yml, dest: overcloud-host-configure/pre.d/10-fix-hostname.yml }
         - { src: fix-networking.yml, dest: overcloud-host-configure/pre.d/15-fix-networking.yml }
         - { src: configure-vxlan.yml, dest: overcloud-host-configure/pre.d/20-configure-vxlan.yml }
+        - { src: growroot.yml, dest: seed-host-configure/pre.d/5-growroot.yml }
         - { src: fix-networking.yml, dest: seed-host-configure/pre.d/15-fix-networking.yml }
         - { src: configure-vxlan.yml, dest: seed-host-configure/pre.d/20-configure-vxlan.yml }
 

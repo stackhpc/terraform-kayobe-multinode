@@ -165,11 +165,13 @@ Install the ansible requirements.
    ansible-galaxy install -r ansible/requirements.yml
 
 Finally run the ansible playbooks. 
-You may need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
+You may need to run `fix-homedir-ownership.yml` if you are using an image that has `ansible_user` not owning their own home folder.
+You may also need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
 If not you can skip that playbook and proceed onto `deploy-openstack-config` which shall configure your Ansible control host in preparation for deployment.
 
 .. code-block:: console
 
+   ansible-playbook -i ${ansible_ip}, ansible/fix-homedir-ownership.yml
    ansible-playbook -i ${ansible_ip}, ansible/grow-control-host.yml -e ansible_user=cloud-user
    ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=cloud-user
 

@@ -108,13 +108,13 @@
 
     - name: Ensure public key is present
       ansible.builtin.copy:
-        src: "{{ public_key_path }}"
+        src: "{{ ssh_key_path }}.pub"
         dest: "{{ ansible_env.HOME }}/.ssh/id_rsa.pub"
         mode: "0644"
 
     - name: Ensure private key is present
       ansible.builtin.copy:
-        src: "{{ private_key_path }}"
+        src: "{{ ssh_key_path }}"
         dest: "{{ ansible_env.HOME }}/.ssh/id_rsa"
         mode: "0600"
 

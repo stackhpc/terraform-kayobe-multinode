@@ -18,6 +18,8 @@ vault_password_path: "~/vault.pw"
 
 ssh_key_path:
 
+vxlan_vni:
+
 lvm_groups:
   - vgname: rootvg
     disks:

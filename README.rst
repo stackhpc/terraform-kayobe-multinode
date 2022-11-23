@@ -164,6 +164,9 @@ Install the ansible requirements.
 
    ansible-galaxy install -r ansible/requirements.yml
 
+Review the vars defined within `defaults.yml` in here you can customise the version of kayobe, kayobe-config or openstack-config. 
+However, make sure to define `ssh_key_path` to point to the location of the SSH key in use amongst the nodes and also `vxlan_vni` which should be unique value between 1 to 16,777,215.
+
 Finally run the ansible playbooks. 
 You may need to run `fix-homedir-ownership.yml` if you are using an image that has `ansible_user` not owning their own home folder.
 You may also need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
@@ -171,9 +174,9 @@ If not you can skip that playbook and proceed onto `deploy-openstack-config` whi
 
 .. code-block:: console
 
-   ansible-playbook -i ${ansible_ip}, ansible/fix-homedir-ownership.yml
-   ansible-playbook -i ${ansible_ip}, ansible/grow-control-host.yml -e ansible_user=cloud-user
-   ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=cloud-user
+   ANSIBLE_REMOTE_TMP=/tmp/ansible/tmp ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/fix-homedir-ownership.yml
+   ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/grow-control-host.yml -e ansible_user=cloud-user
+   ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/deploy-openstack-config.yml -e ansible_user=cloud-user
 
 Deploy OpenStack
 ----------------

@@ -8,13 +8,13 @@
     - name: Verify ssh key path has been set
       ansible.builtin.assert:
         that:
-          - "{{ ssh_key_path }} != None"
+          - ssh_key_path != None
         fail_msg: "Please provide a path to the SSH key used within the multinode environment."
 
     - name: Verify VXLAN VNI has been set
       ansible.builtin.assert:
         that:
-          - "{{ vxlan_vni }} != None"
+          - vxlan_vni != None
         fail_msg: "Please provide a VXLAN VNI. A unique value from 1 to 16777215."
 
     - name: Ensure Ansible host is reachable
@@ -96,7 +96,7 @@
     - name: Ensure VXLAN VNI has been set
       ansible.builtin.lineinfile:
         path: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/inventory/group_vars/all/vxlan.yml"
-        regexp: "^vlxan_vni:"
+        search_string: "vxlan_vni:"
         line: "vxlan_vni: {{ vxlan_vni }}"
         mode: "0644"
 

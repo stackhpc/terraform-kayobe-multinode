@@ -77,6 +77,6 @@ set -x
 
 sudo -E docker run --detach --rm --network host -v $${config_directories[kayobe]}:/stack/kayobe-automation-env/src/kayobe-config -v $${config_directories[kayobe]}/tempest-artifacts:/stack/tempest-artifacts -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY kayobe:latest /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/tempest.sh -e ansible_user=stack
 
-sleep 30
+sleep 360
 
 ssh -oStrictHostKeyChecking=no cloud-user@${ seed_addr } 'sudo docker logs --follow $(sudo docker ps -q)'

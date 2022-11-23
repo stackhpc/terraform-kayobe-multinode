@@ -68,13 +68,15 @@ git -C $${config_directories[kayobe]} submodule update
 if [[ "$(sudo docker image ls)" == *"kayobe"* ]]; then
   echo "Image already exists skipping docker build"
 else
-  sudo DOCKER_BUILDKIT=1 docker build --file .automation/docker/kayobe/Dockerfile --tag kayobe:latest $${config_directories[kayobe]}
+  sudo DOCKER_BUILDKIT=1 docker build --file $${config_directories[kayobe]}/.automation/docker/kayobe/Dockerfile --tag kayobe:latest $${config_directories[kayobe]}
 fi
 
 set +x
 export KAYOBE_AUTOMATION_SSH_PRIVATE_KEY=$(cat ~/.ssh/id_rsa)
 set -x
 
-sudo -E docker run --detach --rm --network host -v $(pwd):/stack/kayobe-automation-env/src/kayobe-config -v $(pwd)/tempest-artifacts:/stack/tempest-artifacts -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY kayobe:latest /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/tempest.sh -e ansible_user=stack
+sudo -E docker run --detach --rm --network host -v $${config_directories[kayobe]}:/stack/kayobe-automation-env/src/kayobe-config -v $${config_directories[kayobe]}/tempest-artifacts:/stack/tempest-artifacts -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY kayobe:latest /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/tempest.sh -e ansible_user=stack
 
-ssh cloud-user@${ seed_addr } 'sudo docker logs --follow $(sudo docker ps -q)'
+sleep 30
+
+ssh -oStrictHostKeyChecking=no cloud-user@${ seed_addr } 'sudo docker logs --follow $(sudo docker ps -q)'

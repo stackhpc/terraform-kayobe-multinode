@@ -174,7 +174,7 @@ If not you can skip that playbook and proceed onto `deploy-openstack-config` whi
 
 .. code-block:: console
 
-   ANSIBLE_REMOTE_TMP=/tmp/ansible/tmp ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/fix-homedir-ownership.yml
+   ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/fix-homedir-ownership.yml -e ansible_user=cloud-user
    ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/grow-control-host.yml -e ansible_user=cloud-user
    ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/deploy-openstack-config.yml -e ansible_user=cloud-user
 

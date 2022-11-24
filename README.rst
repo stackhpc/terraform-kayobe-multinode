@@ -208,3 +208,21 @@ After you are finished with the multinode environment please destroy the nodes t
 This can acomplished by using the provided `scripts/tear-down.sh` which will destroy your controllers, compute, seed and storage nodes whilst leaving your Ansible control host and keypair intact.
 
 If you would like to delete your Ansible control host then you can pass the `-a` flag however if you would also like to remove your keypair then pass `-a -k`
+
+Issues & Fixes
+--------------
+
+Sometimes a compute instance fails to be provisioned by Terraform or fails on boot for any reason.
+If this happens the solution is to mark the resource as tainted and perform terraform apply again which shall destroy and rebuild the failed instance.
+
+.. code-block:: console
+
+   terraform taint 'openstack_compute_instance_v2.controller[2]'
+   terraform apply
+
+Also sometimes the provider may fail to notice that some resources are functioning as expected due to timeouts or other network issues.
+If you can confirm via Horizon or via SSH that the resource is functioning as expected you may untaint the resource preventing Terraform from destroying on subsequent terraform apply.
+
+.. code-block:: console
+
+   terraform untaint 'openstack_compute_instance_v2.controller[2]'

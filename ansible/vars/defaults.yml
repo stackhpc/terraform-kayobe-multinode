@@ -16,8 +16,9 @@ openstack_config_name: openstack-config
 
 vault_password_path: "~/vault.pw"
 
-public_key_path: "~/.ssh/stackhpc.pub"
-private_key_path: "~/.ssh/stackhpc"
+ssh_key_path:
+
+vxlan_vni:
 
 lvm_groups:
   - vgname: rootvg

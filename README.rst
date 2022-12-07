@@ -164,7 +164,7 @@ Install the ansible requirements.
 
    ansible-galaxy install -r ansible/requirements.yml
 
-Review the vars defined within `defaults.yml` in here you can customise the version of kayobe, kayobe-config or openstack-config. 
+Review the vars defined within `ansible/vars/defaults.yml`. In here you can customise the version of kayobe, kayobe-config or openstack-config. 
 However, make sure to define `ssh_key_path` to point to the location of the SSH key in use amongst the nodes and also `vxlan_vni` which should be unique value between 1 to 16,777,215.
 
 Finally run the ansible playbooks. 

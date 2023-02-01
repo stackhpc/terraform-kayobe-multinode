@@ -39,7 +39,7 @@ activate_virt_env "kayobe"
 activate_kayobe_env
 
 set +x
-export KAYOBE_VAULT_PASSWORD=$(cat ~/vault-pw)
+export KAYOBE_VAULT_PASSWORD=$(cat ~/vault.password)
 set -x
 
 kayobe control host bootstrap
@@ -77,6 +77,8 @@ set -x
 
 sudo -E docker run --detach --rm --network host -v $${config_directories[kayobe]}:/stack/kayobe-automation-env/src/kayobe-config -v $${config_directories[kayobe]}/tempest-artifacts:/stack/tempest-artifacts -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY kayobe:latest /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/tempest.sh -e ansible_user=stack
 
+# During the initial deployment the seed node must receive the `gwee/rally` image before we can follow the logs.
+# Therefore, we must wait a reasonable amount time before attempting to do so.
 sleep 360
 
 ssh -oStrictHostKeyChecking=no cloud-user@${ seed_addr } 'sudo docker logs --follow $(sudo docker ps -q)'

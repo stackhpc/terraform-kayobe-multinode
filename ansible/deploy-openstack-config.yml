@@ -122,7 +122,7 @@
     - name: Ensure vault password is present
       ansible.builtin.copy:
         src: "{{ vault_password_path }}"
-        dest: "{{ ansible_env.HOME }}/vault-pw"
+        dest: "{{ ansible_env.HOME }}/vault.password"
         mode: "0600"
 
     - name: Ensure public key is present

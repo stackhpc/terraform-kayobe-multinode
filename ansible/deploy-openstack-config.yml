@@ -15,7 +15,7 @@
       ansible.builtin.assert:
         that:
           - vxlan_vni != None
-        fail_msg: "Please provide a VXLAN VNI. A unique value from 1 to 16777215."
+        fail_msg: "Please provide a VXLAN VNI. A unique value from 1 to 100,000."
 
     - name: Ensure Ansible host is reachable
       ansible.builtin.wait_for_connection:

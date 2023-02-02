@@ -5,6 +5,18 @@
   vars_files:
     - vars/defaults.yml
   tasks:
+    - name: Verify ssh key path has been set
+      ansible.builtin.assert:
+        that:
+          - ssh_key_path != None
+        fail_msg: "Please provide a path to the SSH key used within the multinode environment."
+
+    - name: Verify VXLAN VNI has been set
+      ansible.builtin.assert:
+        that:
+          - vxlan_vni != None
+        fail_msg: "Please provide a VXLAN VNI. A unique value from 1 to 100,000."
+
     - name: Ensure Ansible host is reachable
       ansible.builtin.wait_for_connection:
 
@@ -81,6 +93,13 @@
         dest: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/inventory/hosts"
         mode: "0644"
 
+    - name: Ensure VXLAN VNI has been set
+      ansible.builtin.lineinfile:
+        path: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/inventory/group_vars/all/vxlan.yml"
+        search_string: "vxlan_vni:"
+        line: "vxlan_vni: {{ vxlan_vni }}"
+        mode: "0644"
+
     - name: Ensure Kayobe repository is present
       ansible.builtin.git:
         repo: "{{ kayobe_repo }}"
@@ -103,18 +122,18 @@
     - name: Ensure vault password is present
       ansible.builtin.copy:
         src: "{{ vault_password_path }}"
-        dest: "{{ ansible_env.HOME }}/vault-pw"
+        dest: "{{ ansible_env.HOME }}/vault.password"
         mode: "0600"
 
     - name: Ensure public key is present
       ansible.builtin.copy:
-        src: "{{ public_key_path }}"
+        src: "{{ ssh_key_path }}.pub"
         dest: "{{ ansible_env.HOME }}/.ssh/id_rsa.pub"
         mode: "0644"
 
     - name: Ensure private key is present
       ansible.builtin.copy:
-        src: "{{ private_key_path }}"
+        src: "{{ ssh_key_path }}"
         dest: "{{ ansible_env.HOME }}/.ssh/id_rsa"
         mode: "0600"
 

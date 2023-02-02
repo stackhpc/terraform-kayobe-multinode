@@ -164,6 +164,10 @@ Install the ansible requirements.
 
    ansible-galaxy install -r ansible/requirements.yml
 
+Review the vars defined within `ansible/vars/defaults.yml`. In here you can customise the version of kayobe, kayobe-config or openstack-config. 
+However, make sure to define `ssh_key_path` to point to the location of the SSH key in use amongst the nodes and also `vxlan_vni` which should be unique value between 1 to 100,000.
+VNI should be much smaller than the officially supported limit of 16,777,215 as we encounter errors when attempting to bring interfaces up that use a high VNI.
+
 Finally run the ansible playbooks. 
 You may need to run `fix-homedir-ownership.yml` if you are using an image that has `ansible_user` not owning their own home folder.
 You may also need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
@@ -171,9 +175,8 @@ If not you can skip that playbook and proceed onto `deploy-openstack-config` whi
 
 .. code-block:: console
 
-   ansible-playbook -i ${ansible_ip}, ansible/fix-homedir-ownership.yml
-   ansible-playbook -i ${ansible_ip}, ansible/grow-control-host.yml -e ansible_user=cloud-user
-   ansible-playbook -i ${ansible_ip}, ansible/deploy-openstack-config.yml -e ansible_user=cloud-user
+   ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/grow-control-host.yml -e ansible_user=cloud-user
+   ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/deploy-openstack-config.yml -e ansible_user=cloud-user
 
 Deploy OpenStack
 ----------------
@@ -205,3 +208,21 @@ After you are finished with the multinode environment please destroy the nodes t
 This can acomplished by using the provided `scripts/tear-down.sh` which will destroy your controllers, compute, seed and storage nodes whilst leaving your Ansible control host and keypair intact.
 
 If you would like to delete your Ansible control host then you can pass the `-a` flag however if you would also like to remove your keypair then pass `-a -k`
+
+Issues & Fixes
+--------------
+
+Sometimes a compute instance fails to be provisioned by Terraform or fails on boot for any reason.
+If this happens the solution is to mark the resource as tainted and perform terraform apply again which shall destroy and rebuild the failed instance.
+
+.. code-block:: console
+
+   terraform taint 'openstack_compute_instance_v2.controller[2]'
+   terraform apply
+
+Also sometimes the provider may fail to notice that some resources are functioning as expected due to timeouts or other network issues.
+If you can confirm via Horizon or via SSH that the resource is functioning as expected you may untaint the resource preventing Terraform from destroying on subsequent terraform apply.
+
+.. code-block:: console
+
+   terraform untaint 'openstack_compute_instance_v2.controller[2]'

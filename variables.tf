@@ -54,3 +54,13 @@ variable "multinode_vm_network" {
 variable "multinode_vm_subnet" {
   type = string
 }
+
+variable "compute_is_vm" {
+  description = "Should be set to true if VMs are being used for compute nodes"
+  type = bool
+}
+
+variable "controller_is_vm" {
+  description = "Should be set to true if VMs are being used for controller nodes"
+  type = bool
+}

@@ -60,6 +60,17 @@ resource "openstack_compute_instance_v2" "compute" {
   network {
     name = var.multinode_vm_network
   }
+  dynamic "block_device" {
+    for_each = var.compute_is_vm ? [1] : []
+    content {
+      uuid                  = data.openstack_images_image_v2.multinode_image.id
+      source_type           = "image"
+      volume_size           = 100
+      boot_index            = 0
+      destination_type      = "volume"
+      delete_on_termination = true
+    }
+  }
   timeouts {
     create = "90m"
   }
@@ -74,6 +85,17 @@ resource "openstack_compute_instance_v2" "controller" {
   count        = var.controller_count
   network {
     name = var.multinode_vm_network
+  }
+  dynamic "block_device" {
+    for_each = var.controller_is_vm ? [1] : []
+    content {
+      uuid                  = data.openstack_images_image_v2.multinode_image.id
+      source_type           = "image"
+      volume_size           = 100
+      boot_index            = 0
+      destination_type      = "volume"
+      delete_on_termination = true
+    }
   }
   timeouts {
     create = "90m"

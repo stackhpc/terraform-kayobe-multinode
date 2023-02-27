@@ -113,6 +113,8 @@ Generate Terraform variables:
    ssh_public_key = "~/.ssh/changeme.pub"
    storage_count  = "3"
    storage_flavor = "general.v1.small"
+   compute_is_vm = "true"
+   controller_is_vm = "true"
    EOF
 
 Generate a plan:

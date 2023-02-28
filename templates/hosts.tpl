@@ -36,3 +36,6 @@ ${ element }
 %{ endfor ~}
 
 [rgws]
+
+[monitoring:children]
+controllers

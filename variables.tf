@@ -70,7 +70,7 @@ variable "controller_disk_size" {
 variable "ansible_control_disk_size" {
   description = "Block storage root disk size for the ansible control node in GB. Set to 0 on baremetal to use physical storage."
   type = number
-  default = 50
+  default = 100
 }
 
 variable "seed_disk_size" {

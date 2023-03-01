@@ -55,12 +55,30 @@ variable "multinode_vm_subnet" {
   type = string
 }
 
-variable "compute_is_vm" {
-  description = "Should be set to true if VMs are being used for compute nodes"
-  type = bool
+variable "compute_disk_size" {
+  description = "Block storage root disk size for compute nodes in GB. Set to 0 on baremetal to use physical storage."
+  type = number
 }
 
-variable "controller_is_vm" {
-  description = "Should be set to true if VMs are being used for controller nodes"
-  type = bool
+variable "controller_disk_size" {
+  description = "Block storage root disk size for controller nodes in GB. Set to 0 on baremetal to use physical storage."
+  type = number
+}
+
+variable "ansible_control_disk_size" {
+  description = "Block storage root disk size for the ansible control node in GB. Set to 0 on baremetal to use physical storage."
+  type = number
+  default = 100
+}
+
+variable "seed_disk_size" {
+  description = "Block storage root disk size for the seed node in GB. Set to 0 on baremetal to use physical storage."
+  type = number
+  default = 100
+}
+
+variable "storage_disk_size" {
+  description = "Block storage root disk size for storage nodes in GB. Set to 0 on baremetal to use physical storage."
+  type = number
+  default = 100
 }

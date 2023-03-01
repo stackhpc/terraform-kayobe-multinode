@@ -58,13 +58,11 @@ variable "multinode_vm_subnet" {
 variable "compute_disk_size" {
   description = "Block storage root disk size for compute nodes in GB. Set to 0 on baremetal to use physical storage."
   type = number
-  default = 100
 }
 
 variable "controller_disk_size" {
   description = "Block storage root disk size for controller nodes in GB. Set to 0 on baremetal to use physical storage."
   type = number
-  default = 100
 }
 
 variable "ansible_control_disk_size" {

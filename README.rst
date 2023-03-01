@@ -99,23 +99,40 @@ Generate Terraform variables:
 .. code-block:: console
 
    cat << EOF > terraform.tfvars
+   prefix = "changeme"
+
    ansible_control_vm_flavor = "general.v1.small"
    ansible_control_vm_name   = "ansible-control"
-   compute_count    = "2"
-   controller_count = "3"
+   ansible_control_disk_size = 100
+
+   seed_vm_flavor = "general.v1.small"
+   seed_disk_size = 100
+
    multinode_flavor     = "changeme"
    multinode_image      = "CentOS-stream8-lvm"
    multinode_keypair    = "changeme"
    multinode_vm_network = "stackhpc-ipv4-vlan-v2"
    multinode_vm_subnet  = "stackhpc-ipv4-vlan-subnet-v2"
-   prefix = "changeme"
-   seed_vm_flavor = "general.v1.small"
+   compute_count    = "2"
+   controller_count = "3"
+   compute_disk_size = 0
+   controller_disk_size = 0
+
    ssh_public_key = "~/.ssh/changeme.pub"
+
    storage_count  = "3"
    storage_flavor = "general.v1.small"
-   compute_is_vm = "true"
-   controller_is_vm = "true"
+   storage_disk_size = 100
+
    EOF
+
+You will need to set the `multinode_flavor`, `multinode_keypair`, `prefix`, and
+`ssh_public_key`.
+
+The `multinode_flavor` will change the flavor used for controller and compute
+nodes. Both virtual machines and baremetal are supported, but the 
+`controller_disk_size` and `compute_disk_size` must be set to 0 when using
+baremetal host. This will stop a block device being allocated.
 
 Generate a plan:
 

@@ -32,12 +32,6 @@
       retries: 3
       until: ping_results is succeeded
 
-    - name: Ensure python3-virtualenv is present
-      ansible.builtin.package:
-        name: python3-virtualenv
-        state: present
-      become: true
-
     - name: Ensure git is present
       ansible.builtin.package:
         name: git
@@ -117,6 +111,7 @@
       ansible.builtin.pip:
         name: "{{ src_directory }}/{{ kayobe_name }}/"
         virtualenv: "{{ ansible_env.HOME }}/venvs/kayobe"
+        virtualenv_command: "/usr/bin/python3 -m venv"
         state: present
 
     - name: Ensure vault password is present
@@ -148,6 +143,7 @@
       ansible.builtin.pip:
         requirements: "{{ src_directory }}/{{ openstack_config_name }}/requirements.txt"
         virtualenv: "{{ src_directory }}/{{ openstack_config_name }}/venv"
+        virtualenv_command: "/usr/bin/python3 -m venv"
         state: present
 
     - name: Ensure `openstack` ansible role requirements are present

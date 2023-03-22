@@ -188,8 +188,7 @@ However, make sure to define `ssh_key_path` to point to the location of the SSH 
 VNI should be much smaller than the officially supported limit of 16,777,215 as we encounter errors when attempting to bring interfaces up that use a high VNI. You must set``vault_password_path``; this should be set to the path to a file containing the Ansible vault password.
 
 Finally run the ansible playbooks. 
-You may need to run `fix-homedir-ownership.yml` if you are using an image that has `ansible_user` not owning their own home folder.
-You may also need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
+You may need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
 If not you can skip that playbook and proceed onto `deploy-openstack-config` which shall configure your Ansible control host in preparation for deployment.
 
 .. code-block:: console
@@ -208,7 +207,7 @@ If you choose to opt for automated method you must first SSH into your Ansible c
 
 .. code-block:: console
 
-   ssh centos@${ansible_ip}
+   ssh cloud-user@${ansible_ip}
    ~/deploy-openstack.sh
 
 This script will go through the process of performing the following tasks

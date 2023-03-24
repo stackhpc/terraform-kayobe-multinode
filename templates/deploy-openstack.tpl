@@ -68,7 +68,7 @@ git -C $${config_directories[kayobe]} submodule update
 if [[ "$(sudo docker image ls)" == *"kayobe"* ]]; then
   echo "Image already exists skipping docker build"
 else
-  sudo DOCKER_BUILDKIT=1 docker build --file $${config_directories[kayobe]}/.automation/docker/kayobe/Dockerfile --tag kayobe:latest $${config_directories[kayobe]}
+  sudo DOCKER_BUILDKIT=1 docker build --network host --file $${config_directories[kayobe]}/.automation/docker/kayobe/Dockerfile --tag kayobe:latest $${config_directories[kayobe]}
 fi
 
 set +x

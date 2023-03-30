@@ -93,6 +93,13 @@
         dest: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/inventory/hosts"
         mode: "0644"
 
+    - name: Ensure hosts are added to /etc/hosts
+      become: true
+      ansible.builtin.lineinfile:
+        path: "/etc/hosts"
+        line: "{{ item.value}}\t{{item.key}}"
+      loop: "{{ (lookup('file', 'files/admin-oc-networks.yml') | from_yaml).admin_oc_ips | dict2items }}"
+
     - name: Ensure VXLAN VNI has been set
       ansible.builtin.lineinfile:
         path: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/inventory/group_vars/all/vxlan.yml"

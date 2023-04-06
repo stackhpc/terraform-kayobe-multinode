@@ -1,7 +1,7 @@
 resource "openstack_blockstorage_volume_v3" "volumes" {
   count = var.storage_count
   name  = format("%s-osd-%02d", var.prefix, count.index + 1)
-  size  = 20
+  size  = 40
 }
 
 resource "openstack_compute_volume_attach_v2" "attachments" {

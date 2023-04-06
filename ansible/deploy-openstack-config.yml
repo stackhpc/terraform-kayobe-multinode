@@ -97,7 +97,7 @@
       become: true
       ansible.builtin.lineinfile:
         path: "/etc/hosts"
-        line: "{{ item.value}}\t{{item.key}}"
+        line: "{{ item.value }}\t{{ item.key}}"
       loop: "{{ (lookup('file', 'files/admin-oc-networks.yml') | from_yaml).admin_oc_ips | dict2items }}"
 
     - name: Ensure VXLAN VNI has been set

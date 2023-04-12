@@ -187,12 +187,14 @@ Review the vars defined within `ansible/vars/defaults.yml`. In here you can cust
 However, make sure to define `ssh_key_path` to point to the location of the SSH key in use amongst the nodes and also `vxlan_vni` which should be unique value between 1 to 100,000.
 VNI should be much smaller than the officially supported limit of 16,777,215 as we encounter errors when attempting to bring interfaces up that use a high VNI. You must set``vault_password_path``; this should be set to the path to a file containing the Ansible vault password.
 
-Finally run the ansible playbooks. 
-You may need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
+Finally run the ansible playbooks.
+You may need to run `fix-homedir-ownership.yml` if you are using an image that has `ansible_user` not owning their own home folder.
+You may also need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
 If not you can skip that playbook and proceed onto `deploy-openstack-config` which shall configure your Ansible control host in preparation for deployment.
 
 .. code-block:: console
 
+   ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/fix-homedir-ownership.yml -e ansible_user=cloud-user
    ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/grow-control-host.yml -e ansible_user=cloud-user
    ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/deploy-openstack-config.yml -e ansible_user=cloud-user
 

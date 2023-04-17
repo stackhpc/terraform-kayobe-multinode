@@ -25,7 +25,7 @@
 
     - name: Ensure hosts are reachable
       ansible.builtin.command:
-        cmd: "ping -c 1 -w 2 {{ item.key }}"
+        cmd: "ping -c 1 -w 2 {{ item.value }}"
       loop: "{{ (lookup('file', 'files/admin-oc-networks.yml') | from_yaml).admin_oc_ips | dict2items }}"
       changed_when: false
       register: ping_results

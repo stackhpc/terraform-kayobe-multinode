@@ -114,6 +114,13 @@
         state: directory
         mode: "0755"
 
+    - name: Ensure the latest version of pip is installed
+      ansible.builtin.pip:
+        name: pip
+        virtualenv: "{{ ansible_env.HOME }}/venvs/kayobe"
+        virtualenv_command: "/usr/bin/python3 -m venv"
+        state: latest
+
     - name: Ensure `kayobe` is present
       ansible.builtin.pip:
         name: "{{ src_directory }}/{{ kayobe_name }}/"
@@ -145,6 +152,13 @@
         dest: "{{ src_directory }}/{{ openstack_config_name }}"
         version: "{{ openstack_config_version }}"
         update: false
+
+    - name: Ensure the latest version of pip is installed
+      ansible.builtin.pip:
+        name: pip
+        virtualenv: "{{ src_directory }}/{{ openstack_config_name }}/venv"
+        virtualenv_command: "/usr/bin/python3 -m venv"
+        state: latest
 
     - name: Ensure `openstack` virtualenv is present
       ansible.builtin.pip:

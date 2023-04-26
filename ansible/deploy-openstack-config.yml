@@ -114,6 +114,13 @@
         state: directory
         mode: "0755"
 
+    - name: Ensure python3-venv is present (Ubuntu)
+      ansible.builtin.package:
+        name: python3-venv
+        state: present
+      become: true
+      when: ansible_facts['distribution'] == "Ubuntu"
+
     - name: Ensure the latest version of pip is installed
       ansible.builtin.pip:
         name: pip

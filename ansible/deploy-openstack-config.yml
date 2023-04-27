@@ -114,6 +114,13 @@
         state: directory
         mode: "0755"
 
+    - name: Ensure python3-venv is present (Ubuntu)
+      ansible.builtin.package:
+        name: python3-venv
+        state: present
+      become: true
+      when: ansible_facts['distribution'] == "Ubuntu"
+
     - name: Ensure the latest version of pip is installed
       ansible.builtin.pip:
         name: pip
@@ -206,6 +213,20 @@
       become: true
       changed_when: true
       when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Ensure docker respository is present (Ubuntu)
+      block:
+        - name: Add Docker GPG apt Key
+          ansible.builtin.get_url:
+            url: https://download.docker.com/linux/ubuntu/gpg
+            dest: /etc/apt/trusted.gpg.d/docker.asc
+
+        - name: Add Docker Repository
+          apt_repository:
+            repo: deb https://download.docker.com/linux/ubuntu {{ ansible_facts['distribution_release'] }} stable
+            state: present
+      become: true
+      when: ansible_facts['distribution'] == "Ubuntu"
 
     - name: Ensure docker is present
       ansible.builtin.package:

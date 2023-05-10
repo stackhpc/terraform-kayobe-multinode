@@ -119,6 +119,7 @@ Generate Terraform variables:
    controller_disk_size = 0
 
    ssh_public_key = "~/.ssh/changeme.pub"
+   ssh_user       = "cloud-user"
 
    storage_count  = "3"
    storage_flavor = "general.v1.small"
@@ -126,8 +127,9 @@ Generate Terraform variables:
 
    EOF
 
-You will need to set the `multinode_flavor`, `multinode_keypair`, `prefix`, and
-`ssh_public_key`.
+You will need to set the `multinode_flavor`, `multinode_keypair`, `prefix`,
+`ssh_public_key`, and optionally `ssh_user` if you are using a different
+distribution.
 
 The `multinode_flavor` will change the flavor used for controller and compute
 nodes. Both virtual machines and baremetal are supported, but the 

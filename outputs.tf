@@ -42,7 +42,8 @@ resource "local_file" "openstack_inventory" {
   content = templatefile(
     "${path.module}/templates/openstack-inventory.tpl",
     {
-      seed_addr   = openstack_compute_instance_v2.seed.access_ip_v4
+      seed_addr   = openstack_compute_instance_v2.seed.access_ip_v4,
+      ssh_user    = var.ssh_user
     }
   )
   filename        = "ansible/files/openstack-inventory"
@@ -54,6 +55,7 @@ resource "local_file" "deploy_openstack" {
     "${path.module}/templates/deploy-openstack.tpl",
     {
       seed_addr   = openstack_compute_instance_v2.seed.access_ip_v4
+      ssh_user    = var.ssh_user
     }
   )
   filename        = "ansible/files/deploy-openstack.sh"

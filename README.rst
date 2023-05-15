@@ -119,6 +119,7 @@ Generate Terraform variables:
    controller_disk_size = 0
 
    ssh_public_key = "~/.ssh/changeme.pub"
+   ssh_user       = "changeme"
 
    storage_count  = "3"
    storage_flavor = "general.v1.small"
@@ -126,8 +127,9 @@ Generate Terraform variables:
 
    EOF
 
-You will need to set the `multinode_flavor`, `multinode_keypair`, `prefix`, and
-`ssh_public_key`.
+You will need to set the `multinode_flavor`, `multinode_keypair`, `prefix`,
+`ssh_public_key`, and `ssh_user` (such as using the user `ubuntu`
+if you're using ubuntu or `cloud-user` on Rocky Linux 9, etc).
 
 The `multinode_flavor` will change the flavor used for controller and compute
 nodes. Both virtual machines and baremetal are supported, but the 
@@ -146,14 +148,14 @@ Apply the changes:
 
    terraform apply -auto-approve
 
-You should have requested number of resources spawned on Openstack, and ansible_inventory file produced as output for Kayobe.
+You should have requested a number of resources spawned on Openstack, and an ansible_inventory file produced as output for Kayobe.
 
 Copy your generated id_rsa and id_rsa.pub to ~/.ssh/ on Ansible control host if you want Kayobe to automatically pick them up during bootstrap.
 
 Configure Ansible control host
 
 Using the `deploy-openstack-config.yml` playbook you can setup the Ansible control host to include the kayobe/kayobe-config repositories with `hosts` and `admin-oc-networks`.
-It shall also setup the kayobe virtual environment, allowing for immediate configure and deployment of OpenStack.
+It shall also setup the kayobe virtual environment, allowing for immediate configuration and deployment of OpenStack.
 
 First you must ensure that you have `Ansible installed <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`_ on your local machine.
 
@@ -190,8 +192,8 @@ VNI should be much smaller than the officially supported limit of 16,777,215 as 
 Finally run the ansible playbooks.
 You may need to run `fix-homedir-ownership.yml` if you are using an image that has `ansible_user` not owning their own home folder.
 You may also need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
-If not you can skip that playbook and proceed onto `deploy-openstack-config` which shall configure your Ansible control host in preparation for deployment.
-
+If not you can skip those playbook and proceed onto `deploy-openstack-config` which shall configure your Ansible control host in preparation for deployment.
+Be sure to replace `ansible_user` with the user you are using to connect to the Ansible control host.
 .. code-block:: console
 
    ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/fix-homedir-ownership.yml -e ansible_user=cloud-user
@@ -201,7 +203,7 @@ If not you can skip that playbook and proceed onto `deploy-openstack-config` whi
 Deploy OpenStack
 ----------------
 
-Once the Ansible control host has been configured with a Kayobe/OpenStack config present you can then begin the process of deploying OpenStack.
+Once the Ansible control host has been configured with a Kayobe/OpenStack configuration you can then begin the process of deploying OpenStack.
 This can be achieved by either manually running the various commands to configures the hosts and deploy the services or automated by using `deploy-openstack.sh`,
 which should be available within the homedir on your Ansible control host provided you ran `deploy-openstack-config.yml` earlier.
 
@@ -209,7 +211,7 @@ If you choose to opt for automated method you must first SSH into your Ansible c
 
 .. code-block:: console
 
-   ssh cloud-user@${ansible_ip}
+   ssh ${ssh_user}@${ansible_ip}
    ~/deploy-openstack.sh
 
 This script will go through the process of performing the following tasks

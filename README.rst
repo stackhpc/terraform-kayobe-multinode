@@ -43,7 +43,7 @@ Generate an SSH keypair:
    ssh-keygen -f id_rsa -N ''
 
 Create an OpenStack clouds.yaml file with your credentials to access an
-OpenStack cloud. Alternatively, download one from Horizon.
+OpenStack cloud. Alternatively, download and source an openrc file from Horizon.
 
 .. code-block:: console
 
@@ -59,7 +59,7 @@ OpenStack cloud. Alternatively, download one from Horizon.
        interface: public
    EOF
 
-Export environment variables to use the correct cloud and provide a password:
+Export environment variables to use the correct cloud and provide a password (you shouldn't do this if you have sourced the openrc file):
 
 .. code-block:: console
 
@@ -68,7 +68,7 @@ Export environment variables to use the correct cloud and provide a password:
    export OS_PASSWORD
 
 Or you can source the provided `init.sh` script which shall initialise terraform and export two variables.
-`OS_CLOUD` is a variable which is used by Terraform and must match an entry within `clouds.yml`.
+`OS_CLOUD` is a variable which is used by Terraform and must match an entry within `clouds.yml` (Not needed if you have sourced the openrc file).
 `OS_PASSWORD` is the password used to authenticate when signing into OpenStack.
 
 .. code-block:: console

@@ -1,6 +1,6 @@
 ---
 - name: Grow Control Host
-  hosts: all
+  hosts: control
   gather_facts: true
   vars_files:
     - vars/defaults.yml

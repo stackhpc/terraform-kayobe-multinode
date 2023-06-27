@@ -196,9 +196,10 @@ If not you can skip those playbook and proceed onto `deploy-openstack-config` wh
 Be sure to replace `ansible_user` with the user you are using to connect to the Ansible control host.
 .. code-block:: console
 
-   ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/fix-homedir-ownership.yml -e ansible_user=cloud-user
-   ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/grow-control-host.yml -e ansible_user=cloud-user
-   ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/deploy-openstack-config.yml -e ansible_user=cloud-user
+   ansible-playbook -i ansible/inventory.yml ansible/fix-homedir-ownership.yml -e ansible_user=cloud-user
+   ansible-playbook -i ansible/inventory.yml ansible/add-fqdn.yml -e ansible_user=cloud-user
+   ansible-playbook -i ansible/inventory.yml ansible/grow-control-host.yml -e ansible_user=cloud-user
+   ansible-playbook -i ansible/inventory.yml ansible/deploy-openstack-config.yml -e ansible_user=cloud-user
 
 Deploy OpenStack
 ----------------
@@ -211,7 +212,7 @@ If you choose to opt for automated method you must first SSH into your Ansible c
 
 .. code-block:: console
 
-   ssh ${ssh_user}@${ansible_ip}
+   ssh cloud-user@$(terraform output -raw ansible_control_access_ip_v4)
    ~/deploy-openstack.sh
 
 This script will go through the process of performing the following tasks

@@ -2,31 +2,17 @@
 - name: Fix Home Directory Ownership
   hosts: all
   gather_facts: true
-  vars_files:
-    - files/admin-oc-networks.yml
   vars:
     # At the time of running this playbook the home directory is not owned by the user.
     # Therefore, we will not be permitted to store the Ansible temporary directory in the home folder.
     # This must be relocated to some where that can be written to by the remote user.
     ansible_remote_tmp: "/tmp/ansible"
   tasks:
-    - name: Ensure hosts are reachable
-      ansible.builtin.command:
-        cmd: "ping -c 1 -w 2 {{ item.value }}"
-      loop:
-        "{{ (lookup('file', 'files/admin-oc-networks.yml') | from_yaml).admin_oc_ips | dict2items }}"
-      changed_when: false
-      register: ping_results
-      retries: 15
-      delay: 3
-      until: ping_results is succeeded
-
-    - name: Ensure homedir of ansible control node is owned by cloud-user # noqa: no-changed-when
-      ansible.builtin.command:
-        cmd: "sudo chown -R cloud-user: ."
-
-    - name: Ensure homedir of all nodes is owned by cloud-user # noqa: no-changed-when
-      ansible.builtin.command:
-        cmd: "ssh -oStrictHostKeyChecking=no cloud-user@{{ item.value }} sudo chown -R cloud-user: ."
-      loop: "{{ (lookup('file', 'files/admin-oc-networks.yml') | from_yaml).admin_oc_ips | dict2items }}"
-      delegate_to: localhost
+    - name: Ensure homedir is owned by cloud-user # noqa: no-changed-when
+      ansible.builtin.file:
+        dest: "{{ ansible_env.HOME }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0755"
+      become: true

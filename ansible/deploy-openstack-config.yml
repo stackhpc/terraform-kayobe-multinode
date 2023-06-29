@@ -59,6 +59,7 @@
       loop:
         - overcloud-host-configure/pre.d/
         - seed-host-configure/pre.d/
+        - infra-vm-host-configure/pre.d/
 
     - name: Ensure Kayobe hooks are present
       ansible.builtin.file:
@@ -73,6 +74,9 @@
         - { src: growroot.yml, dest: seed-host-configure/pre.d/5-growroot.yml }
         - { src: fix-networking.yml, dest: seed-host-configure/pre.d/15-fix-networking.yml }
         - { src: configure-vxlan.yml, dest: seed-host-configure/pre.d/20-configure-vxlan.yml }
+        - { src: growroot.yml, dest: infra-vm-host-configure/pre.d/5-growroot.yml }
+        - { src: fix-networking.yml, dest: infra-vm-host-configure/pre.d/15-fix-networking.yml }
+        - { src: configure-vxlan.yml, dest: infra-vm-host-configure/pre.d/20-configure-vxlan.yml }
 
 
     - name: Ensure Admin Overcloud Network file is present

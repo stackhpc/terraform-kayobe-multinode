@@ -45,6 +45,7 @@ set -x
 kayobe control host bootstrap
 kayobe seed host configure
 kayobe overcloud host configure
+%{ if deploy_wazuh }kayobe infra vm host configure%{ endif }
 
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm-deploy.yml
 sleep 30
@@ -52,6 +53,13 @@ kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm.yml
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm-gather-keys.yml
 
 kayobe overcloud service deploy
+
+%{ if deploy_wazuh }
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/wazuh-secrets.yml
+ansible-vault encrypt --vault-password-file ~/vault.password  $KAYOBE_CONFIG_PATH/environments/ci-multinode/wazuh-secrets.yml
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/wazuh-manager.yml
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/wazuh-agent.yml
+%{ endif }
 
 activate_virt_env "openstack"
 activate_kayobe_env

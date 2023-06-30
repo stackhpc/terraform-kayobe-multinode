@@ -98,7 +98,7 @@ variable "infra_vm_disk_size" {
 }
 
 variable "deploy_wazuh" {
-  description = "Bool, whether or not to deploy wazuh"
+  description = "Bool, whether or not to deploy Wazuh."
   type = bool
   default = false
 }

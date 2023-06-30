@@ -141,8 +141,8 @@ nodes. Both virtual machines and baremetal are supported, but the
 baremetal host. This will stop a block device being allocated.
 
 If `deploy_wazuh` is set to true, an infrastructure VM will be created that
-hosts the Wazuh manager. The wazuh deployment playbooks will also be triggered
-automatically to deploy wazuh agents to the overcloud hosts.
+hosts the Wazuh manager. The Wazuh deployment playbooks will also be triggered
+automatically to deploy Wazuh agents to the overcloud hosts.
 
 Generate a plan:
 

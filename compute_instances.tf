@@ -134,3 +134,27 @@ resource "openstack_compute_instance_v2" "storage" {
     create = "90m"
   }
 }
+
+resource "openstack_compute_instance_v2" "wazuh_manager" {
+  name         = format("%s-wazuh-manager-%02d", var.prefix, count.index + 1)
+  flavor_name  = var.infra_vm_flavor
+  key_pair     = resource.openstack_compute_keypair_v2.keypair.name
+  image_name   = var.multinode_image
+  config_drive = true
+  user_data    = file("templates/userdata.cfg.tpl")
+  count        = var.deploy_wazuh ? 1 : 0
+  network {
+    name = var.multinode_vm_network
+  }
+  block_device {
+    uuid                  = data.openstack_images_image_v2.multinode_image.id
+    source_type           = "image"
+    volume_size           = var.infra_vm_disk_size
+    boot_index            = 0
+    destination_type      = "volume"
+    delete_on_termination = true
+  }
+  timeouts {
+    create = "90m"
+  }
+}

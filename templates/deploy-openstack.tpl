@@ -42,19 +42,72 @@ set +x
 export KAYOBE_VAULT_PASSWORD=$(cat ~/vault.password)
 set -x
 
+# Configure hosts
 kayobe control host bootstrap
 kayobe seed host configure
 kayobe overcloud host configure
 %{ if deploy_wazuh }kayobe infra vm host configure%{ endif }
 
+# Deploy Ceph
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm-deploy.yml
 sleep 30
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm.yml
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm-gather-keys.yml
 
+pip install -r $${config_directories[kayobe]}/requirements.txt
+
+# Deploy hashicorp vault to the seed
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-seed.yml
+ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/OS-TLS-INT.pem
+ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/seed-vault-keys.json
+ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/overcloud.key
+
+kayobe overcloud service deploy -kt haproxy
+
+# Deploy hashicorp vault to the controllers
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-overcloud.yml
+ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/overcloud-vault-keys.json
+
+# Generate internal tls certificates
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-generate-internal-tls.yml
+ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy-internal.pem
+
+# Generate backend tls certificates
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-generate-backend-tls.yml
+%{ for hostname in controller_hostname ~}
+ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/${ hostname }-key.pem
+%{ endfor ~}
+
+# Set config to use tls
+sed -i 's/# kolla_enable_tls_internal: true/kolla_enable_tls_internal: true/g' $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla.yml
+cat $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals.yml
+
+# Deploy all services
 kayobe overcloud service deploy
 
+# Enable barbican
+sed -i 's/# kolla_enable_barbican: true/kolla_enable_barbican: true/g' $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla.yml
+cat << EOF >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
+---
+secrets_barbican_approle_secret_id: $(uuidgen)
+EOF
+ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
+
+# Create vault configuration for barbican
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-barbican.yml
+ansible-vault decrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
+
+# Deploy barbican
+cat << EOF >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
+secrets_barbican_approle_role_id: $(cat /tmp/barbican-role-id)
+EOF
+ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
+rm /tmp/barbican-role-id
+mv $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/config/barbican.conf.example $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/config/barbican.conf
+kayobe overcloud service deploy -kt barbican
+
 %{ if deploy_wazuh }
+# Deploy Wazuh
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/wazuh-secrets.yml
 ansible-vault encrypt --vault-password-file ~/vault.password  $KAYOBE_CONFIG_PATH/environments/ci-multinode/wazuh-secrets.yml
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/wazuh-manager.yml
@@ -83,10 +136,11 @@ set +x
 export KAYOBE_AUTOMATION_SSH_PRIVATE_KEY=$(cat ~/.ssh/id_rsa)
 set -x
 
+# Run tempest
 sudo -E docker run --detach --rm --network host -v $${config_directories[kayobe]}:/stack/kayobe-automation-env/src/kayobe-config -v $${config_directories[kayobe]}/tempest-artifacts:/stack/tempest-artifacts -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY kayobe:latest /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/tempest.sh -e ansible_user=stack
 
 # During the initial deployment the seed node must receive the `gwee/rally` image before we can follow the logs.
 # Therefore, we must wait a reasonable amount time before attempting to do so.
 sleep 360
 
-ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } 'sudo docker logs --follow $(sudo docker ps -q)'
+ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } 'sudo docker logs --follow $(sudo docker ps -q | head -n 1)'

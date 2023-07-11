@@ -11,7 +11,6 @@
         line: "{{ item }}"
       loop:
         - "192.168.37.2 internal.infra.mos.{{ root_domain }}"
-        - "192.168.38.2 external.infra.mos.{{ root_domain }}"
         - "192.168.39.2 public.infra.mos.{{ root_domain }}"
       tags: hosts
       become: true

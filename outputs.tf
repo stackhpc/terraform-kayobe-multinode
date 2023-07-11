@@ -68,7 +68,7 @@ resource "local_file" "deploy_openstack" {
 
 resource "ansible_host" "control_host" {
   name   = openstack_compute_instance_v2.ansible_control.access_ip_v4
-  groups = ["control"]
+  groups = ["ansible_control"]
 }
 
 resource "ansible_host" "compute_host" {
@@ -96,5 +96,5 @@ resource "ansible_host" "storage" {
 
 resource "ansible_group" "cluster_group" {
   name     = "cluster"
-  children = ["compute", "control", "controllers", "seed", "storage"]
+  children = ["compute", "ansible_control", "controllers", "seed", "storage"]
 }

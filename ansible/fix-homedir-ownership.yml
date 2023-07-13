@@ -1,14 +1,22 @@
 ---
 - name: Fix Home Directory Ownership
   hosts: all
-  gather_facts: true
+  gather_facts: false
   vars:
     # At the time of running this playbook the home directory is not owned by the user.
     # Therefore, we will not be permitted to store the Ansible temporary directory in the home folder.
     # This must be relocated to some where that can be written to by the remote user.
     ansible_remote_tmp: "/tmp/ansible"
   tasks:
-    - name: Ensure homedir is owned by cloud-user # noqa: no-changed-when
+    - name: Ensure hosts are reachable
+      ansible.builtin.wait_for_connection:
+
+    - name: Gather the home directory of the user
+      ansible.builtin.setup:
+        gather_subset:
+          - user_dir
+
+    - name: Ensure homedir is owned by {{ ansible_user }}
       ansible.builtin.file:
         dest: "{{ ansible_env.HOME }}"
         state: directory

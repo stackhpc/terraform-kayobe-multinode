@@ -1,6 +1,6 @@
 ---
 - name: Deploy OpenStack Configuration
-  hosts: control
+  hosts: ansible_control
   gather_facts: false
   vars_files:
     - vars/defaults.yml

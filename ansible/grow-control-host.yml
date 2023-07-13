@@ -1,6 +1,6 @@
 ---
 - name: Grow Control Host
-  hosts: control
+  hosts: ansible_control
   gather_facts: true
   vars_files:
     - vars/defaults.yml

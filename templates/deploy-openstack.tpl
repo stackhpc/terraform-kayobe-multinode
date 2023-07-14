@@ -82,29 +82,22 @@ ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH
 sed -i 's/# kolla_enable_tls_internal: true/kolla_enable_tls_internal: true/g' $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla.yml
 cat $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals.yml
 
-# Deploy all services
-kayobe overcloud service deploy
-
-# Enable barbican
-sed -i 's/# kolla_enable_barbican: true/kolla_enable_barbican: true/g' $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla.yml
+# Create vault configuration for barbican
 cat << EOF >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
 ---
 secrets_barbican_approle_secret_id: $(uuidgen)
 EOF
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
-
-# Create vault configuration for barbican
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-barbican.yml
 ansible-vault decrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
-
-# Deploy barbican
 cat << EOF >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
 secrets_barbican_approle_role_id: $(cat /tmp/barbican-role-id)
 EOF
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
 rm /tmp/barbican-role-id
-mv $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/config/barbican.conf.example $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/config/barbican.conf
-kayobe overcloud service deploy -kt barbican
+
+# Deploy all services
+kayobe overcloud service deploy
 
 %{ if deploy_wazuh }
 # Deploy Wazuh

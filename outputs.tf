@@ -57,9 +57,10 @@ resource "local_file" "deploy_openstack" {
   content = templatefile(
     "${path.module}/templates/deploy-openstack.tpl",
     {
-      seed_addr    = openstack_compute_instance_v2.seed.access_ip_v4,
-      ssh_user     = var.ssh_user,
-      deploy_wazuh = var.deploy_wazuh
+      seed_addr           = openstack_compute_instance_v2.seed.access_ip_v4,
+      ssh_user            = var.ssh_user,
+      deploy_wazuh        = var.deploy_wazuh
+      controller_hostname = openstack_compute_instance_v2.controller.*.name
     }
   )
   filename        = "ansible/files/deploy-openstack.sh"

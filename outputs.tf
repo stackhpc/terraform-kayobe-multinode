@@ -6,6 +6,10 @@ output "seed_access_ip_v4" {
   value = openstack_compute_instance_v2.seed.access_ip_v4
 }
 
+output "ansible_user" {
+  value = var.ssh_user
+}
+
 resource "local_file" "hosts" {
   content = templatefile(
     "${path.module}/templates/hosts.tpl",
@@ -97,4 +101,7 @@ resource "ansible_host" "storage" {
 resource "ansible_group" "cluster_group" {
   name     = "cluster"
   children = ["compute", "ansible_control", "controllers", "seed", "storage"]
+  variables = {
+    ansible_user = var.ssh_user
+  }
 }

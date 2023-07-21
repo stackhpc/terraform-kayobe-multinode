@@ -39,3 +39,11 @@ ${ element }
 
 [monitoring:children]
 controllers
+
+[wazuh-manager]
+%{ for element in wazuh_manager_hostname ~}
+${ element }
+%{ endfor ~}
+
+[infra-vms:children]
+wazuh-manager

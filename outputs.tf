@@ -19,6 +19,7 @@ resource "local_file" "hosts" {
       ansible_control_hostname = openstack_compute_instance_v2.ansible_control.name
       storage_hostname         = openstack_compute_instance_v2.storage.*.name
       seed_hostname            = openstack_compute_instance_v2.seed.name
+      wazuh_manager_hostname   = openstack_compute_instance_v2.wazuh_manager.*.name
     }
   )
   filename        = "ansible/files/hosts"
@@ -40,6 +41,8 @@ resource "local_file" "admin_networks" {
       storage                  = openstack_compute_instance_v2.storage.*.access_ip_v4
       seed_hostname            = openstack_compute_instance_v2.seed.name
       seed                     = openstack_compute_instance_v2.seed.access_ip_v4
+      wazuh_manager_hostname   = openstack_compute_instance_v2.wazuh_manager.*.name
+      wazuh_manager            = openstack_compute_instance_v2.wazuh_manager.*.access_ip_v4
     }
   )
   filename        = "ansible/files/admin-oc-networks.yml"
@@ -62,8 +65,10 @@ resource "local_file" "deploy_openstack" {
   content = templatefile(
     "${path.module}/templates/deploy-openstack.tpl",
     {
-      seed_addr   = openstack_compute_instance_v2.seed.access_ip_v4
-      ssh_user    = var.ssh_user
+      seed_addr           = openstack_compute_instance_v2.seed.access_ip_v4,
+      ssh_user            = var.ssh_user,
+      deploy_wazuh        = var.deploy_wazuh
+      controller_hostname = openstack_compute_instance_v2.controller.*.name
     }
   )
   filename        = "ansible/files/deploy-openstack.sh"

@@ -15,3 +15,6 @@ admin_oc_ips:
 %{ for hostname, addr in zipmap(storage_hostname, storage) ~}
   ${ hostname }: ${ addr }
 %{ endfor ~}
+%{ for hostname, addr in zipmap(wazuh_manager_hostname, wazuh_manager) ~}
+  ${ hostname }: ${ addr }
+%{ endfor ~}

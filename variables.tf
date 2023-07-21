@@ -51,6 +51,10 @@ variable "storage_flavor" {
   type = string
 }
 
+variable "infra_vm_flavor" {
+  type = string
+}
+
 variable "multinode_vm_network" {
   type = string
 }
@@ -85,4 +89,16 @@ variable "storage_disk_size" {
   description = "Block storage root disk size for storage nodes in GB. Set to 0 on baremetal to use physical storage."
   type = number
   default = 100
+}
+
+variable "infra_vm_disk_size" {
+  description = "Block storage root disk size for infrastructure VMs."
+  type = number
+  default = 100
+}
+
+variable "deploy_wazuh" {
+  description = "Bool, whether or not to deploy Wazuh."
+  type = bool
+  default = false
 }

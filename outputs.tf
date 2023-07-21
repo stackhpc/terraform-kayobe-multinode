@@ -6,7 +6,7 @@ output "seed_access_ip_v4" {
   value = openstack_compute_instance_v2.seed.access_ip_v4
 }
 
-output "ansible_user" {
+output "ssh_user" {
   value = var.ssh_user
 }
 

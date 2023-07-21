@@ -220,7 +220,7 @@ If you choose to opt for automated method you must first SSH into your Ansible c
 
 .. code-block:: console
 
-   ssh $(terraform output -raw ansible_user)@$(terraform output -raw ansible_control_access_ip_v4)
+   ssh $(terraform output -raw ssh_user)@$(terraform output -raw ansible_control_access_ip_v4)
    ~/deploy-openstack.sh
 
 This script will go through the process of performing the following tasks

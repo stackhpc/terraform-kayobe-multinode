@@ -201,7 +201,7 @@ Finally run the ansible playbooks.
 You may need to run `fix-homedir-ownership.yml` if you are using an image that has `ansible_user` not owning their own home folder.
 You may also need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
 If not you can skip those playbook and proceed onto `deploy-openstack-config` which shall configure your Ansible control host in preparation for deployment.
-Be sure to replace `ansible_user` with the user you are using to connect to the Ansible control host.
+
 .. code-block:: console
 
    ansible-playbook -i ansible/inventory.yml ansible/fix-homedir-ownership.yml

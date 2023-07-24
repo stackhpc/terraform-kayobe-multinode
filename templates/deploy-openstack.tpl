@@ -114,7 +114,7 @@ set +x
 source $${KOLLA_CONFIG_PATH}/public-openrc.sh
 set -x
 
-~/src/openstack-config/tools/openstack-config
+~/src/openstack-config/tools/openstack-config -- -e ansible_user=${ ssh_user }
 
 git -C $${config_directories[kayobe]} submodule init
 git -C $${config_directories[kayobe]} submodule update

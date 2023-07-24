@@ -20,6 +20,8 @@ ssh_key_path:
 
 vxlan_vni:
 
+root_domain: sms-lab.cloud
+
 lvm_groups:
   - vgname: rootvg
     disks:

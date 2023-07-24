@@ -201,12 +201,13 @@ Finally run the ansible playbooks.
 You may need to run `fix-homedir-ownership.yml` if you are using an image that has `ansible_user` not owning their own home folder.
 You may also need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
 If not you can skip those playbook and proceed onto `deploy-openstack-config` which shall configure your Ansible control host in preparation for deployment.
-Be sure to replace `ansible_user` with the user you are using to connect to the Ansible control host.
+
 .. code-block:: console
 
-   ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/fix-homedir-ownership.yml -e ansible_user=cloud-user
-   ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/grow-control-host.yml -e ansible_user=cloud-user
-   ansible-playbook -i $(terraform output -raw ansible_control_access_ip_v4), ansible/deploy-openstack-config.yml -e ansible_user=cloud-user
+   ansible-playbook -i ansible/inventory.yml ansible/fix-homedir-ownership.yml
+   ansible-playbook -i ansible/inventory.yml ansible/add-fqdn.yml
+   ansible-playbook -i ansible/inventory.yml ansible/grow-control-host.yml
+   ansible-playbook -i ansible/inventory.yml ansible/deploy-openstack-config.yml
 
 Deploy OpenStack
 ----------------
@@ -219,7 +220,7 @@ If you choose to opt for automated method you must first SSH into your Ansible c
 
 .. code-block:: console
 
-   ssh ${ssh_user}@${ansible_ip}
+   ssh $(terraform output -raw ssh_user)@$(terraform output -raw ansible_control_access_ip_v4)
    ~/deploy-openstack.sh
 
 This script will go through the process of performing the following tasks
@@ -230,6 +231,23 @@ This script will go through the process of performing the following tasks
    * kayobe overcloud service deploy
    * openstack configuration
    * tempest testing
+
+Accessing OpenStack
+-------------------
+
+After a successful deployment of OpenStack you make access the OpenStack API and Horizon by proxying your connection via the seed node, as it has an interface on the public network (192.168.39.X).
+Using software such as sshuttle will allow for easy access.
+
+.. code-block:: console
+
+   sshuttle -r $(terraform output -raw ssh_user)@$(terraform output -raw seed_access_ip_v4) 192.168.39.0/24
+
+You may also use sshuttle to proxy DNS via the multinode environment. Useful if you are working with Designate. 
+Important to node this will proxy all DNS requests from your machine to the first controller within the multinode environment.
+
+.. code-block:: console
+
+   sshuttle -r $(terraform output -raw ssh_user)@$(terraform output -raw seed_access_ip_v4) 192.168.39.0/24 --dns --to-ns 192.168.39.4
 
 Tear Down
 ---------

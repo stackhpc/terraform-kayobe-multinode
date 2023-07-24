@@ -1,0 +1,16 @@
+---
+- name: Add FQDN to hosts
+  hosts: all
+  gather_facts: false
+  vars_files:
+    - vars/defaults.yml
+  tasks:
+    - name: Ensure OS FQDN are added to /etc/hosts
+      ansible.builtin.lineinfile:
+        path: "/etc/hosts"
+        line: "{{ item }}"
+      loop:
+        - "192.168.37.2 internal.infra.mos.{{ root_domain }}"
+        - "192.168.39.2 public.infra.mos.{{ root_domain }}"
+      tags: hosts
+      become: true

@@ -232,6 +232,23 @@ This script will go through the process of performing the following tasks
    * openstack configuration
    * tempest testing
 
+Accessing OpenStack
+-------------------
+
+After a successful deployment of OpenStack you make access the OpenStack API and Horizon by proxying your connection via the seed node, as it has an interface on the public network (192.168.39.X).
+Using software such as sshuttle will allow for easy access.
+
+.. code-block:: console
+
+   sshuttle -r $(terraform output -raw ssh_user)@$(terraform output -raw seed_access_ip_v4) 192.168.39.0/24
+
+You may also use sshuttle to proxy DNS via the multinode environment. Useful if you are working with Designate. 
+Important to node this will proxy all DNS requests from your machine to the first controller within the multinode environment.
+
+.. code-block:: console
+
+   sshuttle -r $(terraform output -raw ssh_user)@$(terraform output -raw seed_access_ip_v4) 192.168.39.0/24 --dns --to-ns 192.168.39.4
+
 Tear Down
 ---------
 

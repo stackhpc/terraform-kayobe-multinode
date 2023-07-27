@@ -5,4 +5,4 @@
   vars_files:
     - vars/defaults.yml
   roles:
-    - { name: mrlesmithjr.manage-lvm, become: true }
+    - { name: mrlesmithjr.manage_lvm, become: true }

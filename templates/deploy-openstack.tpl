@@ -42,6 +42,12 @@ set +x
 export KAYOBE_VAULT_PASSWORD=$(cat ~/vault.password)
 set -x
 
+# Install uuidgen on ubuntu
+if $(which apt 2>/dev/null >/dev/null); then
+    sudo apt update
+    sudo apt -y install uuidgen
+fi
+
 # Configure hosts
 kayobe control host bootstrap
 kayobe seed host configure
@@ -83,16 +89,11 @@ sed -i 's/# kolla_enable_tls_internal: true/kolla_enable_tls_internal: true/g' $
 cat $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals.yml
 
 # Create vault configuration for barbican
-cat << EOF >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
----
-secrets_barbican_approle_secret_id: $(uuidgen)
-EOF
+sed -i "s/secret_id:.*/secret_id: $(uuidgen)/g" KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-barbican.yml
 ansible-vault decrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
-cat << EOF >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
-secrets_barbican_approle_role_id: $(cat /tmp/barbican-role-id)
-EOF
+sed -i "s/role_id:.*/role_id: $(cat /tmp/barbican-role-id)/g" KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
 rm /tmp/barbican-role-id
 

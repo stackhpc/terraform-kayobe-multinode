@@ -197,17 +197,24 @@ Review the vars defined within `ansible/vars/defaults.yml`. In here you can cust
 However, make sure to define `ssh_key_path` to point to the location of the SSH key in use amongst the nodes and also `vxlan_vni` which should be unique value between 1 to 100,000.
 VNI should be much smaller than the officially supported limit of 16,777,215 as we encounter errors when attempting to bring interfaces up that use a high VNI. You must set``vault_password_path``; this should be set to the path to a file containing the Ansible vault password.
 
-Finally run the ansible playbooks.
-You may need to run `fix-homedir-ownership.yml` if you are using an image that has `ansible_user` not owning their own home folder.
-You may also need to run `grow-control-host.yml` if you are using LVM images and the LVMs are too small to install Ansible.
-If not you can skip those playbook and proceed onto `deploy-openstack-config` which shall configure your Ansible control host in preparation for deployment.
+Finally, run the configure-hosts playbook.
 
 .. code-block:: console
 
-   ansible-playbook -i ansible/inventory.yml ansible/fix-homedir-ownership.yml
-   ansible-playbook -i ansible/inventory.yml ansible/add-fqdn.yml
-   ansible-playbook -i ansible/inventory.yml ansible/grow-control-host.yml
-   ansible-playbook -i ansible/inventory.yml ansible/deploy-openstack-config.yml
+   ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml
+
+This playbook sequentially executes 4 other playbooks:
+
+#. ``fix-homedir-ownership.yml`` - Ensures the ``ansible_user`` owns their home directory. Tag: ``fix-homedir``
+#. ``add-fqdn.yml`` - Ensures FQDNs are added to ``/etc/hosts``. Tag: ``fqdn``
+#. ``grow-control-host.yml`` - Applies LVM configuration to the control host to ensure it has enough space to continue with the rest of the deployment. Tag: ``lvm`` 
+#. ``deploy-openstack-config.yml`` - Deploys the OpenStack configuration to the control host. Tag: ``deploy``
+
+These playbooks are tagged so that they can be invoked or skipped as required. For example, if designate is not being deployed, some time can be saved by skipping the FQDN playbook:
+
+.. code-block:: console
+
+   ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml --skip-tags fqdn
 
 Deploy OpenStack
 ----------------

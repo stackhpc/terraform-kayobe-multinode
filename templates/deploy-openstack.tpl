@@ -89,6 +89,7 @@ sed -i 's/# kolla_enable_tls_internal: true/kolla_enable_tls_internal: true/g' $
 cat $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals.yml
 
 # Create vault configuration for barbican
+ansible-vault decrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
 sed -i "s/secret_id:.*/secret_id: $(uuidgen)/g" KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-barbican.yml

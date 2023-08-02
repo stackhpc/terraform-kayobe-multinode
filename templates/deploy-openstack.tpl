@@ -64,9 +64,6 @@ pip install -r $${config_directories[kayobe]}/requirements.txt
 
 # Deploy hashicorp vault to the seed
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-seed.yml
-ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/OS-TLS-INT.pem
-ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/seed-vault-keys.json
-ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/overcloud.key
 
 kayobe overcloud service deploy -kt haproxy
 

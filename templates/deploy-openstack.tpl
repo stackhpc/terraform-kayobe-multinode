@@ -42,10 +42,10 @@ set +x
 export KAYOBE_VAULT_PASSWORD=$(cat ~/vault.password)
 set -x
 
-# Install uuidgen on ubuntu
+# Install uuid-runtime on ubuntu
 if $(which apt 2>/dev/null >/dev/null); then
     sudo apt update
-    sudo apt -y install uuidgen
+    sudo apt -y install uuid-runtime
 fi
 
 # Configure hosts

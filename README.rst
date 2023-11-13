@@ -115,8 +115,8 @@ Generate Terraform variables:
    multinode_vm_subnet  = "stackhpc-ipv4-vlan-subnet-v2"
    compute_count    = "2"
    controller_count = "3"
-   compute_disk_size = 0
-   controller_disk_size = 0
+   compute_disk_size = 100
+   controller_disk_size = 100
 
    ssh_public_key = "~/.ssh/changeme.pub"
    ssh_user       = "changeme"

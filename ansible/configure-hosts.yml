@@ -1,6 +1,8 @@
 ---
 - import_playbook: fix-homedir-ownership.yml
   tags: fix-homedir
+- import_playbook: growroot.yml
+  tags: growroot
 - import_playbook: add-fqdn.yml
   tags: fqdn
 - import_playbook: grow-control-host.yml

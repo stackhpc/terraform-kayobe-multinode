@@ -109,7 +109,7 @@ Generate Terraform variables:
    seed_disk_size = 100
 
    multinode_flavor     = "changeme"
-   multinode_image      = "CentOS-stream8-lvm"
+   multinode_image      = "changeme"
    multinode_keypair    = "changeme"
    multinode_vm_network = "stackhpc-ipv4-vlan-v2"
    multinode_vm_subnet  = "stackhpc-ipv4-vlan-subnet-v2"
@@ -131,9 +131,11 @@ Generate Terraform variables:
 
    EOF
 
-You will need to set the `multinode_flavor`, `multinode_keypair`, `prefix`,
-`ssh_public_key`, and `ssh_user` (such as using the user `ubuntu`
-if you're using ubuntu or `cloud-user` on Rocky Linux 9, etc).
+You will need to set the `multinode_flavor`, `multinode_image`,
+`multinode_keypair`, `prefix`, `ssh_public_key`, and `ssh_user` (such as using
+the user `ubuntu` if you're using ubuntu or `cloud-user` on Rocky Linux 9,
+etc). `overcloud-*` OS images are recommended, as they are most often used in
+production.
 
 The `multinode_flavor` will change the flavor used for controller and compute
 nodes. Both virtual machines and baremetal are supported, but the 
@@ -206,6 +208,7 @@ Finally, run the configure-hosts playbook.
 This playbook sequentially executes 4 other playbooks:
 
 #. ``fix-homedir-ownership.yml`` - Ensures the ``ansible_user`` owns their home directory. Tag: ``fix-homedir``
+#. ``growroot.yml`` - Grows the root PV of the Ansible control host. Tag: ``growroot``
 #. ``add-fqdn.yml`` - Ensures FQDNs are added to ``/etc/hosts``. Tag: ``fqdn``
 #. ``grow-control-host.yml`` - Applies LVM configuration to the control host to ensure it has enough space to continue with the rest of the deployment. Tag: ``lvm`` 
 #. ``deploy-openstack-config.yml`` - Deploys the OpenStack configuration to the control host. Tag: ``deploy``

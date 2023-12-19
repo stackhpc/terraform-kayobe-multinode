@@ -108,37 +108,40 @@ Generate Terraform variables:
    seed_vm_flavor = "general.v1.small"
    seed_disk_size = 100
 
-   multinode_flavor     = "changeme"
-   multinode_image      = "CentOS-stream8-lvm"
+   multinode_flavor     = "general.v1.medium"
+   multinode_image      = "Rocky9-lvm"
    multinode_keypair    = "changeme"
-   multinode_vm_network = "stackhpc-ipv4-vlan-v2"
-   multinode_vm_subnet  = "stackhpc-ipv4-vlan-subnet-v2"
-   compute_count    = "2"
-   controller_count = "3"
-   compute_disk_size = 100
+   multinode_vm_network = "stackhpc-ipv4-geneve"
+   multinode_vm_subnet  = "stackhpc-ipv4-geneve-subnet"
+   compute_count        = "2"
+   controller_count     = "3"
+   compute_disk_size    = 100
    controller_disk_size = 100
 
    ssh_public_key = "~/.ssh/changeme.pub"
-   ssh_user       = "changeme"
+   ssh_user       = "cloud-user"
 
-   storage_count  = "3"
-   storage_flavor = "general.v1.small"
+   storage_count     = "3"
+   storage_flavor    = "general.v1.small"
    storage_disk_size = 100
 
-   deploy_wazuh = true
-   infra_vm_flavor = "general.v1.small"
+   deploy_wazuh       = true
+   infra_vm_flavor    = "general.v1.small"
    infra_vm_disk_size = 100
 
    EOF
 
-You will need to set the `multinode_flavor`, `multinode_keypair`, `prefix`,
-`ssh_public_key`, and `ssh_user` (such as using the user `ubuntu`
-if you're using ubuntu or `cloud-user` on Rocky Linux 9, etc).
+You will need to set the `multinode_keypair`, `prefix`, and `ssh_public_key`.
+By default, Rocky Linux 9 will be used but Ubuntu Jammy is also supported by
+changing `multinode_image` to `Ubuntu-22.04-lvm` and `ssh_user` to `ubuntu`.
+Other LVM images should also work but are untested.
 
 The `multinode_flavor` will change the flavor used for controller and compute
-nodes. Both virtual machines and baremetal are supported, but the 
-`controller_disk_size` and `compute_disk_size` must be set to 0 when using
-baremetal host. This will stop a block device being allocated.
+nodes. Both virtual machines and baremetal are supported, but the `*_disk_size`
+variables must be set to 0 when using baremetal host. This will stop a block
+device being allocated. When any baremetal hosts are deployed, the
+`multinode_vm_network` and `multinode_vm_subnet` should also be changed to
+`stackhpc-ipv4-vlan-v2` and `stackhpc-ipv4-vlan-subnet-v2` respectively.
 
 If `deploy_wazuh` is set to true, an infrastructure VM will be created that
 hosts the Wazuh manager. The Wazuh deployment playbooks will also be triggered

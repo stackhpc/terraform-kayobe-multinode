@@ -38,7 +38,7 @@
 
 - name: Copy Terraform files into project directory
   ansible.builtin.copy:
-    src: "{{ item }}.j2"
+    src: "{{ item }}"
     dest: "{{ terraform_project_path }}/{{ item }}"
   loop: "{{ query('fileglob', '../../../*.tf') }}"
 

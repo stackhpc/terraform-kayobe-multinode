@@ -1,0 +1,15 @@
+---
+
+# Provision the infrastructure
+# The CaaS puts hosts for accessing the OpenStack API into the 'openstack' group
+- hosts: openstack
+  roles:
+    - cluster_infra
+
+# Write the outputs as the final task
+- hosts: localhost
+  tasks:
+    - debug: var=outputs
+      vars:
+        outputs: 
+          cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_gateway_ip }}"

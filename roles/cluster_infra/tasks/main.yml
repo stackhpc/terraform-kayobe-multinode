@@ -49,6 +49,7 @@
     - data.tf
     - versions.tf
     - volumes.tf
+    - terraform.tfvars
 
 #- name: Copy Terraform files into project directory
 #  ansible.builtin.copy:

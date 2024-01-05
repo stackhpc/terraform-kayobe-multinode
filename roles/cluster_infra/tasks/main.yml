@@ -41,15 +41,7 @@
   template:
     src: "{{ item }}.j2"
     dest: "{{ terraform_project_path }}/{{ item }}"
-  loop:
-    - outputs.tf
-    - variables.tf
-    - authentication.tf
-    - compute_instances.tf
-    - data.tf
-    - versions.tf
-    - volumes.tf
-    - terraform.tfvars
+  loop: "{{ tf_files }}"
 
 #- name: Copy Terraform files into project directory
 #  ansible.builtin.copy:

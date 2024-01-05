@@ -16,7 +16,7 @@ terraform_binary_directory: "{{ playbook_dir }}/bin"
 terraform_binary_path: "{{ terraform_binary_directory }}/terraform"
 
 # This controls the location where the Terraform files are rendered
-terraform_project_path: "{{ playbook_dir }}/terraform"
+terraform_project_path: "{{ playbook_dir }}"
 
 # Indicates whether the Terraform operation is reconciling or removing resources
 # Valid values are 'present' and 'absent'
@@ -24,3 +24,13 @@ terraform_state: "{{ cluster_state | default('present') }}"
 
 # The user that should be used to SSH to the cluster hosts
 cluster_ssh_user: cloud-user
+
+tf_files: []
+  #- outputs.tf
+  #- variables.tf
+  # - authentication.tf
+  # - compute_instances.tf
+  # - data.tf
+  # - versions.tf
+  # - volumes.tf
+  # - terraform.tfvars

@@ -5,6 +5,17 @@
     - name: Show Playbook Directory
       debug:
        msg: "{{ playbook_dir }}"
+    - name: Generate SSH Key
+      community.crypto.openssh_keypair:
+        path: "{{ playbook_dir }}/ssh_key"
+        type: ed25519
+        size: 2048
+        state: present
+        force: yes
+    - name: Template Terraform files into project directory
+      template:
+        src: terraform.tfvars.j2
+        dest: "{{ playbook_dir }}/terraform.tfvars"
 
 # Provision the infrastructure
 # The CaaS puts hosts for accessing the OpenStack API into the 'openstack' group

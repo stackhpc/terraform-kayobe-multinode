@@ -7,11 +7,7 @@
        msg: "{{ playbook_dir }}"
 
     - name: Generate SSH Key
-      ansible.posix.ssh_keypair:
-        path: "{{ playbook_dir }}/ssh_key"
-        type: rsa
-        size: 2048
-        state: present
+      command: ssh-keygen -t rsa -b 4096 -f "{{ playbook_dir }}/ssh_key" -q -N ""
 
     - name: Template Terraform files into project directory
       template:

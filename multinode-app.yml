@@ -13,3 +13,7 @@
       vars:
         outputs: 
           cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_gateway_ip }}"
+    
+    - name: Show Playbook Directory
+      debug:
+       msg: "{{ playbook_dir }}"

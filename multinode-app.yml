@@ -1,5 +1,11 @@
 ---
 
+- hosts: localhost
+  tasks:    
+    - name: Show Playbook Directory
+      debug:
+       msg: "{{ playbook_dir }}"
+
 # Provision the infrastructure
 # The CaaS puts hosts for accessing the OpenStack API into the 'openstack' group
 - hosts: openstack

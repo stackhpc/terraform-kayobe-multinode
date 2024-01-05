@@ -36,6 +36,15 @@
     - terraform_state == "present"
     - cluster_upgrade_system_packages is not defined or not cluster_upgrade_system_packages
 
+
+- name: Template Terraform files into project directory
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ terraform_project_path }}/{{ item }}"
+  loop:
+    - outputs.tf
+    - providers.tf
+
 - name: Copy Terraform files into project directory
   ansible.builtin.copy:
     src: "{{ item }}"

@@ -1,0 +1,36 @@
+# This is used to determine the image to use unless explicitly patching
+output "cluster_image" {
+  description = "The id of the image used to build the cluster nodes"
+  value       = "{{ cluster_previous_image | default(cluster_image) }}"
+}
+
+output "cluster_gateway_ip" {
+  description = "The IP address of the gateway used to contact the cluster nodes"
+  value       = "${openstack_networking_floatingip_v2.load_balancer.address}"
+}
+
+output "cluster_nodes" {
+  description = "A list of the nodes in the cluster from which an Ansible inventory will be populated"
+  value       = concat(
+    [
+      {
+        name          = "${openstack_compute_instance_v2.load_balancer.name}"
+        ip            = "${openstack_compute_instance_v2.load_balancer.network[0].fixed_ip_v4}"
+        groups        = ["load_balancers"],
+        facts  = {
+          openstack_project_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
+        }
+      }
+    ],
+    [
+      for backend in openstack_compute_instance_v2.backend: {
+        name          = "${backend.name}"
+        ip            = "${backend.network[0].fixed_ip_v4}"
+        groups        = ["backends"],
+        facts  = {
+          openstack_project_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
+        }
+      }
+    ]
+  )
+}

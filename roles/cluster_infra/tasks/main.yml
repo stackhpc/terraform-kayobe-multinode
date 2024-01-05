@@ -47,6 +47,7 @@
     - authentication.tf
     - compute_instances.tf
     - data.tf
+    - versions.tf
     - volumes.tf
     - terraform.tfvars
 

@@ -1,0 +1,26 @@
+# The default Terraform state key for backends that support it
+terraform_state_key: "cluster/{{ cluster_id }}/tfstate"
+
+# Set up the terraform backend
+# This setup allows us to use the Consul backend when enabled without any changes
+terraform_backend_type: "{{ 'consul' if 'CONSUL_HTTP_ADDR' in ansible_env else 'local' }}"
+terraform_backend_config_defaults:
+  consul:
+    path: "{{ terraform_state_key }}"
+    gzip: "true"
+  local: {}
+terraform_backend_config: "{{ terraform_backend_config_defaults[terraform_backend_type] }}"
+
+# These variables control the location of the Terraform binary
+terraform_binary_directory: "{{ playbook_dir }}/bin"
+terraform_binary_path: "{{ terraform_binary_directory }}/terraform"
+
+# This controls the location where the Terraform files are rendered
+terraform_project_path: "{{ playbook_dir }}/terraform"
+
+# Indicates whether the Terraform operation is reconciling or removing resources
+# Valid values are 'present' and 'absent'
+terraform_state: "{{ cluster_state | default('present') }}"
+
+# The user that should be used to SSH to the cluster hosts
+cluster_ssh_user: ubuntu

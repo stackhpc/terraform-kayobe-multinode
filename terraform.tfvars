@@ -27,5 +27,3 @@ storage_disk_size = 100
 deploy_wazuh       = true
 infra_vm_flavor    = "general.v1.small"
 infra_vm_disk_size = 100
-
-EOF

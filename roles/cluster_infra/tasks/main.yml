@@ -43,12 +43,18 @@
     dest: "{{ terraform_project_path }}/{{ item }}"
   loop:
     - outputs.tf
+    - variables.tf
+    - authentication.tf
+    - compute_instances.tf
+    - data.tf
+    - versions.tf
+    - volumes.tf
 
-- name: Copy Terraform files into project directory
-  ansible.builtin.copy:
-    src: "{{ item }}.tf"
-    dest: "{{ terraform_project_path }}/{{ item }}"
-  loop: "{{ query('fileglob', '../../../*') }}"
+#- name: Copy Terraform files into project directory
+#  ansible.builtin.copy:
+#    src: "{{ item }}.tf"
+#    dest: "{{ terraform_project_path }}/{{ item }}.tf"
+#  loop: "{{ query('fileglob', '../../../*') }}"
 
 - name: Provision infrastructure
   include_role:

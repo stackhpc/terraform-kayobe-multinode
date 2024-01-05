@@ -103,10 +103,10 @@ Generate Terraform variables:
 
    ansible_control_vm_flavor = "general.v1.small"
    ansible_control_vm_name   = "ansible-control"
-   ansible_control_disk_size = 100
+   ansible_control_disk_size = 60
 
    seed_vm_flavor = "general.v1.small"
-   seed_disk_size = 100
+   seed_disk_size = 60
 
    multinode_flavor     = "general.v1.medium"
    multinode_image      = "Rocky9-lvm"
@@ -115,19 +115,19 @@ Generate Terraform variables:
    multinode_vm_subnet  = "stackhpc-ipv4-geneve-subnet"
    compute_count        = "2"
    controller_count     = "3"
-   compute_disk_size    = 100
-   controller_disk_size = 100
+   compute_disk_size    = 60
+   controller_disk_size = 60
 
    ssh_public_key = "~/.ssh/changeme.pub"
    ssh_user       = "cloud-user"
 
    storage_count     = "3"
    storage_flavor    = "general.v1.small"
-   storage_disk_size = 100
+   storage_disk_size = 60
 
    deploy_wazuh       = true
    infra_vm_flavor    = "general.v1.small"
-   infra_vm_disk_size = 100
+   infra_vm_disk_size = 60
 
    EOF
 

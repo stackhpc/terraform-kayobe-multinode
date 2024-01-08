@@ -53,6 +53,27 @@ resource "local_file" "admin_networks" {
   file_permission = "0644"
 }
 
+output "cluster_nodes" {
+  value = concat(
+    [
+      {
+        name          = var.compute_hostname
+        ip            = var.compute
+        groups        = ["compute"],
+      }
+    ],
+    [
+      for backend in openstack_compute_instance_v2.backend: {
+        name          = "${backend.name}"
+        ip            = "${backend.network[0].fixed_ip_v4}"
+        groups        = ["backends"],
+      }
+    ]
+  )
+}
+
+
+
 resource "local_file" "openstack_inventory" {
   content = templatefile(
     "${path.module}/templates/openstack-inventory.tpl",

@@ -54,12 +54,12 @@ resource "local_file" "admin_networks" {
 }
 
 output "cluster_nodes" {
-  value = concat( 
-    [
+  value = join("," , 
+  [
       {
-        name          = "${compute_hostname}"
-        ip            = "${compute}"
-        groups        = ["compute"]
+        name          = "${openstack_compute_instance_v2.compute.*.name}"
+        ip            = "${openstack_compute_instance_v2.compute.[0].access_ip_v4}"
+        groups        = ["compute"],
       }
     ]
   )

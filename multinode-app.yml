@@ -6,8 +6,8 @@
       debug:
        msg: "{{ playbook_dir }}"
 
-    - name: Generate SSH Key
-      command: ssh-keygen -t rsa -b 4096 -f "{{ playbook_dir }}/ssh_key" -q -N ""
+#    - name: Generate SSH Key
+#      command: ssh-keygen -t rsa -b 4096 -f "{{ playbook_dir }}/ssh_key" -q -N ""
 
     - name: Template Terraform files into project directory
       template:

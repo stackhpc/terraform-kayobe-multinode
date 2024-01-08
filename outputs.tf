@@ -61,13 +61,6 @@ output "cluster_nodes" {
         ip            = var.compute
         groups        = ["compute"],
       }
-    ],
-    [
-      for backend in openstack_compute_instance_v2.backend: {
-        name          = "${backend.name}"
-        ip            = "${backend.network[0].fixed_ip_v4}"
-        groups        = ["backends"],
-      }
     ]
   )
 }

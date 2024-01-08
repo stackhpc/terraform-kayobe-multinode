@@ -57,9 +57,9 @@ output "cluster_nodes" {
   value = join("," , 
   [
       {
-        name          = "${openstack_compute_instance_v2.compute.*.name}"
-        ip            = "${openstack_compute_instance_v2.compute.*.access_ip_v4}"
-        groups        = ["compute"],
+        name          = "${openstack_compute_instance_v2.compute.[*].name}"
+        ip            = "${openstack_compute_instance_v2.compute.[*].access_ip_v4}"
+        groups        = ["compute"]
       }
     ]
   )

@@ -87,8 +87,8 @@ resource "openstack_compute_instance_v2" "controller" {
   key_pair     = resource.openstack_compute_keypair_v2.keypair.name
   image_name   = var.multinode_image
   config_drive = true
-  #user_data    = file("templates/userdata.cfg.tpl")
-  user_data    = "${concat(file("templates/userdata.cfg.tpl"),["ssh_authorized_keys","${ var.ssh_authorized_keys }"])}"
+  user_data    = file("templates/userdata.cfg.tpl")
+  #user_data    = "${concat([file("templates/userdata.cfg.tpl")],["ssh_authorized_keys","${ var.ssh_authorized_keys }"])}"
 
   count        = var.controller_count
   network {

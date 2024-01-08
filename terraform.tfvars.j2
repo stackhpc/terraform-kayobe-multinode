@@ -17,7 +17,7 @@ controller_count     = "3"
 compute_disk_size    = 100
 controller_disk_size = 100
 
-ssh_public_key = "{{ playbook_dir }}/ssh_key.pub"
+ssh_public_key = "{{ cluster_deploy_ssh_public_key }}"
 ssh_user       = "cloud-user"
 
 storage_count     = "3"

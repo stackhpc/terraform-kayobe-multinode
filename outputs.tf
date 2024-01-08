@@ -58,7 +58,7 @@ output "cluster_nodes" {
       {
         name          = "${openstack_compute_instance_v2.compute.*.name}"
         ip            = "${openstack_compute_instance_v2.compute.*.access_ip_v4}"
-        groups        = ["compute"],
+        groups        = ["compute"]
       }
     ]
 }

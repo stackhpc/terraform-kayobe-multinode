@@ -57,8 +57,8 @@ output "cluster_nodes" {
   value = concat(
     [
       {
-        name          = "${var.compute_hostname}"
-        ip            = "${var.compute}"
+        name          = "${openstack_compute_instance_v2.compute.*.name}"
+        ip            = "${openstack_compute_instance_v2.compute.*.access_ip_v4}"
         groups        = ["compute"],
       }
     ]

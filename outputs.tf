@@ -54,18 +54,18 @@ resource "local_file" "admin_networks" {
 }
 
 output "cluster_nodes" {
-  value = join("," , 
-  [
-      {
-        name          = "${openstack_compute_instance_v2.compute.[*].name}"
-        ip            = "${openstack_compute_instance_v2.compute.[*].access_ip_v4}"
-        groups        = ["compute"]
-      }
-    ]
-  )
+  description = "A list of the cluster nodes and their IP addresses which will be used by the Ansible inventory"
+  value       = flatten([
+   for node in openstack_compute_instance_v2.compute: {
+       name = node.name
+       ip = node[0].access_ip_v4
+       groups        = ["compute"]
+       facts  = {
+        openstack_project_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
+        }
+   }
+  ])
 }
-
-
 
 resource "local_file" "openstack_inventory" {
   content = templatefile(

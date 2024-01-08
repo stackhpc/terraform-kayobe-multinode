@@ -3,7 +3,8 @@ terraform_state_key: "cluster/{{ cluster_id }}/tfstate"
 
 # Set up the terraform backend
 # This setup allows us to use the Consul backend when enabled without any changes
-terraform_backend_type: 'local'
+#terraform_backend_type: 'local'
+terraform_backend_type: "{{ 'consul' if 'CONSUL_HTTP_ADDR' in ansible_env else 'local' }}"
 terraform_backend_config_defaults:
   consul:
     path: "{{ terraform_state_key }}"

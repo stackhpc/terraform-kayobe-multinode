@@ -2,6 +2,10 @@ output "ansible_control_access_ip_v4" {
   value = openstack_compute_instance_v2.ansible_control.access_ip_v4
 }
 
+output "cluster_gateway_ip" {
+  value = openstack_compute_instance_v2.ansible_control.access_ip_v4
+}
+
 output "seed_access_ip_v4" {
   value = openstack_compute_instance_v2.seed.access_ip_v4
 }

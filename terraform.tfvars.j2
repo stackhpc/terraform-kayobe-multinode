@@ -17,10 +17,6 @@ controller_count     = "3"
 compute_disk_size    = 100
 controller_disk_size = 100
 
-ssh_authorized_keys:
-  - "{{ cluster_deploy_ssh_public_key }}"
-  - "{{ cluster_user_ssh_public_key }}"
-
 ssh_public_key = "{{ cluster_user_ssh_public_key }}"
 ssh_user       = "cloud-user"
 

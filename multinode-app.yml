@@ -13,6 +13,11 @@
       template:
         src: terraform.tfvars.j2
         dest: "{{ playbook_dir }}/terraform.tfvars"
+  
+    - name: Template Terraform userdata.cfg.tpl files into project template directory
+      template:
+        src: "{{ playbook_dir }}/templates/userdata.cfg.tpl.j2"
+        dest: "{{ playbook_dir }}/userdata.cfg.tpl"
 
 # Provision the infrastructure
 # The CaaS puts hosts for accessing the OpenStack API into the 'openstack' group

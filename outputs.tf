@@ -58,7 +58,7 @@ output "cluster_nodes" {
   value       = flatten([
    for node in openstack_compute_instance_v2.compute: {
        name = node.name
-       ip = node[0].access_ip_v4
+       ip = node.access_ip_v4
        groups        = ["compute"]
    }
   ])

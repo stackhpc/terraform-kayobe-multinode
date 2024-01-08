@@ -60,9 +60,6 @@ output "cluster_nodes" {
        name = node.name
        ip = node[0].access_ip_v4
        groups        = ["compute"]
-       facts  = {
-        openstack_project_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
-        }
    }
   ])
 }

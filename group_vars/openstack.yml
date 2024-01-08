@@ -36,4 +36,4 @@ tf_files: []
   # - volumes.tf
   # - terraform.tfvars
 
-cluster_deploy_ssh_public_key: "{{cluster_user_ssh_public_key}}"
+#cluster_deploy_ssh_public_key: "{{cluster_user_ssh_public_key}}"

@@ -43,3 +43,8 @@
         debug:
           msg: "{{ groups | to_yaml }}"   
 #      when: cluster_state != "absent"
+
+- hosts: multinode_ansible_control
+  tasks: 
+    - name: Test hostname
+      command: hostname

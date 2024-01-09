@@ -37,4 +37,3 @@ tf_files: []
   # - terraform.tfvars
 
 # Assign the ansible ssh public key from the ansible runner's generated ssh key
-cluster_ansible_ssh_public_key: "{{ lookup('ssh_key', '{{ playbook_dir }}/ssh_key.pub') }}"

@@ -6,16 +6,6 @@
       debug:
        msg: "{{ playbook_dir }}"
 
-    - name: Generate SSH Key
-      command: ssh-keygen -t rsa -b 4096 -f "{{ playbook_dir }}/ssh_key" -q -N ""
-
-- hosts: all
-  vars:
-   ssh_key_path: "{{ playbook_dir }}"
-   cluster_ansible_ssh_public_key: "{{ lookup('ssh_key', playbook_dir + '/ssh_key.pub') }}"
-
-- hosts: localhost
-  tasks:
     - name: Template Terraform files into project directory
       template:
         src: terraform.tfvars.j2

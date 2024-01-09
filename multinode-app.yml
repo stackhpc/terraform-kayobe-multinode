@@ -32,6 +32,10 @@
 
       - name: Deploy ansible playbook manually
         command: ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml
+          vars:
+            terraform_binary_directory: "{{ playbook_dir }}/../bin"
+            terraform_binary_path: "{{ terraform_binary_directory }}/../terraform"
+            terraform_project_path: "{{ playbook_dir }}"
 
  # Import the playbook to start configuring the multi-node hosts.
 #- name: Configure hosts and deploy ansible

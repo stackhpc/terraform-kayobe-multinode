@@ -55,11 +55,11 @@ resource "local_file" "admin_networks" {
 
 output "cluster_nodes" {
   description = "A list of the cluster nodes and their IP addresses which will be used by the Ansible inventory"
-  value       = {
+  value       = [{
        name = openstack_compute_instance_v2.ansible_control.name
        ip = openstack_compute_instance_v2.ansible_control.access_ip_v4
        groups        = ["multinode_ansible_control"]
-  }
+  }]
 }
 
 #   flatten([

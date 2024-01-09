@@ -1,4 +1,8 @@
+---
 collections:
   - name: https://github.com/stackhpc/ansible-collection-terraform
     type: git
     version: 8c7acce4538aab8c0e928972155a2ccb5cb1b2a1
+  - name: cloud.terraform
+roles:
+  - src: mrlesmithjr.manage_lvm

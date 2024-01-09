@@ -31,8 +31,8 @@
         command: ansible-galaxy install -r ansible/requirements.yml
 
        # Import the playbook to start configuring the multi-node hosts.
-      - name: Configure hosts and deploy ansible
-        import_playbook: ansible/configure-hosts.yml   
+#      - name: Configure hosts and deploy ansible
+#        import_playbook: ansible/configure-hosts.yml   
 
       - debug: var=outputs
         vars:

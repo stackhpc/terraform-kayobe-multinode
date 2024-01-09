@@ -25,10 +25,13 @@
 
 - hosts: localhost
   tasks: 
-#    - block:
+    - block:
       # Install the ansible requirements
-#      - name: Install ansible requirements
-#        command: ansible-galaxy install -r ansible/requirements.yml
+     - name: Install ansible requirements
+       command: ansible-galaxy install -r ansible/requirements.yml
+
+      - name: Deploy ansible playbook manually
+        command: ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml
 
  # Import the playbook to start configuring the multi-node hosts.
 #- name: Configure hosts and deploy ansible
@@ -44,7 +47,7 @@
           msg: "{{ groups | to_yaml }}"   
 #      when: cluster_state != "absent"
 
-- hosts: multinode_ansible_control
-  tasks: 
-    - name: Test hostname
-      command: hostname
+# - hosts: multinode_ansible_control
+#   tasks: 
+#     - name: Test hostname
+#       command: hostname

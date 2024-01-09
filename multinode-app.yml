@@ -25,21 +25,21 @@
 
 - hosts: localhost
   tasks: 
-    - block:
+#    - block:
       # Install the ansible requirements
-      - name: Install ansible requirements
-        command: ansible-galaxy install -r ansible/requirements.yml
+#      - name: Install ansible requirements
+#        command: ansible-galaxy install -r ansible/requirements.yml
 
-       # Import the playbook to start configuring the multi-node hosts.
-#      - name: Configure hosts and deploy ansible
-#        import_playbook: ansible/configure-hosts.yml   
+ # Import the playbook to start configuring the multi-node hosts.
+#- name: Configure hosts and deploy ansible
+#  import_playbook: ansible/configure-hosts.yml   
 
-      - debug: var=outputs
-        vars:
-          outputs: 
-            cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_gateway_ip }}"
+#      - debug: var=outputs
+#        vars:
+#          outputs: 
+#            cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_gateway_ip }}"
 
-      - name: Show Playbook Directory
+      - name: Debug groups
         debug:
-        msg: "{{ playbook_dir }}"   
-      when: cluster_state != "absent"
+          msg: "{{ groups | to_yaml }}"   
+#      when: cluster_state != "absent"

@@ -24,7 +24,8 @@ terraform_project_path: "{{ playbook_dir }}"
 terraform_state: "{{ cluster_state | default('present') }}"
 
 # The user that should be used to SSH to the cluster hosts
-cluster_ssh_user: cloud-user
+cluster_ssh_user: ubuntu
+ssh_user: ubuntu
 
 tf_files: []
   #- outputs.tf

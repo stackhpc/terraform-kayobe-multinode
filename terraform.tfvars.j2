@@ -8,7 +8,7 @@ seed_vm_flavor = "general.v1.small"
 seed_disk_size = 100
 
 multinode_flavor     = "general.v1.medium"
-multinode_image      = "Rocky9-lvm"
+multinode_image      = "Ubuntu-22.04-lvm"
 multinode_keypair    = "MaxMNKP"
 multinode_vm_network = "stackhpc-ipv4-geneve"
 multinode_vm_subnet  = "stackhpc-ipv4-geneve-subnet"
@@ -18,7 +18,7 @@ compute_disk_size    = 100
 controller_disk_size = 100
 
 ssh_public_key = "{{ cluster_user_ssh_public_key }}"
-ssh_user       = "cloud-user"
+ssh_user       = "ubuntu"
 
 storage_count     = "3"
 storage_flavor    = "general.v1.small"

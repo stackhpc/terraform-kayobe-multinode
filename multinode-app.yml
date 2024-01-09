@@ -6,8 +6,9 @@
       debug:
        msg: "{{ playbook_dir }}"
 
-#    - name: Generate SSH Key
-#      command: ssh-keygen -t rsa -b 4096 -f "{{ playbook_dir }}/ssh_key" -q -N ""
+    - name: Generate SSH Key
+      command: ssh-keygen -t rsa -b 4096 -f "{{ playbook_dir }}/ssh_key" -q -N ""
+      ssh_key_path: "{{ playbook_dir }}"
 
     - name: Template Terraform files into project directory
       template:
@@ -36,3 +37,7 @@
     - name: Show Playbook Directory
       debug:
        msg: "{{ playbook_dir }}"
+
+# Import the playbook to start configuring the multi-node hosts.
+- name: Configure hosts and deploy ansible
+  import_playbook: ansible/configure-hosts.yml

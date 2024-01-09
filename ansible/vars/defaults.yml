@@ -16,9 +16,9 @@ openstack_config_name: openstack-config
 
 vault_password_path: "~/vault.password"
 
-ssh_key_path:
+#ssh_key_path:
 
-vxlan_vni:
+#vxlan_vni:
 
 root_domain: sms-lab.cloud
 

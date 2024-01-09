@@ -39,9 +39,11 @@
       debug:
        msg: "{{ playbook_dir }}"
 
-# Install the ansible requirements
-- name: Install ansible requirements
-  command: ansible-galaxy install -r ansible/requirements.yml
+- hosts: localhost
+  tasks: 
+  # Install the ansible requirements
+    - name: Install ansible requirements
+      command: ansible-galaxy install -r ansible/requirements.yml
 
 # Import the playbook to start configuring the multi-node hosts.
 - name: Configure hosts and deploy ansible

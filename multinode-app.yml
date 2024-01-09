@@ -8,7 +8,8 @@
 
     - name: Generate SSH Key
       command: ssh-keygen -t rsa -b 4096 -f "{{ playbook_dir }}/ssh_key" -q -N ""
-      ssh_key_path: "{{ playbook_dir }}"
+      vars:
+        ssh_key_path: "{{ playbook_dir }}"
 
     - name: Template Terraform files into project directory
       template:

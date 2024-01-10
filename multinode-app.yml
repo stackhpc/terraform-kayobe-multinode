@@ -16,7 +16,6 @@
         src: "{{ playbook_dir }}/templates/userdata.cfg.tpl.j2"
         dest: "{{ playbook_dir }}/templates/userdata.cfg.tpl"
 
-
 # Provision the infrastructure
 # The CaaS puts hosts for accessing the OpenStack API into the 'openstack' group
 - hosts: openstack
@@ -25,6 +24,15 @@
 
 - hosts: localhost
   tasks: 
+  # Check whether an ans_vlt_pwd variable is defined and if so, save it into a file called '~/vault.password'. If it doesn't exist, create a the '~/vault.password' file with ans_vlt_pwd = "password_not_set" as the password.
+    - name: Create vault password file
+      vars:
+        ans_dflt: 'default_password'
+      ansible.builtin.copy:
+        content: "{{ ans_vlt_pwd | default( ans_dflt , true ) }}"
+        dest: "~/vault.password"
+        mode: 0600
+
     # - block:
       # # Install the ansible requirements
       # - name: Install ansible posix
@@ -51,9 +59,9 @@
 #          outputs: 
 #            cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_gateway_ip }}"
 
-      - name: Debug groups
-        debug:
-          msg: "{{ groups | to_yaml }}"   
+      # - name: Debug groups
+      #   debug:
+      #     msg: "{{ groups | to_yaml }}"   
 #      when: cluster_state != "absent"
 
 # Import the playbook to start configuring the multi-node hosts.
@@ -61,7 +69,20 @@
   import_playbook: ansible/configure-hosts.yml   
 
 
-# - hosts: multinode_ansible_control
+- hosts: ansible_control
+  vars:
+    ansible_pipelining: true
+    ansible_ssh_pipelining: true
+  tasks: 
+    - name: Deploy OpenStack.
+      ansible.builtin.command:
+        cmd: "bash ~/deploy-openstack.sh"
+
+# - hosts: ansible_control
+#   vars:
+#     ansible_pipelining: true
+#     ansible_ssh_pipelining: true
 #   tasks: 
-#     - name: Test hostname
-#       command: hostname
+#     - name: Deploy OpenStack.
+#       ansible.builtin.shell:
+#         cmd: "./deploy-openstack.sh"

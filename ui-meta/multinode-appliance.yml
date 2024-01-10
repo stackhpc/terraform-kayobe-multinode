@@ -11,14 +11,14 @@ logo: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACAAAAAgACAYAAACyp9MwAAAAAXNS
 
 
 # A list of parameters to be gathered from the user
-parameters:
+# parameters:
   # The name of the Ansible variable that will be populated with the parameter value.
     # This field is required.
-  - name: vxlan_vni
+  # - name: vxlan_vni
     # A human-readable name for the parameter. Defaults to the name if not given.
-    label: Set the VXLAN VNI value.
+    # label: Set the VXLAN VNI value.
     # An optional short description for the parameter.
-    description: Please provide a VXLAN VNI. A unique value from 1 to 100,000.
+    # description: Please provide a VXLAN VNI. A unique value from 1 to 100,000.
     # The kind of the parameter. This field is required.
     # Valid values are:
     #   list
@@ -44,14 +44,14 @@ parameters:
     #     The ID of a volume in the target tenancy.
     #   cloud.cluster
     #     The ID of another cluster in the target tenancy.
-    kind: "integer"
+    # kind: "integer"
     # Indicates whether the parameter is required. Defaults to true if not given.
-    required: true
+    # required: true
     # The default value value for the parameter. Defaults to null if not given, indicating no default.
-    default: null
+    # default: null
     # Indicates whether the parameter is immutable, i.e. cannot be changed after the initial creation.
     # Defaults to false if not given.
-    immutable: true
+    # immutable: true
     # Additional options for the parameter. The valid options depend on the kind of the parameter.
     #   list
     #     min_length: An optional minimum length for the list.
@@ -63,9 +63,9 @@ parameters:
     #     pattern: An optional regular expression pattern to validate the string against.
     #   integer
     #   number
-    options:
-      min: 1
-      max: 100000
+    # options:
+    #   min: 1
+    #   max: 100000
     #   boolean
     #     permanent: If true, indicates that the parameter cannot become false again once it has
     #                been set to true. Defaults to false if not given.
@@ -82,6 +82,37 @@ parameters:
     # options:
     #  min_ram: 1024
     #  min_disk: 10
+    #  secret: true
+    #  confirm: true
+  
+# A list of parameters to be gathered from the user
+parameters:
+  - name: vxlan_vni
+    label: Set the VXLAN VNI value.
+    description: Please provide a VXLAN VNI. A unique value from 1 to 100,000.
+    kind: "integer"
+    required: true
+    default: null
+    immutable: true
+    options:
+      min: 1
+      max: 100000
+      
+
+  - name: ans_vlt_pwd
+    # A human-readable name for the parameter. Defaults to the name if not given.
+    label: Provide the Ansible Vault password.
+    # An optional short description for the parameter.
+    description: Please provide the Ansible Vault password to enable the deployment of the cluster.
+    kind: "string"
+    required: false
+    #default: "password_not_set"
+    immutable: false
+    # Replace the characters of the parameter with asterisks in the UI.
+    options:  
+      secret: true
+      confirm: true
+    #private: true
 
   #- name: backend_count
   #  label: Backend node count

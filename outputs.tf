@@ -53,19 +53,19 @@ resource "local_file" "admin_networks" {
   file_permission = "0644"
 }
 
-output "cluster_nodes" {
-  description = "A list of the cluster nodes and their IP addresses which will be used by the Ansible inventory"
-  value       = [{
-       name = openstack_compute_instance_v2.ansible_control.name
-       ip = openstack_compute_instance_v2.ansible_control.access_ip_v4
-       groups        = ["multinode_ansible_control"]
-  }]
-}
+# output "cluster_nodes" {
+#   description = "A list of the cluster nodes and their IP addresses which will be used by the Ansible inventory"
+#   value       = [{
+#        name = openstack_compute_instance_v2.ansible_control.name
+#        ip = openstack_compute_instance_v2.ansible_control.access_ip_v4
+#        groups        = ["multinode_ansible_control"]
+#   }]
+# }
 
-#   flatten([
-#    for node in openstack_compute_instance_v2.compute: {
-#        name = node.name
-#        ip = node.access_ip_v4
+# flatten([
+#  for node in openstack_compute_instance_v2.compute: {
+#      name = node.name
+#      ip = node.access_ip_v4
 #        groups        = ["compute"]
 #    }
 #   ])
@@ -97,38 +97,93 @@ resource "local_file" "deploy_openstack" {
   file_permission = "0755"
 }
 
-resource "ansible_host" "control_host" {
-  name   = openstack_compute_instance_v2.ansible_control.access_ip_v4
-  groups = ["ansible_control"]
+output "cluster_nodes" {
+  description = "A list of the cluster nodes and their IP addresses which will be used by the Ansible inventory"
+  value       = concat(
+    [
+      {
+        name   = openstack_compute_instance_v2.ansible_control.name
+        ip     = openstack_compute_instance_v2.ansible_control.access_ip_v4
+        groups = ["ansible_control"]
+        variables = {
+          ansible_user = var.ssh_user
+        }
+      }
+    ],
+    flatten([
+      for node in openstack_compute_instance_v2.compute: {
+        name   = node.name
+        ip     = node.access_ip_v4
+        groups = ["compute"]
+        variables = {
+          ansible_user = var.ssh_user
+        }  
+      }
+    ]),
+    flatten([
+      for node in openstack_compute_instance_v2.controller: {
+        name   = node.name
+        ip     = node.access_ip_v4
+        groups = ["controllers"]
+        variables = {
+          ansible_user = var.ssh_user
+        }
+      }
+    ]),    
+    [{
+      name   = openstack_compute_instance_v2.seed.name
+      ip     = openstack_compute_instance_v2.seed.access_ip_v4
+      groups = ["seed"]
+      variables = {
+        ansible_user = var.ssh_user
+      }
+    }],
+    flatten([
+      for node in openstack_compute_instance_v2.storage: {
+        name   = node.name
+        ip     = node.access_ip_v4
+        groups = ["storage"]
+        variables = {
+          ansible_user = var.ssh_user
+        }
+      }
+    ])  
+  )
 }
 
-resource "ansible_host" "compute_host" {
-  for_each = { for host in openstack_compute_instance_v2.compute : host.name => host.access_ip_v4 }
-  name = each.value
-  groups = ["compute"]
-}
+# For Backup
+# resource "ansible_host" "control_host" {
+#   name   = openstack_compute_instance_v2.ansible_control.access_ip_v4
+#   groups = ["ansible_control"]
+# }
 
-resource "ansible_host" "controllers_hosts" {
-  for_each = { for host in openstack_compute_instance_v2.controller : host.name => host.access_ip_v4 }
-  name = each.value
-  groups = ["controllers"]
-}
+# resource "ansible_host" "compute_host" {
+#   for_each = { for host in openstack_compute_instance_v2.compute : host.name => host.access_ip_v4 }
+#   name = each.value
+#   groups = ["compute"]
+# }
 
-resource "ansible_host" "seed_host" {
-  name   = openstack_compute_instance_v2.seed.access_ip_v4
-  groups = ["seed"]
-}
+# resource "ansible_host" "controllers_hosts" {
+#   for_each = { for host in openstack_compute_instance_v2.controller : host.name => host.access_ip_v4 }
+#   name = each.value
+#   groups = ["controllers"]
+# }
 
-resource "ansible_host" "storage" {
-  for_each = { for host in openstack_compute_instance_v2.storage : host.name => host.access_ip_v4 }
-  name = each.value
-  groups = ["storage"]
-}
+# resource "ansible_host" "seed_host" {
+#   name   = openstack_compute_instance_v2.seed.access_ip_v4
+#   groups = ["seed"]
+# }
 
-resource "ansible_group" "cluster_group" {
-  name     = "cluster"
-  children = ["compute", "ansible_control", "controllers", "seed", "storage"]
-  variables = {
-    ansible_user = var.ssh_user
-  }
-}
+# resource "ansible_host" "storage" {
+#   for_each = { for host in openstack_compute_instance_v2.storage : host.name => host.access_ip_v4 }
+#   name = each.value
+#   groups = ["storage"]
+# }
+
+# resource "ansible_group" "cluster_group" {
+#   name     = "cluster"
+#   children = ["compute", "ansible_control", "controllers", "seed", "storage"]
+#   variables = {
+#     ansible_user = var.ssh_user
+#   }
+# }

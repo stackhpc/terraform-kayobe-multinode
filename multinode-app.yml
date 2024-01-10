@@ -28,7 +28,7 @@
     - block:
       # Install the ansible requirements
       - name: Install ansible requirements
-        command: ansible-galaxy install -r ansible/requirements.yml
+        command: ansible-galaxy collection install ansible.posix && ansible-galaxy install -r ansible/requirements.yml
 
       # - name: Deploy ansible playbook manually
       #   command: ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml

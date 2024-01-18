@@ -64,9 +64,12 @@
       #     msg: "{{ groups | to_yaml }}"   
 #      when: cluster_state != "absent"
 
+# If openstack_deploy is true then continue if not end the playbook.
+
 # Import the playbook to start configuring the multi-node hosts.
 - name: Configure hosts and deploy ansible
   import_playbook: ansible/configure-hosts.yml   
+  when: openstack_deploy == true
 
 
 - hosts: ansible_control
@@ -77,6 +80,8 @@
     - name: Deploy OpenStack.
       ansible.builtin.command:
         cmd: "bash ~/deploy-openstack.sh"
+      when: openstack_deploy == true
+  
 
 # - hosts: ansible_control
 #   vars:

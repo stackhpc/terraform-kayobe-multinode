@@ -115,11 +115,10 @@ parameters:
   
   - name: openstack_deploy   #Idealy I would like to turn this into a checkbox.
     # A boolean flag which will be set to true if the user selects the checkbox, this will allow the user to decide whether they wish to have the infrastructure built with or without OpenStack.
-    label: Deploy Infrastructure with OpenStack? #(True/False)
-    description: If you only wish to deploy the infrastructure with OpenStack select this option.
+    label: Deploy Infrastructure with OpenStack services? #(True/False)
+    description: If you wish to deploy OpenStack services in the infrastructure select this option.
     kind: "boolean"
     default: false
-    required: false
     options:
       permanent: true
     

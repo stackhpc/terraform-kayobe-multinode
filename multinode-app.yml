@@ -91,3 +91,10 @@
 #     - name: Deploy OpenStack.
 #       ansible.builtin.shell:
 #         cmd: "./deploy-openstack.sh"
+
+- hosts: localhost
+  tasks: 
+    - debug: var=outputs
+      vars:
+        outputs: 
+          cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_gateway_ip }}"

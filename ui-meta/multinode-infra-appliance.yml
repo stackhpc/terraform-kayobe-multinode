@@ -167,44 +167,9 @@ usage_template: |-
 
   To assess the clusters, use the following ssh commands:
 
-  {% for group in cluster_nodes|groupby('groups') %}
-    # {{ group.0|upper|bold }}
-    {% for node in group.1 %}
-      {% if node.ip is defined %}
-        {% if node.ip != '' %}
-          # {{ node.name|bold }}
-          {% if node.groups[0] == "ansible_control" %}
-            {% set status = "READY" %}
-          {% else %}
-            {% set status = "NOT AVAILABLE" %}
-          {% endif %}
-          # Instance name from {{ node.groups[0]|capitalize }} => {{ status|green if status == "READY" else status|red }} -> ssh {{ ssh_user }}@{{ node.ip }}
-        {% endif %}
-      {% endif %}
-    {% else %}
-      # Web service is not ready yet.
-    {% endfor %}
-  {% endfor %}
-
-  # METHOD 2
-  # Accessing the cluster
-
-  To assess the clusters, use the following ssh commands:
-
-  {% for group in cluster_nodes|groupby('groups') %}
-    # {{ group.grouper|upper }}
-    {% for node in group.list %}
-      {% if node.ip is defined and node.ip != '' %}
-        # {{ node.name }}
-        {% if node.groups[0] == "ansible_control" %}
-          {% set status = "READY" %}
-        {% else %}
-          {% set status = "NOT AVAILABLE" %}
-        {% endif %}
-        # Instance name from {{ node.groups[0]|capitalize }} => {{ status }} -> ssh {{ node.variables.ansible_user }}@{{ node.ip }}
-      {% else %}
-        # Instance name from {{ node.groups[0]|capitalize }} => NOT AVAILABLE -> ssh {{ node.variables.ansible_user }}@{{ node.ip }}
-      {% endif %}
-    {% endfor %}
-    ________________________________________
-  {% endfor %}
+  {% if cluster.outputs.cluster_access_ip %}
+  {% set status = "READY" %}
+  {% else %}
+  {% set status = "NOT READY" %}
+  {% endif %}
+  Ansible Control Host => {{ status|green if status == "READY" else status|red }} -> ssh {{ ssh_user }}@{{ cluster.outputs.cluster_access_ip }}

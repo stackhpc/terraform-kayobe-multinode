@@ -123,46 +123,79 @@ parameters:
       permanent: true
 
   - name: openstack_version
-    label: Select the OpenStack version to deploy.
-    description: Please select the OpenStack version to deploy.
-    kind: "choice"
-    options:
-      choices:
-        - "Victoria"      
-        - "Wallaby"
-        - "Xena"        
-        - "Yoga"
-        - "Zed"
-        - kind: "string"
-          label: "Custom"
-          description: "Please provide the OpenStack version to deploy."
-          options:
-            min_length: 1
-            max_length: 30
+    label: OpenStack GitHub Branch name.
+    description: Please provide the OpenStack GitHub Branch name you wish to deploy.
+    kind: "string"
     required: true
-    default: "Yoga"
+    default: "stackhpc/yoga"
     immutable: true
-    # when:
-    #   - openstack_deploy == true
+    options:
+      live_check: >
+        "curl -s --head https://github.com/{{ openstack_version }}"
+        " | grep 'HTTP/1.1 200 OK' > /dev/null && echo '✅ Valid branch' || echo '❌ Invalid branch'"
 
-  #- name: backend_count
-  #  label: Backend node count
-  #  description: The number of backend nodes.
-  #  kind: integer
-  #  options:
-  #    min: 1
-  #  default: 3
+  # - name: openstack_version
+  #   label: Select the OpenStack version to deploy.
+  #   description: Please select the OpenStack version to deploy.
+  #   kind: "choice"
+  #   options:
+  #     choices:
+  #       - "Victoria"      
+  #       - "Wallaby"
+  #       - "Xena"        
+  #       - "Yoga"
+  #       - "Zed"
+  #   required: true
+  #   default: "Yoga"
+  #   immutable: true
 
-  #- name: backend_flavor
-  #  label: Backend node size
-  #  description: The size to use for the backend nodes.
-  #  kind: "cloud.size"
-  #  immutable: true
-  #  options:
-  #    min_ram: 1024
-  #    min_disk: 10
 
 # A template describing the usage of the appliance
 # This is rendered in the "Cluster details" modal in the Azimuth UI
 usage_template: |-
-  This is a Multinode appliance which deploys a cluster of nodes including the option to deploy the infrastructure with OpenStack.
+  # METHOD 1
+  # Accessing the cluster
+
+  To assess the clusters, use the following ssh commands:
+
+  {% for group in cluster_nodes|groupby('groups') %}
+    # {{ group.0|upper|bold }}
+    {% for node in group.1 %}
+      {% if node.ip is defined %}
+        {% if node.ip != '' %}
+          # {{ node.name|bold }}
+          {% if node.groups[0] == "ansible_control" %}
+            {% set status = "READY" %}
+          {% else %}
+            {% set status = "NOT AVAILABLE" %}
+          {% endif %}
+          # Instance name from {{ node.groups[0]|capitalize }} => {{ status|green if status == "READY" else status|red }} -> ssh {{ ssh_user }}@{{ node.ip }}
+        {% endif %}
+      {% endif %}
+    {% else %}
+      # Web service is not ready yet.
+    {% endfor %}
+  {% endfor %}
+
+  # METHOD 2
+  # Accessing the cluster
+
+  To assess the clusters, use the following ssh commands:
+
+  {% for group in cluster_nodes|groupby('groups') %}
+    # {{ group.grouper|upper }}
+    {% for node in group.list %}
+      {% if node.ip is defined and node.ip != '' %}
+        # {{ node.name }}
+        {% if node.groups[0] == "ansible_control" %}
+          {% set status = "READY" %}
+        {% else %}
+          {% set status = "NOT AVAILABLE" %}
+        {% endif %}
+        # Instance name from {{ node.groups[0]|capitalize }} => {{ status }} -> ssh {{ node.variables.ansible_user }}@{{ node.ip }}
+      {% else %}
+        # Instance name from {{ node.groups[0]|capitalize }} => NOT AVAILABLE -> ssh {{ node.variables.ansible_user }}@{{ node.ip }}
+      {% endif %}
+    {% endfor %}
+    ________________________________________
+  {% endfor %}

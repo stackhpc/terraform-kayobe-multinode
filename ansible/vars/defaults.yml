@@ -29,25 +29,25 @@ lvm_groups:
     create: true
     lvnames:
       - lvname: lv_root
-        size: 15g
+        size: 10g
         create: true
         filesystem: ext4
         mount: true
         mntp: /
       - lvname: lv_tmp
-        size: 15g
+        size: 10g
         create: true
         filesystem: ext4
         mount: true
         mntp: /tmp
       - lvname: lv_var
-        size: 15g
+        size: 10g
         create: true
         filesystem: ext4
         mount: true
         mntp: /var
       - lvname: lv_var_tmp
-        size: 15g
+        size: 5g
         create: true
         filesystem: ext4
         mount: true
@@ -59,13 +59,13 @@ lvm_groups:
         mount: true
         mntp: /var/log
       - lvname: lv_audit
-        size: 5g
+        size: 2g
         create: true
         filesystem: ext4
         mount: true
         mntp: /var/log/audit
       - lvname: lv_home
-        size: 20G
+        size: 10G
         create: true
         filesystem: ext4
         mount: true

@@ -143,6 +143,20 @@ parameters:
     default: "rocky9-lvm"
     immutable: true
 
+  # - name: multinode_image
+  #   label: Select the OpenStack version to deploy.
+  #   description: Please select the OpenStack version to deploy.
+  #   kind: "choice"
+  #   options:
+  #     choices:
+  #       - "Ubuntu-22.04-lvm"      
+  #       - "rocky9-lvm"
+  #   required: true
+  #   default: "rocky9-lvm"
+  #   immutable: true
+
+
+
   # - name: openstack_version
   #   label: Select the OpenStack version to deploy.
   #   description: Please select the OpenStack version to deploy.
@@ -168,8 +182,7 @@ usage_template: |-
   To assess the clusters, use the following ssh commands:
 
   {% if cluster.outputs.cluster_access_ip %}
-  {% set status = "READY" %}
+  Ansible Control Host => READY -> ssh {{ ssh_user }}@{{ cluster.outputs.cluster_access_ip }}  
   {% else %}
-  {% set status = "NOT READY" %}
+  Not Available 
   {% endif %}
-  Ansible Control Host => {{ status|green if status == "READY" else status|red }} -> ssh {{ ssh_user }}@{{ cluster.outputs.cluster_access_ip }}

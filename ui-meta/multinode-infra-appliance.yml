@@ -119,20 +119,29 @@ parameters:
     description: If you wish to deploy OpenStack services in the infrastructure select this option.
     kind: "boolean"
     default: false
-    options:
-      permanent: true
+    required: false
+    immutable: true
 
   - name: openstack_version
     label: OpenStack GitHub Branch name.
     description: Please provide the OpenStack GitHub Branch name you wish to deploy.
     kind: "string"
-    required: true
+    required: false
     default: "stackhpc/yoga"
     immutable: true
+ 
+
+  - name: multinode_image
+    label: Select the OpenStack version to deploy.
+    description: Please select the OpenStack version to deploy.
+    kind: "choice"
     options:
-      live_check: >
-        "curl -s --head https://github.com/{{ openstack_version }}"
-        " | grep 'HTTP/1.1 200 OK' > /dev/null && echo '✅ Valid branch' || echo '❌ Invalid branch'"
+      choices:
+        - "Ubuntu-22.04-lvm"      
+        - "rocky9-lvm"
+    required: true
+    default: "rocky9-lvm"
+    immutable: true
 
   # - name: openstack_version
   #   label: Select the OpenStack version to deploy.

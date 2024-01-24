@@ -6,9 +6,9 @@ variable "ssh_public_key" {
   type = string
 }
 
-variable "ssh_user" {
-  type = string
-}
+# variable "ssh_user" {
+#   type = string
+# }
 
 variable "ansible_control_vm_name" {
   type = string

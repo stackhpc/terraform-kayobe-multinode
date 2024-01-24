@@ -133,6 +133,12 @@ parameters:
         - "Xena"        
         - "Yoga"
         - "Zed"
+        - kind: "string"
+          label: "Custom"
+          description: "Please provide the OpenStack version to deploy."
+          options:
+            min_length: 1
+            max_length: 30
     required: true
     default: "Yoga"
     immutable: true

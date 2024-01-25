@@ -242,6 +242,30 @@ This script will go through the process of performing the following tasks
    * openstack configuration
    * tempest testing
 
+**Note**: When setting up a multi-node on a cloud which doesn't have access to test pulp (i.e. everywhere except SMS lab) a separate local pulp must be deployed. Before doing so, it is a good idea to make sure your seed VM has sufficient disk space by setting ``seed_disk_size`` in your ``terraform.tfvars`` to an appropriate value (100-200 GB should suffice). In order to set up the local pulp service on the seed, first obtain/generate a set of Ark credentials, then add the following configuration to ``etc/kayobe/environments/ci-multinode/stackhpc-ci.yml``
+
+.. code-block:: console
+
+   stackhpc_release_pulp_username: <ark-credentials-username>
+   stackhpc_release_pulp_password: !vault |
+          <vault-encrypted-ark-password>
+
+   pulp_username: admin
+   pulp_password: <randomly-generated-password-to-set-for-local-pulp-admin-user>
+
+You may also need to comment out many of the other config overrides in ``stackhpc-ci.yml`` such as ``stackhpc_repo_mirror_url`` plus all of the ``stackhpc_repo_*`` and ``stackhpc_docker_registry*`` variables. 
+
+To create the local pulp as part of the automated deployment, add the following commands to the ``deploy-openstack.sh`` script in between ``kayobe seed service deploy`` and ``kayobe overcloud host configure``:
+
+.. code-block:: console
+   
+   kayobe seed service deploy --tags seed-deploy-containers --kolla-tags none -e deploy_containers_registry_attempt_login=false
+   kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-repo-sync.yml
+   kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-repo-publish.yml
+   kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-container-sync.yml
+   kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-container-publish.yml
+
+
 Accessing OpenStack
 -------------------
 

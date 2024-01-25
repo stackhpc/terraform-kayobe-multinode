@@ -107,6 +107,7 @@ Generate Terraform variables:
 
    seed_vm_flavor = "general.v1.small"
    seed_disk_size = 100
+   deploy_pulp    = false
 
    multinode_flavor     = "general.v1.medium"
    multinode_image      = "Rocky9-lvm"
@@ -255,16 +256,7 @@ This script will go through the process of performing the following tasks
 
 You may also need to comment out many of the other config overrides in ``stackhpc-ci.yml`` such as ``stackhpc_repo_mirror_url`` plus all of the ``stackhpc_repo_*`` and ``stackhpc_docker_registry*`` variables which only apply to local pulp. 
 
-To create the local pulp as part of the automated deployment, add the following commands to the ``deploy-openstack.sh`` script in between ``kayobe seed service deploy`` and ``kayobe overcloud host configure``:
-
-.. code-block:: console
-   
-   kayobe seed service deploy --tags seed-deploy-containers --kolla-tags none -e deploy_containers_registry_attempt_login=false
-   kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-repo-sync.yml
-   kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-repo-publish.yml
-   kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-container-sync.yml
-   kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-container-publish.yml
-
+To create the local Pulp as part of the automated deployment, set ``deploy_pulp`` to ``true`` in your ``terraform.tfvars`` file.
 
 Accessing OpenStack
 -------------------

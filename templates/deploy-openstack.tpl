@@ -51,6 +51,14 @@ fi
 # Configure hosts
 kayobe control host bootstrap
 kayobe seed host configure
+%{ if deploy_pulp }
+# Deploy Pulp
+kayobe seed service deploy --tags seed-deploy-containers --kolla-tags none -e deploy_containers_registry_attempt_login=false
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-repo-sync.yml
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-repo-publish.yml
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-container-sync.yml
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-container-publish.yml
+%{ endif }
 kayobe overcloud host configure
 %{ if deploy_wazuh }kayobe infra vm host configure%{ endif }
 

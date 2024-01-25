@@ -87,7 +87,7 @@ logo: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACAAAAAgACAYAAACyp9MwAAAAAXNS
 # A list of parameters to be gathered from the user
 parameters:
   - name: vxlan_vni
-    label: Set the VXLAN VNI value.
+    label: Set VXLAN VNI.
     description: Please provide a VXLAN VNI. A unique value from 1 to 100,000.
     kind: "integer"
     required: true
@@ -100,7 +100,7 @@ parameters:
 
   - name: ans_vlt_pwd
     # A human-readable name for the parameter. Defaults to the name if not given.
-    label: Provide the Ansible Vault password.
+    label: Ansible Vault password.
     # An optional short description for the parameter.
     description: Please provide the Ansible Vault password to enable the deployment of the cluster.
     kind: "string"
@@ -123,8 +123,10 @@ parameters:
     immutable: true
 
   - name: openstack_version
-    label: OpenStack GitHub Branch name.
-    description: Please provide the OpenStack GitHub Branch name you wish to deploy.
+    label: OpenStack GitHub Branch.
+    description: >
+      Please provide the OpenStack GitHub Branch name you wish to deploy.
+      i.e. stackhpc/yoga (for https://github.com/stackhpc/stackhpc-kayobe-config/tree/stackhpc/yoga)
     kind: "string"
     required: false
     default: "stackhpc/yoga"
@@ -132,30 +134,28 @@ parameters:
  
 
   - name: multinode_image
-    label: Select the OpenStack version to deploy.
-    description: Please select the OpenStack version to deploy.
-    kind: "choice"
-    options:
-      choices:
-        - "Ubuntu-22.04-lvm"      
-        - "rocky9-lvm"
+    label: Operating system image.
+    description: > 
+      Please provide the OS you wish to deploy on this multinode infrastructure.
+      The image must be available in the OpenStack tenancy, two supported images are:
+      - Ubuntu-22.04-lvm
+      - rocky9-lvm
+    kind: "string"
     required: true
     default: "rocky9-lvm"
     immutable: true
 
-  # - name: multinode_image
-  #   label: Select the OpenStack version to deploy.
-  #   description: Please select the OpenStack version to deploy.
-  #   kind: "choice"
-  #   options:
-  #     choices:
-  #       - "Ubuntu-22.04-lvm"      
-  #       - "rocky9-lvm"
-  #   required: true
-  #   default: "rocky9-lvm"
-  #   immutable: true
-
-
+  - name: ssh_user
+    label: Operating system SSH username.
+    description: >
+      Please select the OS username in order to connect to the infrastructure.
+      Examples are:
+      - ubuntu (Ubuntu-22.04-lvm)
+      - cloud_user (rocky9-lvm)
+    kind: "string"
+    required: true
+    default: "cloud_user"
+    immutable: false
 
   # - name: openstack_version
   #   label: Select the OpenStack version to deploy.
@@ -176,7 +176,6 @@ parameters:
 # A template describing the usage of the appliance
 # This is rendered in the "Cluster details" modal in the Azimuth UI
 usage_template: |-
-  # METHOD 1
   # Accessing the cluster
 
   To assess the clusters, use the following ssh commands:

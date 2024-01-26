@@ -148,6 +148,10 @@ If `deploy_wazuh` is set to true, an infrastructure VM will be created that
 hosts the Wazuh manager. The Wazuh deployment playbooks will also be triggered
 automatically to deploy Wazuh agents to the overcloud hosts.
 
+.. caution::
+
+   Local pulp deployment is a new feature and may not be stable
+
 If `deploy_pulp` is set to true, a local pulp container will be deployed on the
 seed node. This is mandatory for any multinode not running on SMS. Pulp can
 sync a lot of data, so it is recommended that you ensure `seed_disk_size` is
@@ -234,6 +238,10 @@ The Ansible Control host should now be accessible with the following command:
 
 Deploy Pulp
 -----------
+
+.. caution::
+
+   Local pulp deployment is a new feature and may not be stable
 
 To set up a local pulp service on the seed, first obtain/generate a set of Ark credentials using `this workflow <https://github.com/stackhpc/stackhpc-release-train-clients/actions/workflows/create-client-credentials.yml>`_, then add the following configuration to ``~/src/kayobe-config/etc/kayobe/environments/ci-multinode/stackhpc-ci.yml``on the Ansible Control host.
 

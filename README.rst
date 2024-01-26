@@ -107,6 +107,7 @@ Generate Terraform variables:
 
    seed_vm_flavor = "general.v1.small"
    seed_disk_size = 100
+   deploy_pulp    = false
 
    multinode_flavor     = "general.v1.medium"
    multinode_image      = "Rocky9-lvm"
@@ -146,6 +147,16 @@ device being allocated. When any baremetal hosts are deployed, the
 If `deploy_wazuh` is set to true, an infrastructure VM will be created that
 hosts the Wazuh manager. The Wazuh deployment playbooks will also be triggered
 automatically to deploy Wazuh agents to the overcloud hosts.
+
+.. caution::
+
+   Local pulp deployment is a new feature and may not be stable
+
+If `deploy_pulp` is set to true, a local pulp container will be deployed on the
+seed node. This is mandatory for any multinode not running on SMS. Pulp can
+sync a lot of data, so it is recommended that you ensure `seed_disk_size` is
+greater than 150 when using this option. Local pulp deployments require
+additional configuration, which is detailed below.
 
 Generate a plan:
 
@@ -219,18 +230,41 @@ These playbooks are tagged so that they can be invoked or skipped as required. F
 
    ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml --skip-tags fqdn
 
+The Ansible Control host should now be accessible with the following command:
+
+.. code-block:: console
+
+   ssh $(terraform output -raw ssh_user)@$(terraform output -raw ansible_control_access_ip_v4)
+
+Deploy Pulp
+-----------
+
+.. caution::
+
+   Local pulp deployment is a new feature and may not be stable
+
+To set up a local pulp service on the seed, first obtain/generate a set of Ark credentials using `this workflow <https://github.com/stackhpc/stackhpc-release-train-clients/actions/workflows/create-client-credentials.yml>`_, then add the following configuration to ``~/src/kayobe-config/etc/kayobe/environments/ci-multinode/stackhpc-ci.yml``on the Ansible Control host.
+
+.. code-block:: yaml
+
+   stackhpc_release_pulp_username: <ark-credentials-username>
+   stackhpc_release_pulp_password: !vault |
+          <vault-encrypted-ark-password>
+
+   pulp_username: admin
+   pulp_password: <randomly-generated-password-to-set-for-local-pulp-admin-user>
+
 Deploy OpenStack
 ----------------
 
 Once the Ansible control host has been configured with a Kayobe/OpenStack configuration you can then begin the process of deploying OpenStack.
-This can be achieved by either manually running the various commands to configures the hosts and deploy the services or automated by using `deploy-openstack.sh`,
+This can be achieved by either manually running the various commands to configure the hosts and deploy the services or automated by using `deploy-openstack.sh`,
 which should be available within the homedir on your Ansible control host provided you ran `deploy-openstack-config.yml` earlier.
 
 If you choose to opt for automated method you must first SSH into your Ansible control host and then run the `deploy-openstack.sh` script
 
 .. code-block:: console
 
-   ssh $(terraform output -raw ssh_user)@$(terraform output -raw ansible_control_access_ip_v4)
    ~/deploy-openstack.sh
 
 This script will go through the process of performing the following tasks

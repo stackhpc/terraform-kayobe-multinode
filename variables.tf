@@ -102,3 +102,9 @@ variable "deploy_wazuh" {
   type = bool
   default = false
 }
+
+variable "deploy_pulp" {
+  description = "Bool, whether or not to deploy Pulp."
+  type = bool
+  default = false
+}

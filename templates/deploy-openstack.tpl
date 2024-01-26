@@ -48,9 +48,20 @@ if $(which apt 2>/dev/null >/dev/null); then
     sudo apt -y install uuid-runtime
 fi
 
+# Edit config when deploying a local pulp repository
+%{ if deploy_pulp } sed -i -e 's/^resolv_/#resolv_/g' -e 's/^stackhpc_repo_/#stackhpc_repo_/g' -e 's/^stackhpc_include/#stackhpc_include/g' -e 's/^stackhpc_docker_registry:/#stackhpc_docker_registry:/g' $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/stackhpc-ci.yml %{ endif }
+
 # Configure hosts
 kayobe control host bootstrap
 kayobe seed host configure
+%{ if deploy_pulp }
+# Deploy Pulp
+kayobe seed service deploy --tags seed-deploy-containers --kolla-tags none -e deploy_containers_registry_attempt_login=false
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-repo-sync.yml
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-repo-publish.yml
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-container-sync.yml
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/pulp-container-publish.yml
+%{ endif }
 kayobe overcloud host configure
 %{ if deploy_wazuh }kayobe infra vm host configure%{ endif }
 

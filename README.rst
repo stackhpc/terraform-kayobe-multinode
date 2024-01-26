@@ -148,6 +148,12 @@ If `deploy_wazuh` is set to true, an infrastructure VM will be created that
 hosts the Wazuh manager. The Wazuh deployment playbooks will also be triggered
 automatically to deploy Wazuh agents to the overcloud hosts.
 
+If `deploy_pulp` is set to true, a local pulp container will be deployed on the
+seed node. This is mandatory for any multinode not running on SMS. Pulp can
+sync a lot of data, so it is recommended that you ensure `seed_disk_size` is
+greater than 150 when using this option. Local pulp deployments require
+additional configuration, which is detailed below.
+
 Generate a plan:
 
 .. code-block:: console
@@ -220,30 +226,16 @@ These playbooks are tagged so that they can be invoked or skipped as required. F
 
    ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml --skip-tags fqdn
 
-Deploy OpenStack
-----------------
-
-Once the Ansible control host has been configured with a Kayobe/OpenStack configuration you can then begin the process of deploying OpenStack.
-This can be achieved by either manually running the various commands to configures the hosts and deploy the services or automated by using `deploy-openstack.sh`,
-which should be available within the homedir on your Ansible control host provided you ran `deploy-openstack-config.yml` earlier.
-
-If you choose to opt for automated method you must first SSH into your Ansible control host and then run the `deploy-openstack.sh` script
+The Ansible Control host should now be accessible with the following command:
 
 .. code-block:: console
 
    ssh $(terraform output -raw ssh_user)@$(terraform output -raw ansible_control_access_ip_v4)
-   ~/deploy-openstack.sh
 
-This script will go through the process of performing the following tasks
-   * kayobe control host bootstrap
-   * kayobe seed host configure
-   * kayobe overcloud host configure
-   * cephadm deployment
-   * kayobe overcloud service deploy
-   * openstack configuration
-   * tempest testing
+Deploy Pulp
+-----------
 
-**Note**: When setting up a multinode on a cloud which doesn't have access to test pulp (i.e. everywhere except SMS lab) a separate local pulp must be deployed. Before doing so, it is a good idea to make sure your seed VM has sufficient disk space by setting ``seed_disk_size`` in your ``terraform.tfvars`` to an appropriate value (100-200 GB should suffice). In order to set up the local pulp service on the seed, first obtain/generate a set of Ark credentials using `this workflow <https://github.com/stackhpc/stackhpc-release-train-clients/actions/workflows/create-client-credentials.yml>`_, then add the following configuration to ``etc/kayobe/environments/ci-multinode/stackhpc-ci.yml``
+To set up a local pulp service on the seed, first obtain/generate a set of Ark credentials using `this workflow <https://github.com/stackhpc/stackhpc-release-train-clients/actions/workflows/create-client-credentials.yml>`_, then add the following configuration to ``~/src/kayobe-config/etc/kayobe/environments/ci-multinode/stackhpc-ci.yml``on the Ansible Control host.
 
 .. code-block:: yaml
 
@@ -254,9 +246,33 @@ This script will go through the process of performing the following tasks
    pulp_username: admin
    pulp_password: <randomly-generated-password-to-set-for-local-pulp-admin-user>
 
-You may also need to comment out many of the other config overrides in ``stackhpc-ci.yml`` such as ``stackhpc_repo_mirror_url`` plus all of the ``stackhpc_repo_*`` and ``stackhpc_docker_registry*`` variables which only apply to local pulp. 
+Run the command below to automatically comment out the overrides in ``stackhpc-ci.yml`` for pointing to test pulp.
 
-To create the local Pulp as part of the automated deployment, set ``deploy_pulp`` to ``true`` in your ``terraform.tfvars`` file.
+.. code-block:: console
+
+   sed -i -e 's/^resolv_/#resolv_/g' -e 's/^stackhpc_repo_/#stackhpc_repo_/g' -e 's/^stackhpc_include/#stackhpc_include/g' -e 's/^stackhpc_docker_registry:/#stackhpc_docker_registry:/g' ~/src/kayobe-config/etc/kayobe/environments/ci-multinode/stackhpc-ci.yml
+
+Deploy OpenStack
+----------------
+
+Once the Ansible control host has been configured with a Kayobe/OpenStack configuration you can then begin the process of deploying OpenStack.
+This can be achieved by either manually running the various commands to configure the hosts and deploy the services or automated by using `deploy-openstack.sh`,
+which should be available within the homedir on your Ansible control host provided you ran `deploy-openstack-config.yml` earlier.
+
+If you choose to opt for automated method you must first SSH into your Ansible control host and then run the `deploy-openstack.sh` script
+
+.. code-block:: console
+
+   ~/deploy-openstack.sh
+
+This script will go through the process of performing the following tasks
+   * kayobe control host bootstrap
+   * kayobe seed host configure
+   * kayobe overcloud host configure
+   * cephadm deployment
+   * kayobe overcloud service deploy
+   * openstack configuration
+   * tempest testing
 
 Accessing OpenStack
 -------------------

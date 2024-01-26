@@ -1,6 +1,6 @@
 ---
 - name: Fix Home Directory Ownership
-  hosts: all
+  hosts: all, !localhost
   gather_facts: false
   vars:
     # At the time of running this playbook the home directory is not owned by the user.
@@ -16,7 +16,7 @@
         gather_subset:
           - user_dir
 
-    - name: Ensure homedir is owned by {{ ansible_user }}
+    - name: Ensure homedir is owned by "{{ ansible_user }}"
       ansible.builtin.file:
         dest: "{{ ansible_env.HOME }}"
         state: directory

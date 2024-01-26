@@ -16,7 +16,10 @@
         src: "{{ playbook_dir }}/templates/userdata.cfg.tpl.j2"
         dest: "{{ playbook_dir }}/templates/userdata.cfg.tpl"
 
-# Provision the infrastructure The CaaS puts hosts for accessing the OpenStack
+
+# Provision the infrastructure
+
+# The CaaS puts hosts for accessing the OpenStack
 # API into the 'openstack' group
 - hosts: openstack
   roles:

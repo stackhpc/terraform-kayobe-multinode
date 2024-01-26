@@ -157,21 +157,6 @@ parameters:
     default: "cloud_user"
     immutable: false
 
-  # - name: openstack_version
-  #   label: Select the OpenStack version to deploy.
-  #   description: Please select the OpenStack version to deploy.
-  #   kind: "choice"
-  #   options:
-  #     choices:
-  #       - "Victoria"      
-  #       - "Wallaby"
-  #       - "Xena"        
-  #       - "Yoga"
-  #       - "Zed"
-  #   required: true
-  #   default: "Yoga"
-  #   immutable: true
-
 
 # A template describing the usage of the appliance
 # This is rendered in the "Cluster details" modal in the Azimuth UI

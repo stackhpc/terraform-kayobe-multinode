@@ -53,24 +53,6 @@ resource "local_file" "admin_networks" {
   file_permission = "0644"
 }
 
-# output "cluster_nodes" {
-#   description = "A list of the cluster nodes and their IP addresses which will be used by the Ansible inventory"
-#   value       = [{
-#        name = openstack_compute_instance_v2.ansible_control.name
-#        ip = openstack_compute_instance_v2.ansible_control.access_ip_v4
-#        groups        = ["multinode_ansible_control"]
-#   }]
-# }
-
-# flatten([
-#  for node in openstack_compute_instance_v2.compute: {
-#      name = node.name
-#      ip = node.access_ip_v4
-#        groups        = ["compute"]
-#    }
-#   ])
-# }
-
 resource "local_file" "openstack_inventory" {
   content = templatefile(
     "${path.module}/templates/openstack-inventory.tpl",
@@ -151,7 +133,8 @@ output "cluster_nodes" {
   )
 }
 
-# For Backup
+# Template of all the hosts' configuration which can be used to generate Ansible varables.
+
 # resource "ansible_host" "control_host" {
 #   name   = openstack_compute_instance_v2.ansible_control.access_ip_v4
 #   groups = ["ansible_control"]

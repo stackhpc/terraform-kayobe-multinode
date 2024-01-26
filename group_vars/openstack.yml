@@ -23,18 +23,4 @@ terraform_project_path: "{{ playbook_dir }}"
 # Valid values are 'present' and 'absent'
 terraform_state: "{{ cluster_state | default('present') }}"
 
-# The user that should be used to SSH to the cluster hosts
-cluster_ssh_user: "{{ 'cloud-user' if multinode_image == 'rocky9-lvm' else 'ubuntu' }}"
-ssh_user: "{{ 'cloud-user' if multinode_image == 'rocky9-lvm' else 'ubuntu' }}"
 
-tf_files: []
-  #- outputs.tf
-  #- variables.tf
-  # - authentication.tf
-  # - compute_instances.tf
-  # - data.tf
-  # - versions.tf
-  # - volumes.tf
-  # - terraform.tfvars
-
-# Assign the ansible ssh public key from the ansible runner's generated ssh key

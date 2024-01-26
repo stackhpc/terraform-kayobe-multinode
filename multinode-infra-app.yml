@@ -16,15 +16,18 @@
         src: "{{ playbook_dir }}/templates/userdata.cfg.tpl.j2"
         dest: "{{ playbook_dir }}/templates/userdata.cfg.tpl"
 
-# Provision the infrastructure
-# The CaaS puts hosts for accessing the OpenStack API into the 'openstack' group
+# Provision the infrastructure The CaaS puts hosts for accessing the OpenStack
+# API into the 'openstack' group
 - hosts: openstack
   roles:
     - cluster_infra
 
 - hosts: localhost
   tasks: 
-  # Check whether an ans_vlt_pwd variable is defined and if so, save it into a file called '~/vault.password'. If it doesn't exist, create a the '~/vault.password' file with ans_vlt_pwd = "password_not_set" as the password.
+  # Check whether an ans_vlt_pwd variable is defined and if so, save it into a
+  # file called '~/vault.password'. If it doesn't exist, create a the
+  # '~/vault.password' file with ans_vlt_pwd = "password_not_set" as the
+  # password.
     - name: Create vault password file
       vars:
         ans_dflt: 'default_password'
@@ -32,37 +35,6 @@
         content: "{{ ans_vlt_pwd | default( ans_dflt , true ) }}"
         dest: "~/vault.password"
         mode: 0600
-
-    # - block:
-      # # Install the ansible requirements
-      # - name: Install ansible posix
-      #   command: ansible-galaxy collection install ansible.posix
-
-      # # Install the ansible requirements
-      # - name: Install ansible community general
-      #   command: ansible-galaxy collection install community.general
-
-      # # Install the ansible requirements
-      # - name: Install ansible requirements
-      #   command: ansible-galaxy install -r ansible/requirements.yml
-
-
-      # - name: Deploy ansible playbook manually
-      #   command: ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml
-      #   vars:
-      #    terraform_binary_directory: "{{ playbook_dir }}/../bin"
-      #    terraform_binary_path: "{{ terraform_binary_directory }}/../terraform"
-      #    terraform_project_path: "{{ playbook_dir }}"
-
-#      - debug: var=outputs
-#        vars:
-#          outputs: 
-#            cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_gateway_ip }}"
-
-      # - name: Debug groups
-      #   debug:
-      #     msg: "{{ groups | to_yaml }}"   
-#      when: cluster_state != "absent"
 
 # If openstack_deploy is true then continue if not end the playbook.
 
@@ -82,16 +54,7 @@
         cmd: "bash ~/deploy-openstack.sh"
       when: openstack_deploy == true
   
-
-# - hosts: ansible_control
-#   vars:
-#     ansible_pipelining: true
-#     ansible_ssh_pipelining: true
-#   tasks: 
-#     - name: Deploy OpenStack.
-#       ansible.builtin.shell:
-#         cmd: "./deploy-openstack.sh"
-
+# This is to get the ip of the ansible-controller host.
 - hosts: localhost
   tasks: 
     - debug: var=outputs

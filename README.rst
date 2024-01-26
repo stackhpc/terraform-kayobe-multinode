@@ -254,12 +254,6 @@ To set up a local pulp service on the seed, first obtain/generate a set of Ark c
    pulp_username: admin
    pulp_password: <randomly-generated-password-to-set-for-local-pulp-admin-user>
 
-Run the command below to automatically comment out the overrides in ``stackhpc-ci.yml`` for pointing to test pulp.
-
-.. code-block:: console
-
-   sed -i -e 's/^resolv_/#resolv_/g' -e 's/^stackhpc_repo_/#stackhpc_repo_/g' -e 's/^stackhpc_include/#stackhpc_include/g' -e 's/^stackhpc_docker_registry:/#stackhpc_docker_registry:/g' ~/src/kayobe-config/etc/kayobe/environments/ci-multinode/stackhpc-ci.yml
-
 Deploy OpenStack
 ----------------
 

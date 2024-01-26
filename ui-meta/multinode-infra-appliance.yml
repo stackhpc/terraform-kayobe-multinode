@@ -124,7 +124,7 @@ parameters:
 
   - name: openstack_version
     label: OpenStack GitHub Branch.
-    description: >
+    description: |
       Please provide the OpenStack GitHub Branch name you wish to deploy.
       i.e. stackhpc/yoga (for https://github.com/stackhpc/stackhpc-kayobe-config/tree/stackhpc/yoga)
     kind: "string"
@@ -135,7 +135,7 @@ parameters:
 
   - name: multinode_image
     label: Operating system image.
-    description: > 
+    description: |
       Please provide the OS you wish to deploy on this multinode infrastructure.
       The image must be available in the OpenStack tenancy, two supported images are:
       - Ubuntu-22.04-lvm
@@ -147,8 +147,8 @@ parameters:
 
   - name: ssh_user
     label: Operating system SSH username.
-    description: >
-      Please select the OS username in order to connect to the infrastructure.
+    description: |
+      Please select the OS username in order to connect to the infrastructure. 
       Examples are:
       - ubuntu (Ubuntu-22.04-lvm)
       - cloud_user (rocky9-lvm)

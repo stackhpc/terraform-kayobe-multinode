@@ -23,4 +23,4 @@ terraform_project_path: "{{ playbook_dir }}"
 # Valid values are 'present' and 'absent'
 terraform_state: "{{ cluster_state | default('present') }}"
 
-
+cluster_ssh_user: "{{ ssh_user }}"

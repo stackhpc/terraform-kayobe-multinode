@@ -111,10 +111,11 @@ parameters:
     options:  
       secret: true
       confirm: true
-    #private: true
   
   - name: openstack_deploy 
-    # A boolean flag which will be set to true if the user selects the checkbox, this will allow the user to decide whether they wish to have the infrastructure built with or without OpenStack.
+    # A boolean flag which will be set to true if the user selects the checkbox,
+    # this will allow the user to decide whether they wish to have the
+    # infrastructure built with or without OpenStack.
     label: Deploy Infrastructure with OpenStack services? #(True/False)
     description: If you wish to deploy OpenStack services in the infrastructure select this option.
     kind: "boolean"
@@ -122,10 +123,20 @@ parameters:
     required: false
     immutable: true
 
-  - name: openstack_version
-    label: OpenStack GitHub Branch.
+  - name: kayobe_version_branch
+    label: Kayobe GitHub Branch.
     description: |
       Please provide the OpenStack GitHub Branch name you wish to deploy.
+      i.e. stackhpc/yoga (for https://github.com/stackhpc/kayobe/tree/stackhpc/yoga)
+    kind: "string"
+    required: false
+    default: "stackhpc/yoga"
+    immutable: true
+
+  - name: kayobe_config_branch
+    label: Kayobe configuration GitHub Branch.
+    description: |
+      Please provide the GitHub Branch with the OpenStack configuration you wish to deploy.
       i.e. stackhpc/yoga (for https://github.com/stackhpc/stackhpc-kayobe-config/tree/stackhpc/yoga)
     kind: "string"
     required: false

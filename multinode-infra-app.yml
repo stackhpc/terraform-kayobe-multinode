@@ -25,14 +25,10 @@
 - hosts: localhost
   tasks: 
   # Check whether an ans_vlt_pwd variable is defined and if so, save it into a
-  # file called '~/vault.password'. If it doesn't exist, create a the
-  # '~/vault.password' file with ans_vlt_pwd = "password_not_set" as the
-  # password.
+  # file called '~/vault.password'.
     - name: Create vault password file
-      vars:
-        ans_dflt: 'default_password'
       ansible.builtin.copy:
-        content: "{{ ans_vlt_pwd | default( ans_dflt , true ) }}"
+        content: "{{ ans_vlt_pwd }}"
         dest: "~/vault.password"
         mode: 0600
 

@@ -1,7 +1,7 @@
 # The machine-readable name of the appliance
 name: "multinode-infra"
 # The human-readable label for the appliance
-label: "Multinode Infrastructure Deployment"
+label: "Multinode OpenStack test cluster"
 # A short description of the appliance, rendered as-is
 description: An Azimuth appliance for deploying a multinode OpenStack test cluster using Kayobe.
 # The URL of the logo for the appliance

@@ -165,7 +165,7 @@ parameters:
       - cloud_user (rocky9-lvm)
     kind: "string"
     required: true
-    default: "cloud_user"
+    default: "cloud-user"
     immutable: false
 
 

@@ -1,5 +1,0 @@
----
-collections:
-  - name: cloud.terraform
-roles:
-  - src: mrlesmithjr.manage_lvm

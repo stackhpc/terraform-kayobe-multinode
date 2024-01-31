@@ -1,0 +1,59 @@
+---
+
+- hosts: localhost
+  tasks:    
+    - name: Show Playbook Directory
+      debug:
+       msg: "{{ playbook_dir }}"
+
+    - name: Template Terraform files into project directory
+      template:
+        src: terraform.tfvars.j2
+        dest: "{{ playbook_dir }}/terraform.tfvars"
+  
+    - name: Template Terraform userdata.cfg.tpl files into project template directory
+      template:
+        src: "{{ playbook_dir }}/templates/userdata.cfg.tpl.j2"
+        dest: "{{ playbook_dir }}/templates/userdata.cfg.tpl"
+
+# Provision the infrastructure The CaaS puts hosts for accessing the OpenStack
+# API into the 'openstack' group
+- hosts: openstack
+  roles:
+    - cluster_infra
+
+- hosts: localhost
+  tasks: 
+  # Check whether an ans_vlt_pwd variable is defined and if so, save it into a
+  # file called '~/vault.password'.
+    - name: Create vault password file
+      ansible.builtin.copy:
+        content: "{{ ans_vlt_pwd }}"
+        dest: "~/vault.password"
+        mode: 0600
+
+# If openstack_deploy is true then continue if not end the playbook.
+
+# Import the playbook to start configuring the multi-node hosts.
+- name: Configure hosts and deploy ansible
+  import_playbook: ansible/configure-hosts.yml   
+  when: openstack_deploy == true
+
+
+- hosts: ansible_control
+  vars:
+    ansible_pipelining: true
+    ansible_ssh_pipelining: true
+  tasks: 
+    - name: Deploy OpenStack.
+      ansible.builtin.command:
+        cmd: "bash ~/deploy-openstack.sh"
+      when: openstack_deploy == true
+  
+# This is to get the ip of the ansible-controller host.
+- hosts: localhost
+  tasks: 
+    - debug: var=outputs
+      vars:
+        outputs: 
+          cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_gateway_ip }}"

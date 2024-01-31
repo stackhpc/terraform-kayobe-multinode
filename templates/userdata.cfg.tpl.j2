@@ -7,3 +7,6 @@ packages:
   - git
   - vim
   - tmux
+ssh_authorized_keys:
+  - "{{ cluster_deploy_ssh_public_key }}"
+  - "{{ cluster_user_ssh_public_key }}"

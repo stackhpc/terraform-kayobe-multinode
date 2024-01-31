@@ -3,7 +3,7 @@ name: "multinode-infra"
 # The human-readable label for the appliance
 label: "Multinode Infrastructure Deployment"
 # A short description of the appliance, rendered as-is
-description: An appliance for deploying a multinode cluster on Azimuth with the option of deploying just the Infrastructure.
+description: An Azimuth appliance for deploying a multinode OpenStack test cluster using Kayobe.
 # The URL of the logo for the appliance
 # This should be an HTTPS URL, because plain HTTP URLs will cause content warnings when Azimuth is served over HTTPS
 # Alternatively, as shown here, a data URL can be used to encode the image directly 

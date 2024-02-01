@@ -1,0 +1,22 @@
+---
+ 
+    - name: Show Playbook Directory
+      debug:
+       msg: "{{ playbook_dir }}"
+
+    - name: Template Terraform files into project directory
+      template:
+        src: terraform.tfvars.j2
+        dest: "{{ terraform_project_path }}/terraform.tfvars"
+  
+    - name: Template Terraform userdata.cfg.tpl files into project template directory
+      template:
+        src: "{{ terraform_roles_path }}/azimuth_deploy/templates/userdata.cfg.tpl.j2"
+        dest: "{{ terraform_project_path }}/templates/userdata.cfg.tpl"
+
+    - name: Create vault password file
+      ansible.builtin.copy:
+        content: "{{ ans_vlt_pwd | default( ans_dflt , true ) }}"
+        dest: "~/vault.password"
+        mode: 0600
+        

@@ -5,6 +5,10 @@ label: "Multinode Customisable Deployment"
 # A short description of the appliance, rendered as-is
 description: |
   An appliance for deploying a multinode cluster on Azimuth with options to deploy it with a custom version of OpenStack or just the infrastructure.
+
+# This variable is what determines the type of installation that will be performed as certain variables are only used in certain installation types.
+manual_deployment: false
+
 # The URL of the logo for the appliance
 # This should be an HTTPS URL, because plain HTTP URLs will cause content warnings when Azimuth is served over HTTPS
 # Alternatively, as shown here, a data URL can be used to encode the image directly 

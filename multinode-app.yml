@@ -1,20 +1,19 @@
 ---
 
 - hosts: localhost
-  tasks:    
-    - name: Show Playbook Directory
-      debug:
-       msg: "{{ playbook_dir }}"
+  tasks:
+    # If this variable is not set then it will default to true and deploy the infrastructure without the azimuth_deploy role.
+    manual_deployment: "{{ manual_deployment | default(true) }}"
 
-    - name: Template Terraform files into project directory
-      template:
-        src: terraform.tfvars.j2
-        dest: "{{ playbook_dir }}/terraform.tfvars"
-  
-    - name: Template Terraform userdata.cfg.tpl files into project template directory
-      template:
-        src: "{{ playbook_dir }}/templates/userdata.cfg.tpl.j2"
-        dest: "{{ playbook_dir }}/templates/userdata.cfg.tpl"
+- hosts: localhost
+  roles:
+    - azimuth_deploy
+  when: manual_deployment == false
+
+- hosts: localhost
+  roles:
+    - manual_deploy
+  when: manual_deployment == true
 
 
 # Provision the infrastructure
@@ -24,20 +23,8 @@
 - hosts: openstack
   roles:
     - cluster_infra
+  when: manual_deployment == false
 
-- hosts: localhost
-  tasks: 
-  # Check whether an ans_vlt_pwd variable is defined and if so, save it into a
-  # file called '~/vault.password'. If it doesn't exist, create a the
-  # '~/vault.password' file with ans_vlt_pwd = "password_not_set" as the
-  # password.
-    - name: Create vault password file
-      vars:
-        ans_dflt: 'default_password'
-      ansible.builtin.copy:
-        content: "{{ ans_vlt_pwd | default( ans_dflt , true ) }}"
-        dest: "~/vault.password"
-        mode: 0600
 
 # If openstack_deploy is true then continue if not end the playbook.
 

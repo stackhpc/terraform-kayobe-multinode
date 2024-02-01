@@ -35,6 +35,7 @@
   when:
     - terraform_state == "present"
     - cluster_upgrade_system_packages is not defined or not cluster_upgrade_system_packages
+    - manual_deployment == false
 
 
 - name: Provision infrastructure

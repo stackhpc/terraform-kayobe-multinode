@@ -25,6 +25,10 @@
     - cluster_infra
   when: manual_deployment == false
 
+- hosts: localhost
+  roles:
+    - cluster_infra
+  when: manual_deployment == true
 
 # If openstack_deploy is true then continue if not end the playbook.
 

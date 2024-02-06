@@ -1,19 +1,17 @@
 ---
 
 - hosts: localhost
-  tasks:
-    # If this variable is not set then it will default to true and deploy the infrastructure without the azimuth_deploy role.
-    manual_deployment: "{{ manual_deployment | default(true) }}"
+  roles:
+    - role: azimuth_deploy
+      when: manual_deployment == "false"
 
 - hosts: localhost
   roles:
-    - azimuth_deploy
-  when: manual_deployment == false
-
-- hosts: localhost
-  roles:
-    - manual_deploy
-  when: manual_deployment == true
+    - role: manual_deploy
+      when: manual_deployment == "true"
+  vars:
+    terraform_project_path: "{{ playbook_dir }}"
+    terraform_roles_path: "{{ playbook_dir }}/roles"
 
 
 # Provision the infrastructure
@@ -23,19 +21,13 @@
 - hosts: openstack
   roles:
     - cluster_infra
-  when: manual_deployment == false
-
-- hosts: localhost
-  roles:
-    - cluster_infra
-  when: manual_deployment == true
 
 # If openstack_deploy is true then continue if not end the playbook.
 
 # Import the playbook to start configuring the multi-node hosts.
 - name: Configure hosts and deploy ansible
   import_playbook: ansible/configure-hosts.yml   
-  when: openstack_deploy == true
+  when: openstack_deploy | bool
 
 
 - hosts: ansible_control
@@ -46,7 +38,7 @@
     - name: Deploy OpenStack.
       ansible.builtin.command:
         cmd: "bash ~/deploy-openstack.sh"
-      when: openstack_deploy == true
+      when: openstack_deploy | bool
   
 # This is to get the ip of the ansible-controller host.
 - hosts: localhost

@@ -1,272 +1,274 @@
 ---
 
-- name: Are you providing 'tfvars' or would you like to set them now?
-  vars_prompt:
-    - name: "tfvars"
-      prompt: "Did you provide tfvars? (y/n)"
-      default: "n"
-      private: no
+# - name: Are you providing 'tfvars' or would you like to set them now?
+#   vars_prompt:
+#     - name: tfvars
+#       prompt: "Did you provide tfvars? (y/n)"
+#       default: "n"
+#       private: no
 
-- name: Use these defaults?
-  when: tfvars == "n"
-  debug:
-    msg: |
-      prefix = "manual_multinode"
-      ansible_control_vm_flavor = "general.v1.small"
-      ansible_control_vm_name = "ansible-control"
-      ansible_control_disk_size = 100
-      seed_vm_flavor = "general.v1.small"
-      seed_disk_size = 100
-      multinode_flavor = "general.v1.medium"
-      multinode_image = "Rocky9-lvm"
-      multinode_keypair = "MNKP-manual_multinode"
-      multinode_vm_network = "stackhpc-ipv4-geneve"
-      multinode_vm_subnet = "stackhpc-ipv4-geneve-subnet"
-      compute_count = "2"
-      controller_count = "3"
-      compute_disk_size = 100
-      controller_disk_size = 100
-      ssh_public_key = "~/.ssh/id_rsa.pub"
-      ssh_user = "cloud-user"
-      storage_count = "3"
-      storage_flavor = "general.v1.small"
-      storage_disk_size = 100
-      deploy_wazuh = false
-      infra_vm_flavor = "general.v1.small"
-      infra_vm_disk_size = 100
-      kayobe_config_branch = "stackhpc/yoga"
-      kayobe_version_branch = "stackhpc/yoga"
-      vxlan_vni = A randomly generated number between 1 and 100,000
-  vars_prompt:
-    - name: "use_defaults"
-      prompt: "Do you want to use these defaults? (y/n)"
-      default: "y"
-      private: no
+# - name: Use these defaults?
+#   when: tfvars == "n"
+#   debug:
+#     msg: |
+#       prefix = "manual_multinode"
+#       ansible_control_vm_flavor = "general.v1.small"
+#       ansible_control_vm_name = "ansible-control"
+#       ansible_control_disk_size = 100
+#       seed_vm_flavor = "general.v1.small"
+#       seed_disk_size = 100
+#       multinode_flavor = "general.v1.medium"
+#       multinode_image = "Rocky9-lvm"
+#       multinode_keypair = "MNKP-manual_multinode"
+#       multinode_vm_network = "stackhpc-ipv4-geneve"
+#       multinode_vm_subnet = "stackhpc-ipv4-geneve-subnet"
+#       compute_count = "2"
+#       controller_count = "3"
+#       compute_disk_size = 100
+#       controller_disk_size = 100
+#       ssh_public_key = "~/.ssh/id_rsa.pub"
+#       ssh_user = "cloud-user"
+#       storage_count = "3"
+#       storage_flavor = "general.v1.small"
+#       storage_disk_size = 100
+#       deploy_wazuh = false
+#       infra_vm_flavor = "general.v1.small"
+#       infra_vm_disk_size = 100
+#       kayobe_config_branch = "stackhpc/yoga"
+#       kayobe_version_branch = "stackhpc/yoga"
+#       vxlan_vni = A randomly generated number between 1 and 100,000
+#   vars_prompt:
+#     - name: "use_defaults"
+#       prompt: "Do you want to use these defaults? (y/n)"
+#       default: "y"
+#       private: no
 
-- name: Set default variables if tfvars == n and use_defaults == y.
-  when:
-    - tfvars == "n"
-    - use_defaults == "y"
-  copy:
-    content: |
-      prefix = "manual_multinode"
-      ansible_control_vm_flavor = "general.v1.small"
-      ansible_control_vm_name = "ansible-control"
-      ansible_control_disk_size = 100
-      seed_vm_flavor = "general.v1.small"
-      seed_disk_size = 100
-      multinode_flavor = "general.v1.medium"
-      multinode_image = "Rocky9-lvm"
-      multinode_keypair = "MNKP-manual_multinode"
-      multinode_vm_network = "stackhpc-ipv4-geneve"
-      multinode_vm_subnet = "stackhpc-ipv4-geneve-subnet"
-      compute_count = "2"
-      controller_count = "3"
-      compute_disk_size = 100
-      controller_disk_size = 100
-      ssh_public_key = "~/.ssh/id_rsa.pub"
-      ssh_user = "cloud-user"
-      storage_count = "3"
-      storage_flavor = "general.v1.small"
-      storage_disk_size = 100
-      deploy_wazuh = false
-      infra_vm_flavor = "general.v1.small"
-      infra_vm_disk_size = 100
-      kayobe_config_branch = "stackhpc/yoga"
-      kayobe_version_branch = "stackhpc/yoga"
-      vxlan_vni = "{{ lookup('pipe', 'shuf -i 1-100000 -n 1') }}"
-    dest: "{{ terraform_project_path }}/terraform.tfvars"
+# - name: Set default variables if tfvars == n and use_defaults == y.
+#   when:
+#     - tfvars == "n"
+#     - use_defaults == "y"
+#   copy:
+#     content: |
+#       prefix = "manual_multinode"
+#       ansible_control_vm_flavor = "general.v1.small"
+#       ansible_control_vm_name = "ansible-control"
+#       ansible_control_disk_size = 100
+#       seed_vm_flavor = "general.v1.small"
+#       seed_disk_size = 100
+#       multinode_flavor = "general.v1.medium"
+#       multinode_image = "Rocky9-lvm"
+#       multinode_keypair = "MNKP-manual_multinode"
+#       multinode_vm_network = "stackhpc-ipv4-geneve"
+#       multinode_vm_subnet = "stackhpc-ipv4-geneve-subnet"
+#       compute_count = "2"
+#       controller_count = "3"
+#       compute_disk_size = 100
+#       controller_disk_size = 100
+#       ssh_public_key = "~/.ssh/id_rsa.pub"
+#       ssh_user = "cloud-user"
+#       storage_count = "3"
+#       storage_flavor = "general.v1.small"
+#       storage_disk_size = 100
+#       deploy_wazuh = false
+#       infra_vm_flavor = "general.v1.small"
+#       infra_vm_disk_size = 100
+#       kayobe_config_branch = "stackhpc/yoga"
+#       kayobe_version_branch = "stackhpc/yoga"
+#       vxlan_vni = "{{ lookup('pipe', 'shuf -i 1-100000 -n 1') }}"
+#     dest: "{{ terraform_project_path }}/terraform.tfvars"
   
 
-- name: Ask for variable input if not providing 'tfvars'  
-  when: 
-    - tfvars == "n" 
-    - use_defaults == "n"
-  vars_prompt:
-    - name: "prefix"
-      prompt: "Enter the prefix (default: manual_multinode)"
-      default: "manual_multinode"
-      private: no
+# - name: Ask for variable input if not providing 'tfvars'  
+#   when: 
+#     - tfvars == "n" 
+#     - use_defaults == "n"
+#   vars_prompt:
+#     - name: "prefix"
+#       prompt: "Enter the prefix (default: manual_multinode)"
+#       default: "manual_multinode"
+#       private: no
 
-    - name: "ansible_control_vm_flavor"
-      prompt: "Enter the flavor for ansible control VM (default: general.v1.small)"
-      default: "general.v1.small"
-      private: no
+#     - name: "ansible_control_vm_flavor"
+#       prompt: "Enter the flavor for ansible control VM (default: general.v1.small)"
+#       default: "general.v1.small"
+#       private: no
 
-    - name: "ansible_control_vm_name"
-      prompt: "Enter the name for ansible control VM (default: ansible-control)"
-      default: "ansible-control"
-      private: no
+#     - name: "ansible_control_vm_name"
+#       prompt: "Enter the name for ansible control VM (default: ansible-control)"
+#       default: "ansible-control"
+#       private: no
 
-    - name: "ansible_control_disk_size"
-      prompt: "Enter the disk size (in Gb) for ansible control VM (default: 100)"
-      default: 100
-      private: no
+#     - name: "ansible_control_disk_size"
+#       prompt: "Enter the disk size (in Gb) for ansible control VM (default: 100)"
+#       default: 100
+#       private: no
 
-    - name: "seed_vm_flavor"
-      prompt: "Enter the flavor for seed VM (default: general.v1.small)"
-      default: "general.v1.small"
-      private: no
+#     - name: "seed_vm_flavor"
+#       prompt: "Enter the flavor for seed VM (default: general.v1.small)"
+#       default: "general.v1.small"
+#       private: no
 
-    - name: "seed_disk_size"
-      prompt: "Enter the disk size (in Gb) for seed VM (default: 100)"
-      default: 100
-      private: no
+#     - name: "seed_disk_size"
+#       prompt: "Enter the disk size (in Gb) for seed VM (default: 100)"
+#       default: 100
+#       private: no
 
-    - name: "multinode_flavor"
-      prompt: "Enter the flavor for multinode VMs (default: general.v1.medium)"
-      default: "general.v1.medium"
-      private: no
+#     - name: "multinode_flavor"
+#       prompt: "Enter the flavor for multinode VMs (default: general.v1.medium)"
+#       default: "general.v1.medium"
+#       private: no
 
-    - name: "multinode_image"
-      prompt: "Enter the image for multinode VMs (default: Rocky9-lvm)"
-      default: "Rocky9-lvm"
-      private: no
+#     - name: "multinode_image"
+#       prompt: "Enter the image for multinode VMs (default: Rocky9-lvm)"
+#       default: "Rocky9-lvm"
+#       private: no
 
-    - name: "multinode_keypair"
-      prompt: "Enter the keypair for multinode VMs (default: MNKP-{{ prefix }})"
-      default: "MNKP-{{ prefix }}"
-      private: no
+#     - name: "multinode_keypair"
+#       prompt: "Enter the keypair for multinode VMs (default: MNKP-{{ prefix }})"
+#       default: "MNKP-{{ prefix }}"
+#       private: no
 
-    - name: "multinode_vm_network"
-      prompt: "Enter the network for multinode VMs (default: stackhpc-ipv4-geneve)"
-      default: "stackhpc-ipv4-geneve"
-      private: no
+#     - name: "multinode_vm_network"
+#       prompt: "Enter the network for multinode VMs (default: stackhpc-ipv4-geneve)"
+#       default: "stackhpc-ipv4-geneve"
+#       private: no
 
-    - name: "multinode_vm_subnet"
-      prompt: "Enter the subnet for multinode VMs (default: stackhpc-ipv4-geneve-subnet)"
-      default: "stackhpc-ipv4-geneve-subnet"
-      private: no
+#     - name: "multinode_vm_subnet"
+#       prompt: "Enter the subnet for multinode VMs (default: stackhpc-ipv4-geneve-subnet)"
+#       default: "stackhpc-ipv4-geneve-subnet"
+#       private: no
 
-    - name: "compute_count"
-      prompt: "Enter the count for compute VMs (default: 2)"
-      default: "2"
-      private: no
+#     - name: "compute_count"
+#       prompt: "Enter the count for compute VMs (default: 2)"
+#       default: "2"
+#       private: no
 
-    - name: "controller_count"
-      prompt: "Enter the count for controller VMs (default: 3)"
-      default: "3"
-      private: no
+#     - name: "controller_count"
+#       prompt: "Enter the count for controller VMs (default: 3)"
+#       default: "3"
+#       private: no
 
-    - name: "compute_disk_size"
-      prompt: "Enter the disk size (in Gb) for compute VMs (default: 100)"
-      default: 100
-      private: no
+#     - name: "compute_disk_size"
+#       prompt: "Enter the disk size (in Gb) for compute VMs (default: 100)"
+#       default: 100
+#       private: no
 
-    - name: "controller_disk_size"
-      prompt: "Enter the disk size (in Gb) for controller VMs (default: 100)"
-      default: 100
-      private: no
+#     - name: "controller_disk_size"
+#       prompt: "Enter the disk size (in Gb) for controller VMs (default: 100)"
+#       default: 100
+#       private: no
 
-    - name: "ssh_public_key"
-      prompt: "Enter the path to the SSH key (default: ~/.ssh/id_rsa.pub)"
-      default: "~/.ssh/id_rsa.pub"
-      private: no
+#     - name: "ssh_public_key"
+#       prompt: "Enter the path to the SSH key (default: ~/.ssh/id_rsa.pub)"
+#       default: "~/.ssh/id_rsa.pub"
+#       private: no
 
-    - name: "ssh_user"
-      prompt: "Enter the SSH user (default: cloud-user)"
-      default: "cloud-user"
-      private: no
+#     - name: "ssh_user"
+#       prompt: "Enter the SSH user (default: cloud-user)"
+#       default: "cloud-user"
+#       private: no
 
-    - name: "storage_count"
-      prompt: "Enter the count for storage VMs (default: 3)"
-      default: "3"
-      private: no
+#     - name: "storage_count"
+#       prompt: "Enter the count for storage VMs (default: 3)"
+#       default: "3"
+#       private: no
 
-    - name: "storage_flavor"
-      prompt: "Enter the flavor for storage VMs (default: general.v1.small)"
-      default: "general.v1.small"
-      private: no
+#     - name: "storage_flavor"
+#       prompt: "Enter the flavor for storage VMs (default: general.v1.small)"
+#       default: "general.v1.small"
+#       private: no
 
-    - name: "storage_disk_size"
-      prompt: "Enter the disk size for storage VMs (default: 100)"
-      default: 100
-      private: no
+#     - name: "storage_disk_size"
+#       prompt: "Enter the disk size for storage VMs (default: 100)"
+#       default: 100
+#       private: no
 
-    - name: "deploy_wazuh"
-      prompt: "Deploy Wazuh? (true/false) (default: false)"
-      default: false
-      private: no
+#     - name: "deploy_wazuh"
+#       prompt: "Deploy Wazuh? (true/false) (default: false)"
+#       default: false
+#       private: no
 
-    - name: "infra_vm_flavor"
-      prompt: "Enter the flavor for infra VM (default: general.v1.small)"
-      default: "general.v1.small"
-      private: no
+#     - name: "infra_vm_flavor"
+#       prompt: "Enter the flavor for infra VM (default: general.v1.small)"
+#       default: "general.v1.small"
+#       private: no
 
-    - name: "infra_vm_disk_size"
-      prompt: "Enter the disk size for infra VM (default: 100)"
-      default: 100
-      private: no
+#     - name: "infra_vm_disk_size"
+#       prompt: "Enter the disk size for infra VM (default: 100)"
+#       default: 100
+#       private: no
 
-    - name: "kayobe_config_branch"
-      prompt: "Enter the Kayobe config branch (default: stackhpc/yoga)"
-      default: "stackhpc/yoga"
-      private: no
+#     - name: "kayobe_config_branch"
+#       prompt: "Enter the Kayobe config branch (default: stackhpc/yoga)"
+#       default: "stackhpc/yoga"
+#       private: no
 
-    - name: "kayobe_version_branch"
-      prompt: "Enter the Kayobe version branch (default: stackhpc/yoga)"
-      default: "stackhpc/yoga"
-      private: no
+#     - name: "kayobe_version_branch"
+#       prompt: "Enter the Kayobe version branch (default: stackhpc/yoga)"
+#       default: "stackhpc/yoga"
+#       private: no
 
-    - name: "vxlan_vni"
-      prompt: "Enter the VXLAN VNI (default: randomly generated whole integer between 1 and 100,000)"
-      default: "{{ lookup('pipe', 'shuf -i 1-100000 -n 1') }}"
-      private: no
-      validate: "^[1-9][0-9]{0,4}$"
-      invalid_msg: "Please enter a whole integer between 1 and 100,000."
+#     - name: "vxlan_vni"
+#       prompt: "Enter the VXLAN VNI (default: randomly generated whole integer between 1 and 100,000)"
+#       default: "{{ lookup('pipe', 'shuf -i 1-100000 -n 1') }}"
+#       private: no
+#       validate: "^[1-9][0-9]{0,4}$"
+#       invalid_msg: "Please enter a whole integer between 1 and 100,000."
 
-- name: Print out the variables into terraform.tfvars.  
-  when: 
-    - tfvars == "n" 
-    - use_defaults == "n"
-  copy:
-    content: |
-      prefix = "{{ prefix }}"
-      ansible_control_vm_flavor = "{{ ansible_control_vm_flavor }}"
-      ansible_control_vm_name = "{{ ansible_control_vm_name }}"
-      ansible_control_disk_size = {{ ansible_control_disk_size }}
-      seed_vm_flavor = "{{ seed_vm_flavor }}"
-      seed_disk_size = {{ seed_disk_size }}
-      multinode_flavor = "{{ multinode_flavor }}"
-      multinode_image = "{{ multinode_image }}"
-      multinode_keypair = "{{ multinode_keypair }}"
-      multinode_vm_network = "{{ multinode_vm_network }}"
-      multinode_vm_subnet = "{{ multinode_vm_subnet }}"
-      compute_count = "{{ compute_count }}"
-      controller_count = "{{ controller_count }}"
-      compute_disk_size = {{ compute_disk_size }}
-      controller_disk_size = {{ controller_disk_size }}
-      ssh_public_key = "{{ ssh_public_key }}"
-      ssh_user = "{{ ssh_user }}"
-      storage_count = "{{ storage_count }}"
-      storage_flavor = "{{ storage_flavor }}"
-      storage_disk_size = {{ storage_disk_size }}
-      deploy_wazuh = {{ deploy_wazuh }}
-      infra_vm_flavor = "{{ infra_vm_flavor }}"
-      infra_vm_disk_size = {{ infra_vm_disk_size }}
-      kayobe_config_branch = "{{ kayobe_config_branch }}"
-      kayobe_version_branch = "{{ kayobe_version_branch }}"
-      vxlan_vni = {{ vxlan_vni }}
-    dest: "{{ terraform_project_path }}/terraform.tfvars"
-    
+# - name: Print out the variables into terraform.tfvars.  
+#   when: 
+#     - tfvars == "n" 
+#     - use_defaults == "n"
+#   copy:
+#     content: |
+#       prefix = "{{ prefix }}"
+#       ansible_control_vm_flavor = "{{ ansible_control_vm_flavor }}"
+#       ansible_control_vm_name = "{{ ansible_control_vm_name }}"
+#       ansible_control_disk_size = {{ ansible_control_disk_size }}
+#       seed_vm_flavor = "{{ seed_vm_flavor }}"
+#       seed_disk_size = {{ seed_disk_size }}
+#       multinode_flavor = "{{ multinode_flavor }}"
+#       multinode_image = "{{ multinode_image }}"
+#       multinode_keypair = "{{ multinode_keypair }}"
+#       multinode_vm_network = "{{ multinode_vm_network }}"
+#       multinode_vm_subnet = "{{ multinode_vm_subnet }}"
+#       compute_count = "{{ compute_count }}"
+#       controller_count = "{{ controller_count }}"
+#       compute_disk_size = {{ compute_disk_size }}
+#       controller_disk_size = {{ controller_disk_size }}
+#       ssh_public_key = "{{ ssh_public_key }}"
+#       ssh_user = "{{ ssh_user }}"
+#       storage_count = "{{ storage_count }}"
+#       storage_flavor = "{{ storage_flavor }}"
+#       storage_disk_size = {{ storage_disk_size }}
+#       deploy_wazuh = {{ deploy_wazuh }}
+#       infra_vm_flavor = "{{ infra_vm_flavor }}"
+#       infra_vm_disk_size = {{ infra_vm_disk_size }}
+#       kayobe_config_branch = "{{ kayobe_config_branch }}"
+#       kayobe_version_branch = "{{ kayobe_version_branch }}"
+#       vxlan_vni = {{ vxlan_vni }}
+#     dest: "{{ terraform_project_path }}/terraform.tfvars"
+
 - name: Set their input variables to match the Azimuth's deployment variable names.
-  vars:
-    cluster_ssh_private_key_file: "{{ ssh_public_key | regex_replace('\\.pub$', '') }}"
-    cluster_user_ssh_public_key: "{{ lookup('file', ssh_public_key) }}"
-    ssh_public_key: "{{ cluster_user_ssh_public_key }}"
+  set_fact:
+    cluster_ssh_private_key_file: "{{ ssh_public_key_path | regex_replace('\\.pub$', '') }}"
+    cluster_user_ssh_public_key: "{{ lookup('file', ssh_public_key_path) }}"
+    openstack_deploy: true
+    terraform_variables:
+      ssh_public_key: "{{ lookup('file', ssh_public_key_path) }}"
 
 - name: Template Terraform userdata.cfg.tpl files into project template directory
   template:
     src: "{{ terraform_roles_path }}/manual_deploy/templates/userdata.cfg.tpl.j2"
     dest: "{{ terraform_project_path }}/templates/userdata.cfg.tpl"
 
-- name: Deploy OpenStack?
-  vars_prompt:
-    - name: "openstack_deploy"
-      prompt: "Do you want to deploy OpenStack? (y/n)"
-      default: "true"
-      private: no
-  register: openstack_deploy_input
+# - name: Deploy OpenStack?
+#   vars_prompt:
+#     - name: "openstack_deploy"
+#       prompt: "Do you want to deploy OpenStack? (y/n)"
+#       default: "true"
+#       private: no
+#   register: openstack_deploy_input
 
-- set_fact:
-    openstack_deploy: "{{ openstack_deploy_input.openstack_deploy | regex_replace('^(y|Y)$', 'true') | regex_replace('^(n|N)$', 'false') | bool }}"
+# - set_fact:
+#     openstack_deploy: "{{ openstack_deploy_input.openstack_deploy | regex_replace('^(y|Y)$', 'true') | regex_replace('^(n|N)$', 'false') | bool }}"

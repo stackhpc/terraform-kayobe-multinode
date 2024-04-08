@@ -5,6 +5,7 @@ provider "registry.terraform.io/ansible/ansible" {
   version     = "1.1.0"
   constraints = "1.1.0"
   hashes = [
+    "h1:7xrnVIriMIjo18EPNksMCRtERYj2dDae9Y3zVZRR6iM=",
     "h1:HCfdAL7ACDRWRc+vyRY9m9zagfm2V7oBe5g/LqBHKno=",
     "zh:183fe9fabb56454f776b6b433bbeba5dc5e91fbab0afd53c4ccf1f7c3afe02a5",
     "zh:1eda7c6051cd3d8e25865e3ec0d2923937d2c686db86e6e4c87d140a86a77a95",
@@ -27,6 +28,7 @@ provider "registry.terraform.io/ansible/ansible" {
 provider "registry.terraform.io/hashicorp/local" {
   version = "2.4.0"
   hashes = [
+    "h1:R97FTYETo88sT2VHfMgkPU3lzCsZLunPftjSI5vfKe8=",
     "h1:ZUEYUmm2t4vxwzxy1BvN1wL6SDWrDxfH7pxtzX8c6d0=",
     "zh:53604cd29cb92538668fe09565c739358dc53ca56f9f11312b9d7de81e48fab9",
     "zh:66a46e9c508716a1c98efbf793092f03d50049fa4a83cd6b2251e9a06aca2acf",

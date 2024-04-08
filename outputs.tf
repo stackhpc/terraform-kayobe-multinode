@@ -1,5 +1,5 @@
 output "ansible_control_access_ip_v4" {
-  value = openstack_compute_instance_v2.ansible_control.access_ip_v4
+  value = var.add_ansible_control_fip ? openstack_networking_floatingip_v2.ansible_control_fip[0].address : openstack_compute_instance_v2.ansible_control.access_ip_v4
 }
 
 output "seed_access_ip_v4" {
@@ -76,7 +76,7 @@ resource "local_file" "deploy_openstack" {
 }
 
 resource "ansible_host" "control_host" {
-  name   = openstack_compute_instance_v2.ansible_control.access_ip_v4
+  name   = var.add_ansible_control_fip ? openstack_networking_floatingip_v2.ansible_control_fip[0].address : openstack_compute_instance_v2.ansible_control.access_ip_v4
   groups = ["ansible_control"]
   variables = {
     ansible_user = var.ssh_user

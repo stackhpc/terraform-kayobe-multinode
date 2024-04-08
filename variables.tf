@@ -102,3 +102,15 @@ variable "deploy_wazuh" {
   type = bool
   default = false
 }
+
+variable "add_ansible_control_fip" {
+  description = "Bool, whether to add a floating IP address to the Ansible control host."
+  type = bool
+  default = false
+}
+
+variable "ansible_control_fip_pool" {
+  description = "Pool/network from which to allocate a floating IP for the Ansible control host."
+  type = string
+  default = ""
+}

@@ -129,6 +129,8 @@ Generate Terraform variables:
    infra_vm_flavor    = "general.v1.small"
    infra_vm_disk_size = 100
 
+   add_ansible_control_fip = false
+   ansible_control_fip_pool = ""
    EOF
 
 You will need to set the `multinode_keypair`, `prefix`, and `ssh_public_key`.
@@ -146,6 +148,12 @@ device being allocated. When any baremetal hosts are deployed, the
 If `deploy_wazuh` is set to true, an infrastructure VM will be created that
 hosts the Wazuh manager. The Wazuh deployment playbooks will also be triggered
 automatically to deploy Wazuh agents to the overcloud hosts.
+
+If `add_ansible_control_fip` is set to `true`, a floating IP will be created
+and attached to the Ansible control host. In that case
+`ansible_control_fip_pool` should be set to the name of the pool (network) from
+which to allocate the floating IP, and the floating IP will be used for SSH
+access to the control host.
 
 Generate a plan:
 

@@ -248,6 +248,8 @@ This script will go through the process of performing the following tasks
    * openstack configuration
    * tempest testing
 
+Tempest test results are written to ~/tempest-artifacts.
+
 Accessing OpenStack
 -------------------
 

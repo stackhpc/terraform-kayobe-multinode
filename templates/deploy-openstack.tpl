@@ -139,7 +139,7 @@ export KAYOBE_AUTOMATION_SSH_PRIVATE_KEY=$(cat ~/.ssh/id_rsa)
 set -x
 
 # Run tempest
-sudo -E docker run --detach --rm --network host -v $${config_directories[kayobe]}:/stack/kayobe-automation-env/src/kayobe-config -v $${config_directories[kayobe]}/tempest-artifacts:/stack/tempest-artifacts -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY kayobe:latest /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/tempest.sh -e ansible_user=stack
+sudo -E docker run --detach --rm --network host -v $${config_directories[kayobe]}:/stack/kayobe-automation-env/src/kayobe-config -v ~/tempest-artifacts:/stack/tempest-artifacts -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY kayobe:latest /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/tempest.sh -e ansible_user=stack
 
 # During the initial deployment the seed node must receive the `gwee/rally` image before we can follow the logs.
 # Therefore, we must wait a reasonable amount time before attempting to do so.

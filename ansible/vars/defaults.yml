@@ -22,8 +22,10 @@ vxlan_vni:
 
 root_domain: sms-lab.cloud
 
+vg_name: rootvg
+
 lvm_groups:
-  - vgname: rootvg
+  - vgname: "{{ vg_name }}"
     disks:
       - /dev/vda3
     create: true

@@ -206,10 +206,8 @@ Finally, run the configure-hosts playbook.
 
    ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml
 
-This playbook sequentially executes 4 other playbooks:
+This playbook sequentially executes 2 other playbooks:
 
-#. ``fix-homedir-ownership.yml`` - Ensures the ``ansible_user`` owns their home directory. Tag: ``fix-homedir``
-#. ``add-fqdn.yml`` - Ensures FQDNs are added to ``/etc/hosts``. Tag: ``fqdn``
 #. ``grow-control-host.yml`` - Applies LVM configuration to the control host to ensure it has enough space to continue with the rest of the deployment. Tag: ``lvm`` 
 #. ``deploy-openstack-config.yml`` - Deploys the OpenStack configuration to the control host. Tag: ``deploy``
 
@@ -217,7 +215,7 @@ These playbooks are tagged so that they can be invoked or skipped as required. F
 
 .. code-block:: console
 
-   ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml --skip-tags fqdn
+   ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml --skip-tags lvm
 
 Deploy OpenStack
 ----------------

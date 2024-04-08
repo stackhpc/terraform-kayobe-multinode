@@ -1,8 +1,4 @@
 ---
-- import_playbook: fix-homedir-ownership.yml
-  tags: fix-homedir
-- import_playbook: add-fqdn.yml
-  tags: fqdn
 - import_playbook: grow-control-host.yml
   tags: lvm
 - import_playbook: deploy-openstack-config.yml

@@ -20,7 +20,7 @@ ssh_key_path:
 
 vxlan_vni:
 
-root_domain: sms-lab.cloud
+root_domain: stackhpc.com
 
 vg_name: rootvg
 

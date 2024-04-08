@@ -145,4 +145,4 @@ sudo -E docker run --detach --rm --network host -v $${config_directories[kayobe]
 # Therefore, we must wait a reasonable amount time before attempting to do so.
 sleep 360
 
-ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } 'sudo docker logs --follow $(sudo docker ps -q | head -n 1)'
+ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } 'sudo docker logs --follow tempest'

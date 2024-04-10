@@ -24,6 +24,8 @@ declare -A config_directories=(
 )
 
 tempest_dir="$HOME/tempest-artifacts"
+lock_path=/tmp/deploy-openstack.lock
+rc_path=/tmp/deploy-openstack.rc
 
 function activate_virt_env () {
   set +u
@@ -36,6 +38,18 @@ function activate_kayobe_env () {
   source $${config_directories[kayobe]}/kayobe-env --environment ci-multinode
   set -u
 }
+
+# Use a "lock" directory to ensure that only one instance of this script can run concurrently.
+if mkdir "$lock_path"; then
+  trap "rmdir $lock_path" EXIT
+else
+  echo "Refusing to deploy because a deployment is currently in progress."
+  echo "If you are sure this is not the case, remove the $lock_path directory and run this script again."
+  exit 1
+fi
+
+# Write an exit code to a file to allow Ansible to report the result.
+echo 1 >$rc_path
 
 activate_virt_env "kayobe"
 activate_kayobe_env
@@ -174,3 +188,6 @@ if [[ $(wc -l < $tempest_dir/failed-tests) -ne 0 ]]; then
 fi
 
 echo "Tempest testing successful"
+
+# Report success.
+echo 0 >$rc_path

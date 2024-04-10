@@ -189,8 +189,45 @@ Make sure to define `ssh_key_path` to point to the location of the SSH key in us
 VNI should be much smaller than the officially supported limit of 16,777,215 as we encounter errors when attempting to bring interfaces up that use a high VNI.
 You must set `vault_password_path`; this should be set to the path to a file containing the Ansible vault password.
 
-Deployment
-==========
+Deployment: The fast(er) way
+============================
+
+The `scripts/deploy.sh` script provides a fully automated deployment method
+that can be used to perform all steps from infrastructure deployment through to
+Tempest testing without user interaction. Any errors encountered will be
+reported and halt the deployment.
+
+This script makes use of the `ansible/deploy-openstack.yml` Ansible playbook
+that runs the `deploy-openstack.sh` script in a `tmux` session on the Ansible
+control host. The session is logged to `~/tmux.kayobe\:0.log` on the Ansible
+control host. Use `less -r ~/tmux.kayobe\:0.log` to view the logs in their
+original colourful glory.
+
+Note that this approach requires all Terraform, Ansible, Kayobe and OpenStack
+configuration to be provided in advance. For Kayobe and OpenStack
+configuration, this may be achieved by providing suitable branches for the
+kayobe-config and openstack-config repositories and referencing them in
+`ansible/vars/defaults.yml`.
+
+To tear down the cluster immediately after a successful deployment, combine
+with the `scripts/tear-down.sh` script.
+
+.. code-block:: console
+
+   ./scripts/deploy.sh && ./scripts/tear-down.sh -a -k
+
+Note that this will not tear down the cluster if deployment fails, allowing for
+debugging the issue and/or retrying.
+
+Deployment: The slow(er) way
+============================
+
+This section describes a more hands-on, interactive deployment method. It may
+be useful to gain a better understanding of how the deployment works, modify
+the deployment process in some way, or iterate on configuration.
+
+Terraform Deploy infrastructure using Terraform
+-----------------------------------------------
 
 Generate a plan:
 
@@ -207,7 +244,7 @@ Apply the changes:
 You should have requested a number of resources to be spawned on Openstack.
 
 Configure Ansible control host
-==============================
+------------------------------
 
 Run the configure-hosts.yml playbook to configure the Ansible control host.
 
@@ -223,7 +260,7 @@ This playbook sequentially executes 2 other playbooks:
 These playbooks are tagged so that they can be invoked or skipped using `tags` or `--skip-tags` as required.
 
 Deploy OpenStack
-================
+----------------
 
 Once the Ansible control host has been configured with a Kayobe/OpenStack configuration you can then begin the process of deploying OpenStack.
 This can be achieved by either manually running the various commands to configure the hosts and deploy the services or automated by using the generated `deploy-openstack.sh` script.

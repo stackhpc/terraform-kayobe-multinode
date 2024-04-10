@@ -91,6 +91,12 @@ kayobe overcloud service deploy --skip-tags os_capacity -kt haproxy
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-overcloud.yml
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/overcloud-vault-keys.json
 
+# Generate external tls certificates
+if [[ -f $KAYOBE_CONFIG_PATH/ansible/vault-generate-test-external-tls.yml ]]; then
+  kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-generate-test-external-tls.yml
+  ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy.pem
+fi
+
 # Generate internal tls certificates
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-generate-internal-tls.yml
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy-internal.pem
@@ -102,6 +108,7 @@ ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH
 %{ endfor ~}
 
 # Set config to use tls
+sed -i 's/# kolla_enable_tls_external: true/kolla_enable_tls_external: true/g' $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla.yml
 sed -i 's/# kolla_enable_tls_internal: true/kolla_enable_tls_internal: true/g' $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla.yml
 cat $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals.yml
 
@@ -132,6 +139,11 @@ activate_kayobe_env
 set +x
 source $${KOLLA_CONFIG_PATH}/public-openrc.sh
 set -x
+
+# Add the Vault CA to the trust store on the seed.
+scp -oStrictHostKeyChecking=no $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/ca/vault.crt ${ ssh_user }@${ seed_addr }:
+ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } sudo cp vault.crt /etc/pki/ca-trust/source/anchors/OS-TLS-ROOT.crt
+ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } sudo update-ca-trust
 
 ~/src/openstack-config/tools/openstack-config -- -e ansible_user=${ ssh_user }
 

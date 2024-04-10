@@ -18,6 +18,8 @@ vault_password_path: "~/vault.password"
 
 ssh_key_path:
 
+ansible_ssh_private_key_file: "{{ ssh_key_path }}"
+
 vxlan_vni:
 
 root_domain: stackhpc.com

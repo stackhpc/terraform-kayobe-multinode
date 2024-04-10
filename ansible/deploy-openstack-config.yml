@@ -11,10 +11,30 @@
           - ssh_key_path != None
         fail_msg: "Please provide a path to the SSH key used within the multinode environment."
 
+    - name: Verify ssh key exists
+      ansible.builtin.assert:
+        that:
+          - ssh_key_path | expanduser is exists
+        fail_msg: "Could not find SSH key at {{ ssh_key_path | expanduser }}"
+
+    - name: Verify vault password path has been set
+      ansible.builtin.assert:
+        that:
+          - vault_password_path != None
+        fail_msg: "Please provide a path to the vault password used within the multinode environment."
+
+    - name: Verify vault password exists
+      ansible.builtin.assert:
+        that:
+          - vault_password_path | expanduser is exists
+        fail_msg: "Could not find vault password at {{ vault_password_path | expanduser }}"
+
     - name: Verify VXLAN VNI has been set
       ansible.builtin.assert:
         that:
           - vxlan_vni != None
+          - vxlan_vni | int > 0
+          - vxlan_vni | int <= 100000
         fail_msg: "Please provide a VXLAN VNI. A unique value from 1 to 100,000."
 
     - name: Gather facts about the host

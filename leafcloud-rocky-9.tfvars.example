@@ -1,9 +1,9 @@
 # Example tfvars file for running on Leafcloud in the stackhpc-dev project.
-# - Items marked as "changeme" must be changed
+# - Items commented out must be uncommented and changed
 # - Rocky Linux 9 image for Yoga (note that images need to be shared with the stackhpc-dev project)
 # - Ansible control host uses a floating IP
 
-prefix = "changeme"
+#prefix = "changeme"
 
 ansible_control_vm_flavor = "en1.xsmall"
 ansible_control_vm_name   = "ansible-control"
@@ -14,7 +14,7 @@ seed_disk_size = 100
 
 multinode_flavor     = "en1.large"
 multinode_image      = "overcloud-rocky-9-yoga-20240124T094316"
-multinode_keypair    = "changeme"
+#multinode_keypair    = "changeme"
 multinode_vm_network = "stackhpc-dev"
 multinode_vm_subnet  = "stackhpc-dev"
 compute_count    = "2"
@@ -22,7 +22,7 @@ controller_count = "3"
 compute_disk_size = 100
 controller_disk_size = 100
 
-ssh_public_key = "changeme"
+#ssh_public_key = "changeme"
 ssh_user       = "cloud-user"
 
 storage_count  = "3"

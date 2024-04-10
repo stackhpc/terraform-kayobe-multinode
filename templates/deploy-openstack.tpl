@@ -128,7 +128,7 @@ kayobe overcloud service deploy
 %{ if deploy_wazuh }
 # Deploy Wazuh
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/wazuh-secrets.yml
-ansible-vault encrypt --vault-password-file ~/vault.password  $KAYOBE_CONFIG_PATH/environments/ci-multinode/wazuh-secrets.yml
+ansible-vault encrypt --vault-password-file ~/vault.password  $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/wazuh-secrets.yml
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/wazuh-manager.yml
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/wazuh-agent.yml
 %{ endif }

@@ -145,7 +145,7 @@ scp -oStrictHostKeyChecking=no $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONM
 ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } sudo cp vault.crt /etc/pki/ca-trust/source/anchors/OS-TLS-ROOT.crt
 ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } sudo update-ca-trust
 
-~/src/openstack-config/tools/openstack-config -- -e ansible_user=${ ssh_user }
+~/src/openstack-config/tools/openstack-config
 
 git -C $${config_directories[kayobe]} submodule init
 git -C $${config_directories[kayobe]} submodule update

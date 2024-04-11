@@ -237,14 +237,13 @@ This script will go through the process of performing the following tasks:
    * openstack configuration
    * tempest testing
 
-Tempest test results will be written to ~/tempest-artifacts.
+Tempest test results will be written to `~/tempest-artifacts`.
 
-If you choose to opt for automated method you must first SSH into your Ansible control host.
+If you choose to opt for the automated method you must first SSH into your Ansible control host.
 
 .. code-block:: console
 
    ssh $(terraform output -raw ssh_user)@$(terraform output -raw ansible_control_access_ip_v4)
-   ~/deploy-openstack.sh
 
 Start a `tmux` session to avoid halting the deployment if you are disconnected.
 

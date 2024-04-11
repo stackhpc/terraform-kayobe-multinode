@@ -6,6 +6,17 @@ kayobe_config_version: stackhpc/yoga
 kayobe_config_name: kayobe-config
 kayobe_config_environment: ci-multinode
 
+# Custom Kayobe configuration.
+# Can be used to modify a vanilla configuration to avoid creating a branch.
+# Paths are relative to ci-multinode environment.
+# Blocks are applied using the ansible.builtin.blockinfile module.
+# Example:
+# kayobe_config_custom:
+#   - path: time.yml
+#     block: |
+#       timezone: Europe/London
+kayobe_config_custom: []
+
 kayobe_repo: https://github.com/stackhpc/kayobe.git
 kayobe_version: stackhpc/yoga
 kayobe_name: kayobe

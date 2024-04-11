@@ -1,0 +1,86 @@
+---
+- name: Deploy OpenStack
+  hosts: ansible_control
+  gather_facts: false
+  vars:
+    # 6 hours should be enough...
+    deployment_timeout_s: "{{ 6 * 60 * 60 }}"
+    lock_path: /tmp/deploy-openstack.lock
+    rc_path: /tmp/deploy-openstack.rc
+    tmux_session: kayobe
+    tmux_log_path: "~/tmux.{{ tmux_session }}:0.log"
+    connection_info: |
+      # SSH to Ansible control host
+      ssh {{ ansible_user }}@{{ ansible_host }}
+      # Either: Attach to the tmux session
+      tmux -t {{ tmux_session }} attach
+      # Or: Follow the log file
+      less -r {{ tmux_log_path }}
+  vars_files:
+    - vars/defaults.yml
+  tasks:
+    - name: Check if tmux session exists
+      command: tmux has-session -t {{ tmux_session }}
+      failed_when: false
+      register: session_check
+
+    - name: Create a new tmux window and log to a file
+      command: >-
+        tmux new -d -s {{ tmux_session }}\;
+        pipe-pane -t {{ tmux_session }} -o 'cat >> ~/tmux.#S:#P.log'
+      when: session_check.rc != 0
+
+    # deploy-openstack.sh uses a "lock" directory to ensure that only one
+    # instance can run concurrently.
+    - name: Check that no deployment is in progress
+      stat:
+        path: "{{ lock_path }}"
+      register: lock_stat
+
+    - name: Fail if a deployment is in progress
+      fail:
+        msg: |
+          Refusing to deploy because a deployment is currently in progress.
+          If you are sure this is not the case, remove the {{ lock_path }}
+          directory and run this playbook again.
+      when: lock_stat.stat.exists
+
+    - name: Run deploy-openstack.sh in tmux window
+      command: >-
+        tmux send -t {{ tmux_session }}.0 './deploy-openstack.sh' ENTER
+
+    - name: Show how to follow deployment progress
+      debug:
+        msg: |
+          Deployment of OpenStack has started.
+          To follow progress:
+
+          {{ connection_info }}
+
+    - name: Wait for deploy-openstack.sh to start
+      pause:
+        seconds: 30
+
+    - name: Wait for deployment to complete
+      stat:
+        path: "{{ lock_path }}"
+      register: lock_stat
+      until: not lock_stat.stat.exists
+      retries: "{{ (deployment_timeout_s | int / 10) | int }}"
+      delay: 10
+      failed_when: false
+
+    # deploy-openstack.sh writes an exit code to a file. 0 is success
+    - name: Check deployment result
+      slurp:
+        path: "{{ rc_path }}"
+      register: rc_slurp
+
+    - name: Fail if deployment was unsuccessful
+      fail:
+        msg: |
+          Deployment or testing of OpenStack was unsuccessful.
+          To see results:
+
+          {{ connection_info }}
+      when: rc_slurp.content | b64decode != "0"

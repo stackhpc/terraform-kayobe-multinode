@@ -138,7 +138,7 @@ Install the Ansible galaxy requirements.
 
 If the deployed instances are behind an SSH bastion you must ensure that your SSH config is setup appropriately with a proxy jump.
 
-.. code-block:: console
+.. code-block::
 
    Host lab-bastion
       HostName BastionIPAddr

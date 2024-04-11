@@ -156,7 +156,8 @@ Configure Terraform variables
 =============================
 
 Populate Terraform variables in `terraform.tfvars`. Examples are provided in
-files named `*.tfvars.example`.
+files named `*.tfvars.example`. The available variables are defined in
+`variables.tf` along with their type, description, and optional default.
 
 You will need to set the `multinode_keypair`, `prefix`, and `ssh_public_key`.
 By default, Rocky Linux 9 will be used but Ubuntu Jammy is also supported by

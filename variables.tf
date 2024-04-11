@@ -1,64 +1,80 @@
 variable "storage_count" {
+  description = "Number of storage hosts"
   type = string
 }
 
 variable "ssh_public_key" {
+  description = "Path to an SSH public key to register as a keypair in OpenStack"
   type = string
 }
 
 variable "ssh_user" {
+  description = "Username to use for SSH access to host"
   type = string
 }
 
 variable "ansible_control_vm_name" {
+  description = "Name of the Ansible control host"
   type = string
 }
 
 variable "seed_vm_flavor" {
+  description = "OpenStack flavor to use for the seed VM"
   type = string
 }
 
 variable "prefix" {
+  description = "A prefix to apply the name of all hosts"
   type    = string
 }
 
 variable "compute_count" {
+  description = "Number of compute hosts"
   type = string
 }
 
 variable "controller_count" {
+  description = "Number of controller hosts"
   type = string
 }
 
 variable "multinode_image" {
+  description = "Name of an image registered in Glance with which to deploy hosts"
   type = string
 }
 
 variable "multinode_keypair" {
+  description = "Name of an SSH keypair to register in OpenStack"
   type = string
 }
 
 variable "ansible_control_vm_flavor" {
+  description = "OpenStack flavor to use for the Ansible control host"
   type = string
 }
 
 variable "multinode_flavor" {
+  description = "OpenStack flavor to use for the controller and compute hosts"
   type = string
 }
 
 variable "storage_flavor" {
+  description = "OpenStack flavor to use for the storage hosts"
   type = string
 }
 
 variable "infra_vm_flavor" {
+  description = "OpenStack flavor to use for the Wazuh VM"
   type = string
 }
 
 variable "multinode_vm_network" {
+  description = "OpenStack network to attach hosts to"
   type = string
 }
 
 variable "multinode_vm_subnet" {
+  description = "OpenStack subnet to attach hosts to"
   type = string
 }
 

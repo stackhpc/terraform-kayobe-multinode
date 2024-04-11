@@ -1,4 +1,5 @@
 # Example tfvars file for running on Leafcloud in the stackhpc-dev project.
+# - See variables.tf for variable descriptions
 # - Items commented out must be uncommented and changed
 # - Rocky Linux 9 image for Yoga (note that images need to be shared with the stackhpc-dev project)
 # - Ansible control host uses a floating IP

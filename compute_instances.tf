@@ -1,3 +1,22 @@
+data "openstack_networking_network_v2" "multinode_network" {
+  name = var.multinode_vm_network
+}
+
+resource "openstack_networking_port_v2" "ansible_control_port" {
+  network_id = data.openstack_networking_network_v2.multinode_network.id
+}
+
+resource "openstack_networking_floatingip_v2" "ansible_control_fip" {
+  count = var.add_ansible_control_fip ? 1 : 0
+  pool = var.ansible_control_fip_pool
+}
+
+resource "openstack_networking_floatingip_associate_v2" "ansible_control_fip_association" {
+  count = var.add_ansible_control_fip ? 1 : 0
+  floating_ip = resource.openstack_networking_floatingip_v2.ansible_control_fip.0.address
+  port_id = resource.openstack_networking_port_v2.ansible_control_port.id
+}
+
 resource "openstack_compute_instance_v2" "ansible_control" {
   name         = format("%s-%s", var.prefix, var.ansible_control_vm_name)
   flavor_name  = var.ansible_control_vm_flavor
@@ -5,7 +24,7 @@ resource "openstack_compute_instance_v2" "ansible_control" {
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
   network {
-    name = var.multinode_vm_network
+    port = resource.openstack_networking_port_v2.ansible_control_port.id
   }
 
   dynamic "block_device" {

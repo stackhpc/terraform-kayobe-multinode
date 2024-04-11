@@ -23,6 +23,8 @@ declare -A config_directories=(
   ["openstack"]="$HOME/src/openstack-config"
 )
 
+tempest_dir="$HOME/tempest-artifacts"
+
 function activate_virt_env () {
   set +u
   source $${virtual_environments[$1]}
@@ -68,7 +70,8 @@ ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/seed-vault-keys.json
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/*.key
 
-kayobe overcloud service deploy -kt haproxy
+# Skip os_capacity deployment since it requires admin-openrc.sh which doesn't exist yet.
+kayobe overcloud service deploy --skip-tags os_capacity -kt haproxy
 
 # Deploy hashicorp vault to the controllers
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-overcloud.yml
@@ -138,11 +141,36 @@ set +x
 export KAYOBE_AUTOMATION_SSH_PRIVATE_KEY=$(cat ~/.ssh/id_rsa)
 set -x
 
+if [[ -d $tempest_dir ]]; then
+  tempest_backup=$${tempest_dir}.$(date --iso-8601=minutes)
+  echo "Found previous Tempest test results"
+  echo "Moving to $tempest_backup"
+  mv $tempest_dir $tempest_backup
+fi
+
 # Run tempest
-sudo -E docker run --detach --rm --network host -v $${config_directories[kayobe]}:/stack/kayobe-automation-env/src/kayobe-config -v $${config_directories[kayobe]}/tempest-artifacts:/stack/tempest-artifacts -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY kayobe:latest /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/tempest.sh -e ansible_user=stack
+sudo -E docker run --name kayobe_tempest --detach --rm --network host -v $${config_directories[kayobe]}:/stack/kayobe-automation-env/src/kayobe-config -v $tempest_dir:/stack/tempest-artifacts -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY kayobe:latest /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/tempest.sh -e ansible_user=stack
 
 # During the initial deployment the seed node must receive the `gwee/rally` image before we can follow the logs.
 # Therefore, we must wait a reasonable amount time before attempting to do so.
 sleep 360
 
-ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } 'sudo docker logs --follow $(sudo docker ps -q | head -n 1)'
+if ! ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } 'sudo docker logs --follow tempest'; then
+  echo "Failed to follow Tempest container logs after waiting 360 seconds"
+  echo "Ignoring - this may or may not indicate an error"
+fi
+
+# Wait for Kayobe Tempest pipeline to complete to ensure artifacts exist.
+sudo docker container wait kayobe_tempest
+
+if [[ ! -f $tempest_dir/failed-tests ]]; then
+  echo "Unable to find Tempest test results in $tempest_dir/failed-tests"
+  exit 1
+fi
+
+if [[ $(wc -l < $tempest_dir/failed-tests) -ne 0 ]]; then
+  echo "Some Tempest tests failed"
+  exit 1
+fi
+
+echo "Tempest testing successful"

@@ -1,0 +1,38 @@
+# Example tfvars file for running on Leafcloud in the stackhpc-dev project.
+# - See variables.tf for variable descriptions
+# - Items commented out must be uncommented and changed
+# - Rocky Linux 9 image for Yoga (note that images need to be shared with the stackhpc-dev project)
+# - Ansible control host uses a floating IP
+
+#prefix = "changeme"
+
+ansible_control_vm_flavor = "en1.xsmall"
+ansible_control_vm_name   = "ansible-control"
+ansible_control_disk_size = 100
+
+seed_vm_flavor = "en1.xsmall"
+seed_disk_size = 100
+
+multinode_flavor     = "en1.large"
+multinode_image      = "overcloud-rocky-9-yoga-20240124T094316"
+#multinode_keypair    = "changeme"
+multinode_vm_network = "stackhpc-dev"
+multinode_vm_subnet  = "stackhpc-dev"
+compute_count    = "2"
+controller_count = "3"
+compute_disk_size = 100
+controller_disk_size = 100
+
+#ssh_public_key = "changeme"
+ssh_user       = "cloud-user"
+
+storage_count  = "3"
+storage_flavor = "en1.medium"
+storage_disk_size = 100
+
+deploy_wazuh = false
+infra_vm_flavor = "en1.xsmall"
+infra_vm_disk_size = 100
+
+add_ansible_control_fip = true
+ansible_control_fip_pool = "external"

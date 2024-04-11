@@ -1,8 +1,79 @@
 ---
 - name: Grow Control Host
   hosts: ansible_control
-  gather_facts: true
+  gather_facts: false
   vars_files:
     - vars/defaults.yml
-  roles:
-    - { name: mrlesmithjr.manage_lvm, become: true }
+  tasks:
+    - name: Ensure hosts are reachable
+      ansible.builtin.wait_for_connection:
+
+    - name: Gather facts
+      setup:
+
+    - name: Check LVM status
+      shell:
+        cmd: vgdisplay | grep -q lvm2
+      changed_when: false
+      failed_when: false
+      check_mode: false
+      register: lvm_check
+      become: true
+
+    - block:
+        - name: Check if growpart is installed
+          shell:
+            cmd: type growpart
+          changed_when: false
+          failed_when: false
+          check_mode: false
+          register: growpart_check
+          become: true
+
+        - name: Ensure growpart is installed
+          package:
+            name: "{% if ansible_facts.os_family == 'RedHat' %}cloud-utils-growpart{% else %}cloud-guest-utils{% endif %}"
+            state: present
+          become: true
+          when: growpart_check.rc !=0
+
+        - name: Get root PV device
+          command: "pvs --select vg_name={{ vg_name }} --reportformat json"
+          register: pvs
+          become: true
+          changed_when: false
+          check_mode: false
+
+        - name: Fail if root PV device not found
+          fail:
+            msg: >
+              Expected LVM physical volume devices not found in volume group {{ vg_name }}
+          when: (pvs.stdout | from_json).report[0].pv | length == 0
+
+        - name: Grow partition
+          command: "growpart {{ disk }} {{ part_num }}"
+          vars:
+            pv: "{{ pvs.stdout | from_json }}"
+            disk_tmp: "{{ pv.report[0].pv[0].pv_name[:-1] }}"
+            disk: "{{ disk_tmp[:-1] if disk_tmp[-1] == 'p' and disk_tmp[:9] == '/dev/nvme' else disk_tmp }}"
+            part_num: "{{ pv.report[0].pv[0].pv_name[-1] }}"
+          become: true
+          failed_when: "growpart.rc != 0 and 'NOCHANGE' not in growpart.stdout"
+          changed_when: "'NOCHANGE' not in growpart.stdout"
+          register: growpart
+
+        - name: Grow LVM PV
+          command: "pvresize {{ disk }}"
+          vars:
+            pv: "{{ pvs.stdout | from_json }}"
+            disk: "{{ pv.report[0].pv[0].pv_name }}"
+          become: true
+      when: lvm_check.rc == 0 or growroot_ignore_lvm_check
+#      when: "'NOCHANGE' not in growpart.stdout"
+# Commenting out the conditional because growpart is already triggered by cloud-init - hence it emits NOCHANGE
+# Cloud-Inits growpart implementation has a bug https://bugzilla.redhat.com/show_bug.cgi?id=2122575
+# PVresize is not being triggered
+
+    - import_role:
+        name: mrlesmithjr.manage_lvm
+      become: true

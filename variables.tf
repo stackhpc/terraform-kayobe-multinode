@@ -20,7 +20,6 @@ variable "seed_vm_flavor" {
 
 variable "prefix" {
   type    = string
-  default = "kayobe-mn"
 }
 
 variable "compute_count" {

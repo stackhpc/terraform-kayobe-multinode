@@ -120,6 +120,14 @@
         line: "vxlan_vni: {{ vxlan_vni }}"
         mode: "0644"
 
+    - name: Ensure custom Kayobe configuration is applied
+      ansible.builtin.blockinfile:
+        path: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/{{ item.path }}"
+        block: "{{ item.block }}"
+        mode: "0644"
+        create: true
+      loop: "{{ kayobe_config_custom }}"
+
     - name: Ensure Kayobe repository is present
       ansible.builtin.git:
         repo: "{{ kayobe_repo }}"

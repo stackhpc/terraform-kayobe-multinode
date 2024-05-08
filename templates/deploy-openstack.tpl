@@ -142,8 +142,13 @@ set -x
 
 # Add the Vault CA to the trust store on the seed.
 scp -oStrictHostKeyChecking=no $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/ca/vault.crt ${ ssh_user }@${ seed_addr }:
-ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } sudo cp vault.crt /etc/pki/ca-trust/source/anchors/OS-TLS-ROOT.crt
-ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } sudo update-ca-trust
+if [[ $(grep '^ID=' /etc/os-release | cut -d= -f2) == "ubuntu" ]]; then
+  ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } sudo cp vault.crt /usr/local/share/ca-certificates/OS-TLS-ROOT.crt
+  ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } sudo update-ca-certificates
+else
+  ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } sudo cp vault.crt /etc/pki/ca-trust/source/anchors/OS-TLS-ROOT.crt
+  ssh -oStrictHostKeyChecking=no ${ ssh_user }@${ seed_addr } sudo update-ca-trust
+fi
 
 ~/src/openstack-config/tools/openstack-config
 

@@ -24,6 +24,7 @@ declare -A config_directories=(
 )
 
 tempest_dir="$HOME/tempest-artifacts"
+sot_results_dir="$HOME/sot-results"
 lock_path=/tmp/deploy-openstack.lock
 rc_path=/tmp/deploy-openstack.rc
 
@@ -194,17 +195,42 @@ fi
 # Wait for Kayobe Tempest pipeline to complete to ensure artifacts exist.
 sudo docker container wait kayobe_tempest
 
+activate_virt_env "kayobe"
+activate_kayobe_env
+
+if [[ -d $sot_results_dir ]]; then
+  sot_results_backup=$${sot_results_dir}.$(date --iso-8601=minutes)
+  echo "Found previous StackHPC OpenStack test results"
+  echo "Moving to $sot_results_backup"
+  mv $sot_results_dir $sot_results_backup
+fi
+
+# Run StackHPC OpenStack tests
+kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/stackhpc-openstack-tests.yml
+
+rc=0
+echo "Tempest test results are available in $tempest_dir"
 if [[ ! -f $tempest_dir/failed-tests ]]; then
   echo "Unable to find Tempest test results in $tempest_dir/failed-tests"
-  exit 1
-fi
-
-if [[ $(wc -l < $tempest_dir/failed-tests) -ne 0 ]]; then
+  rc=1
+elif [[ $(wc -l < $tempest_dir/failed-tests) -ne 0 ]]; then
   echo "Some Tempest tests failed"
-  exit 1
+  rc=1
+else
+  echo "Tempest testing successful"
 fi
 
-echo "Tempest testing successful"
+echo "StackHPC OpenStack test results are available in $sot_results_dir"
+if [[ ! -f $sot_results_dir/failed-tests ]]; then
+  echo "Unable to find StackHPC OpenStack test results in $sot_results_dir/failed-tests"
+  rc=1
+elif [[ $(wc -l < $sot_results_dir/failed-tests) -ne 0 ]]; then
+  echo "Some StackHPC OpenStack tests failed"
+  rc=1
+else
+  echo "StackHPC OpenStack testing successful"
+fi
 
 # Report success.
-echo 0 >$rc_path
+echo "Writing result to $rc_path"
+echo $rc >$rc_path

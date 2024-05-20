@@ -13,7 +13,7 @@
       # SSH to Ansible control host
       ssh {{ ansible_user }}@{{ ansible_host }}
       # Either: Attach to the tmux session
-      tmux -t {{ tmux_session }} attach
+      tmux attach -t {{ tmux_session }}
       # Or: Follow the log file
       less -r {{ tmux_log_path }}
   vars_files:

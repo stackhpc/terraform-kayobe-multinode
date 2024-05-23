@@ -84,8 +84,8 @@ ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/seed-vault-keys.json
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/*.key
 
-# Skip os_capacity deployment since it requires admin-openrc.sh which doesn't exist yet.
-kayobe overcloud service deploy --skip-tags os_capacity -kt haproxy
+# Skip os_capacity and radosgw_usage_exporter deployment since they require admin-openrc.sh which doesn't exist yet.
+kayobe overcloud service deploy --skip-tags os_capacity,radosgw_usage_exporter -kt haproxy
 
 # Deploy hashicorp vault to the controllers
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-overcloud.yml

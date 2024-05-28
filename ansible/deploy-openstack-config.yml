@@ -274,3 +274,9 @@
         state: started
         enabled: true
       become: true
+
+    - name: Ensure tmux is present
+      ansible.builtin.package:
+        name: tmux
+        state: present
+      become: true

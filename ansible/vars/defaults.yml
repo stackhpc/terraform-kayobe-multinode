@@ -2,7 +2,7 @@
 src_directory: "{{ ansible_env.HOME }}/src"
 
 kayobe_config_repo: https://github.com/stackhpc/stackhpc-kayobe-config.git
-kayobe_config_version: stackhpc/yoga
+kayobe_config_version: stackhpc/2023.1
 kayobe_config_name: kayobe-config
 kayobe_config_environment: ci-multinode
 
@@ -18,7 +18,7 @@ kayobe_config_environment: ci-multinode
 kayobe_config_custom: []
 
 kayobe_repo: https://github.com/stackhpc/kayobe.git
-kayobe_version: stackhpc/yoga
+kayobe_version: stackhpc/2023.1
 kayobe_name: kayobe
 
 openstack_config_repo: https://github.com/stackhpc/openstack-config-multinode

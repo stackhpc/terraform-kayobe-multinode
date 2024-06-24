@@ -84,8 +84,11 @@ ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/seed-vault-keys.json
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/*.key
 
-# Skip os_capacity deployment since it requires admin-openrc.sh which doesn't exist yet.
-kayobe overcloud service deploy --skip-tags os_capacity -kt haproxy
+# NOTE: Previously it was necessary to first deploy HAProxy with TLS disabled.
+if [[ -f $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml ]]; then
+  # Skip os_capacity deployment since it requires admin-openrc.sh which doesn't exist yet.
+  kayobe overcloud service deploy --skip-tags os_capacity -kt haproxy
+fi
 
 # Deploy hashicorp vault to the controllers
 kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-overcloud.yml
@@ -107,10 +110,12 @@ kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-generate-backend-tls.yml
 ansible-vault encrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/${ hostname }-key.pem
 %{ endfor ~}
 
-# Set config to use tls
-sed -i 's/# kolla_enable_tls_external: true/kolla_enable_tls_external: true/g' $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla.yml
-sed -i 's/# kolla_enable_tls_internal: true/kolla_enable_tls_internal: true/g' $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla.yml
-cat $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals.yml
+# NOTE: Previously it was necessary to first deploy HAProxy with TLS disabled.
+if [[ -f $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml ]]; then
+  sed -i 's/# kolla_enable_tls_external: true/kolla_enable_tls_external: true/g' $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla.yml
+  sed -i 's/# kolla_enable_tls_internal: true/kolla_enable_tls_internal: true/g' $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla.yml
+  cat $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals.yml
+fi
 
 # Create vault configuration for barbican
 ansible-vault decrypt --vault-password-file ~/vault.password $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml

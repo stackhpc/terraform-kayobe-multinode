@@ -62,7 +62,10 @@ Initialise Terraform:
 
    terraform init
 
-Generate an SSH keypair. The public key will be registered in OpenStack as a
+Generate an SSH keypair. Note that `ED25519 keys are not currently supported by RHEL
+<https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/securing_networks/index#making-openssh-more-secure_assembly_using-secure-communications-between-two-systems-with-openssh>`__ 
+when using the FIPS security standard (as enabled by the CIS benchmark hardening
+scripts in kayobe-config). The public key will be registered in OpenStack as a
 keypair and authorised by the instances deployed by Terraform. The private and
 public keys will be transferred to the Ansible control host to allow it to
 connect to the other hosts. Note that password-protected keys are not currently
@@ -70,7 +73,7 @@ supported.
 
 .. code-block:: console
 
-   ssh-keygen -f id_rsa -N ''
+   ssh-keygen -t rsa -f id_rsa -N ''
 
 Create an OpenStack clouds.yaml file with your credentials to access an
 OpenStack cloud. Alternatively, download and source an openrc file from Horizon.

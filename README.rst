@@ -70,7 +70,10 @@ supported.
 
 .. code-block:: console
 
-   ssh-keygen -f id_rsa -N ''
+   ssh-keygen -t rsa -f id_rsa -N ''
+
+Note that ED25519 keys are `not currently supported by RHEL <https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/securing_networks/index#making-openssh-more-secure_assembly_using-secure-communications-between-two-systems-with-openssh>`__ when using the FIPS
+security standard (as enabled by the CIS benchmark hardening scripts).
 
 Create an OpenStack clouds.yaml file with your credentials to access an
 OpenStack cloud. Alternatively, download and source an openrc file from Horizon.

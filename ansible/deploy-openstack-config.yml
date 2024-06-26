@@ -128,13 +128,6 @@
         create: true
       loop: "{{ kayobe_config_custom }}"
 
-    - name: Ensure Kayobe repository is present
-      ansible.builtin.git:
-        repo: "{{ kayobe_repo }}"
-        version: "{{ kayobe_version }}"
-        dest: "{{ src_directory }}/{{ kayobe_name }}"
-        update: false
-
     - name: Ensure `venvs` directory exists
       ansible.builtin.file:
         path: "{{ ansible_env.HOME }}/venvs"
@@ -159,7 +152,7 @@
       ansible.builtin.replace:
         path: "{{ src_directory }}/{{ kayobe_config_name }}/requirements.txt"
         regexp: "^kayobe@.*$"
-        replace: "kayobe@git+file://{{ src_directory }}/{{ kayobe_name }}"
+        replace: "kayobe@git+{{ kayobe_repo }}@{{ kayobe_version }}"
 
     - name: Ensure `kayobe-config` requirements are installed
       ansible.builtin.pip:

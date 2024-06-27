@@ -83,4 +83,4 @@
           To see results:
 
           {{ connection_info }}
-      when: rc_slurp.content | b64decode != "0"
+      when: rc_slurp.content | b64decode | trim != "0"

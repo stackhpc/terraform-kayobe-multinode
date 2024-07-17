@@ -29,6 +29,9 @@ vault_password_path: "~/vault.password"
 
 ssh_key_path:
 
+# A list of additional SSH public keys to authorise on the Ansible control host.
+extra_ssh_public_keys: []
+
 ansible_ssh_private_key_file: "{{ ssh_key_path }}"
 
 vxlan_vni:

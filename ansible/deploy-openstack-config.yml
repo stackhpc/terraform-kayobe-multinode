@@ -225,6 +225,12 @@
         dest: "{{ ansible_env.HOME }}/.ssh/id_rsa"
         mode: "0600"
 
+    - name: Ensure additional public keys are authorised
+      ansible.posix.authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ item }}"
+      loop: "{{ extra_ssh_public_keys }}"
+
     - name: Ensure OpenStack Config repository is present
       ansible.builtin.git:
         repo: "{{ openstack_config_repo }}"

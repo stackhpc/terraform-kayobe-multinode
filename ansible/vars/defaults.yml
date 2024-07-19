@@ -92,3 +92,6 @@ lvm_groups:
 manage_lvm: true
 
 pvresize_to_max: true
+
+# Whether to upgrade the Ansible control host.
+upgrade: false

@@ -63,18 +63,57 @@
         state: present
       become: true
 
+    - name: Ensure uuid-runtime is present (Ubuntu)
+      ansible.builtin.package:
+        name: uuid-runtime
+        state: present
+      become: true
+      when: ansible_facts['distribution'] == "Ubuntu"
+
     - name: Ensure `source` directory exists
       ansible.builtin.file:
         path: "{{ src_directory }}"
         state: directory
         mode: "0755"
 
+    - name: Revert TLS changes to avoid git conflicts (upgrade)
+      ansible.builtin.shell:
+        cmd: >-
+          if [[ -f {{ kayobe_environment_path }}/kolla/globals-tls-config.yml ]]; then
+            sed -i 's/^kolla_enable_tls_internal: true/# kolla_enable_tls_internal: true/g' {{ kayobe_environment_path }}/kolla.yml
+          fi
+      when: upgrade | bool
+      vars:
+        kayobe_environment_path: "{{ src_directory }}/kayobe-config/etc/kayobe/environments/{{ kayobe_config_environment }}"
+
+    - name: Stash Kayobe Config changes (upgrade)
+      ansible.builtin.command:
+        cmd: git stash
+        chdir: "{{ src_directory }}/{{ kayobe_config_name }}"
+      when: upgrade | bool
+
     - name: Ensure Kayobe Config repository is present
       ansible.builtin.git:
         repo: "{{ kayobe_config_repo }}"
         version: "{{ kayobe_config_version }}"
         dest: "{{ src_directory }}/{{ kayobe_config_name }}"
-        update: false
+        update: "{{ upgrade | bool }}"
+
+    - name: Pop stashed Kayobe Config changes (upgrade)
+      ansible.builtin.command:
+        cmd: git stash pop
+        chdir: "{{ src_directory }}/{{ kayobe_config_name }}"
+      when: upgrade | bool
+
+    - name: Replace TLS changes to avoid git conflicts (upgrade)
+      ansible.builtin.shell:
+        cmd: >-
+          if [[ -f {{ kayobe_environment_path }}/kolla/globals-tls-config.yml ]]; then
+            sed -i 's/# kolla_enable_tls_internal: true/kolla_enable_tls_internal: true/g' {{ kayobe_environment_path }}/kolla.yml
+          fi
+      when: upgrade | bool
+      vars:
+        kayobe_environment_path: "{{ src_directory }}/kayobe-config/etc/kayobe/environments/{{ kayobe_config_environment }}"
 
     - name: Ensure hooks directory are present
       ansible.builtin.file:
@@ -103,7 +142,6 @@
         - { src: fix-networking.yml, dest: infra-vm-host-configure/pre.d/15-fix-networking.yml }
         - { src: configure-vxlan.yml, dest: infra-vm-host-configure/pre.d/20-configure-vxlan.yml }
 
-
     - name: Ensure Admin Overcloud Network file is present
       ansible.builtin.copy:
         src: "files/admin-oc-networks.yml"
@@ -115,6 +153,15 @@
         src: "files/hosts"
         dest: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/inventory/hosts"
         mode: "0644"
+
+    - name: Ensure multinode.sh script is present
+      ansible.builtin.copy:
+        src: "files/multinode.sh"
+        dest: "/usr/local/bin/multinode.sh"
+        mode: "0755"
+      become: true
+      tags:
+        - multinode.sh
 
     - name: Ensure root_domain is defined
       ansible.builtin.lineinfile:
@@ -162,8 +209,14 @@
         repo: "{{ kayobe_repo }}"
         version: "{{ kayobe_version or 'stackhpc/' ~ openstack_release.stdout }}"
         dest: "{{ src_directory }}/{{ kayobe_name }}"
-        update: false
+        update: "{{ upgrade | bool }}"
       when: kayobe_src_required
+
+    - name: Ensure `venvs` directory is absent (upgrade)
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/venvs"
+        state: absent
+      when: upgrade | bool
 
     - name: Ensure `venvs` directory exists
       ansible.builtin.file:
@@ -231,6 +284,15 @@
         key: "{{ item }}"
       loop: "{{ extra_ssh_public_keys }}"
 
+    - name: "{% if upgrade | bool %}Upgrade{% else %}Bootstrap{% endif %} control host"
+      ansible.builtin.shell:
+        cmd: |-
+          set -eu
+          source {{ ansible_env.HOME }}/venvs/kayobe/bin/activate
+          source {{ src_directory }}/{{ kayobe_config_name }}/kayobe-env --environment {{ kayobe_config_environment }}
+          export KAYOBE_VAULT_PASSWORD="$(cat ~/vault.password)"
+          kayobe control host {% if upgrade | bool %}upgrade{% else %}bootstrap{% endif %}
+
     - name: Ensure OpenStack Config repository is present
       ansible.builtin.git:
         repo: "{{ openstack_config_repo }}"
@@ -277,13 +339,6 @@
         src: files/openstack-inventory
         dest: "{{ src_directory }}/{{ openstack_config_name }}/ansible/inventory"
         mode: 0644
-
-    - name: Ensure `deploy-openstack.sh` script is present
-      ansible.builtin.copy:
-        src: "files/deploy-openstack.sh"
-        dest: "{{ ansible_env.HOME }}/deploy-openstack.sh"
-        mode: "755"
-      tags: deploy-openstack
 
     - name: Ensure docker repository is present
       ansible.builtin.command:

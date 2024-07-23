@@ -148,11 +148,12 @@
         virtualenv_command: "/usr/bin/python3 -m venv"
         state: latest
 
-    - name: Fix up `kayobe-config` requirements to point to local checkout
+    - name: Fix up `kayobe-config` requirements to point to requested version
       ansible.builtin.replace:
         path: "{{ src_directory }}/{{ kayobe_config_name }}/requirements.txt"
         regexp: "^kayobe@.*$"
         replace: "kayobe@git+{{ kayobe_repo }}@{{ kayobe_version }}"
+      when: kayobe_version is truthy
 
     - name: Ensure `kayobe-config` requirements are installed
       ansible.builtin.pip:

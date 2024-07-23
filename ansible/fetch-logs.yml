@@ -77,3 +77,28 @@
         # For jump host
         use_ssh_args: true
       loop: "{{ find_tempest_results.files }}"
+
+    - name: Find StackHPC OpenStack test results
+      ansible.builtin.find:
+        path: "/home/{{ ansible_user }}"
+        # Also include old backed up results.
+        patterns: "sot-results*"
+        file_type: "directory"
+        depth: 1
+      register: find_sot_results
+
+    # NOTE: In Ansible 2.10 and lower the synchronize module does not respect
+    # SSH connection variables. This may result in Permission Denied issues if
+    # using an SSH key that is not in ~/.ssh.
+    - name: Fetch StackHPC OpenStack test results
+      ansible.posix.synchronize:
+        src: "{{ item.path }}"
+        dest: "{{ fetch_logs_dest }}/"
+        mode: pull
+        archive: no
+        recursive: true
+        copy_links: true
+        verify_host: true
+        # For jump host
+        use_ssh_args: true
+      loop: "{{ find_sot_results.files }}"

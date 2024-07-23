@@ -304,9 +304,47 @@ function run_tempest() {
   echo "Tempest testing successful"
 }
 
+function run_stackhpc_openstack_tests() {
+  # Run StackHPC OpenStack test suite. Return non-zero if any tests failed.
+
+  sot_results_dir="$HOME/sot-results"
+
+  if [[ ! -f $KAYOBE_CONFIG_PATH/ansible/stackhpc-openstack-tests.yml ]]; then
+    echo "StackHPC OpenStack tests playbook not found - skipping"
+    return
+  fi
+
+  if [[ -d $sot_results_dir ]]; then
+    sot_results_backup=${sot_results_dir}.$(date --iso-8601=minutes)
+    echo "Found previous StackHPC OpenStack test results"
+    echo "Moving to $sot_results_backup"
+    mv $sot_results_dir $sot_results_backup
+  fi
+
+  # Run StackHPC OpenStack tests
+  kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/stackhpc-openstack-tests.yml
+
+  echo "StackHPC OpenStack test results are available in $sot_results_dir"
+  if [[ ! -f $sot_results_dir/failed-tests ]]; then
+    echo "Unable to find StackHPC OpenStack test results in $sot_results_dir/failed-tests"
+    return 1
+  fi
+
+  if [[ $(wc -l < $sot_results_dir/failed-tests) -ne 0 ]]; then
+    echo "Some StackHPC OpenStack tests failed"
+    return 1
+  fi
+
+  echo "StackHPC OpenStack testing successful"
+}
+
 function run_tests() {
+  # Run both Tempest and StackHPC OpenStack tests to get full results.
   rc=0
   if ! run_tempest; then
+    rc=1
+  fi
+  if ! run_stackhpc_openstack_tests; then
     rc=1
   fi
   return $rc
@@ -350,6 +388,7 @@ function usage() {
   echo "  create_resources"
   echo "  build_kayobe_image"
   echo "  run_tempest"
+  echo "  run_stackhpc_openstack_tests"
   echo "  upgrade_overcloud"
 }
 
@@ -373,7 +412,7 @@ function main() {
       $cmd
       ;;
     # Standard commands.
-    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud)
+    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|run_stackhpc_openstack_tests|upgrade_overcloud)
       setup
       $cmd
       report_success

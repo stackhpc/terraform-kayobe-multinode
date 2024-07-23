@@ -329,8 +329,10 @@ This script will go through the process of performing the following tasks:
    * kayobe overcloud service deploy
    * OpenStack configuration
    * Tempest testing
+   * StackHPC OpenStack tests
 
 Tempest test results will be written to ``~/tempest-artifacts``.
+StackHPC OpenStack test results will be written to ``~/sot-results``.
 
 If you choose to opt for the automated method you must first SSH into your Ansible control host.
 

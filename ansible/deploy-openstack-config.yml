@@ -17,6 +17,12 @@
           - ssh_key_path | expanduser is exists
         fail_msg: "Could not find SSH key at {{ ssh_key_path | expanduser }}"
 
+    - name: Verify ssh public key exists
+      ansible.builtin.assert:
+        that:
+          - (ssh_key_path ~ '.pub') | expanduser is exists
+        fail_msg: "Could not find SSH key at {{ (ssh_key_path ~ '.pub') | expanduser }}"
+
     - name: Verify vault password path has been set
       ansible.builtin.assert:
         that:
@@ -41,6 +47,15 @@
       ansible.builtin.setup:
         gather_subset:
           - user_dir
+
+    # TODO: Remove this when Red Hat FIPS policy has been updated to allow ed25519 keys.
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/367429#note_1840422075
+    - name: Verify ssh key is not ed25519
+      ansible.builtin.assert:
+        that:
+          - "'ssh-ed25519' not in lookup('ansible.builtin.file', (ssh_key_path ~ '.pub') | expanduser)"
+        fail_msg: "FIPS policy does not currently support ed25519 SSH keys on RHEL family systems"
+      when: ansible_facts['os_family'] == "RedHat"
 
     - name: Ensure git is present
       ansible.builtin.package:

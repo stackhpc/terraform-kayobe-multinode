@@ -143,6 +143,28 @@
         create: true
       loop: "{{ kayobe_config_custom }}"
 
+    - name: Determine OpenStack release
+      ansible.builtin.shell:
+        cmd: >
+          awk -F'=' '/defaultbranch/ {print $2}' {{ src_directory }}/{{ kayobe_config_name }}/.gitreview |
+          sed -E "s,(stable|unmaintained)/,,"
+      register: openstack_release
+      changed_when: false
+
+    # Yoga and earlier releases require a Kayobe checkout for the symlinks in
+    # etc/kayobe/ansible/ to resolve correctly.
+    - name: Set a fact about whether a Kayobe source checkout is required
+      ansible.builtin.set_fact:
+        kayobe_src_required: "{{ openstack_release.stdout != 'zed' and not openstack_release.stdout.startswith('202') }}"
+
+    - name: Ensure Kayobe repository is present (Yoga & earlier)
+      ansible.builtin.git:
+        repo: "{{ kayobe_repo }}"
+        version: "{{ kayobe_version or 'stackhpc/' ~ openstack_release.stdout }}"
+        dest: "{{ src_directory }}/{{ kayobe_name }}"
+        update: false
+      when: kayobe_src_required
+
     - name: Ensure `venvs` directory exists
       ansible.builtin.file:
         path: "{{ ansible_env.HOME }}/venvs"
@@ -176,6 +198,14 @@
         virtualenv: "{{ ansible_env.HOME }}/venvs/kayobe"
         virtualenv_command: "/usr/bin/python3 -m venv"
         state: present
+
+    - name: Ensure `kayobe` is installed (Yoga & earlier)
+      ansible.builtin.pip:
+        name: "{{ src_directory }}/{{ kayobe_name }}/"
+        virtualenv: "{{ ansible_env.HOME }}/venvs/kayobe"
+        virtualenv_command: "/usr/bin/python3 -m venv"
+        state: present
+      when: kayobe_src_required
 
     - name: Ensure vault password is present
       ansible.builtin.copy:

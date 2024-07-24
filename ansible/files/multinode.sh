@@ -174,6 +174,12 @@ function generate_barbican_secrets() {
 function deploy_overcloud() {
   kayobe overcloud host configure
 
+  # Update packages to latest available in release train repos.
+  kayobe overcloud host package update --packages '*'
+
+  # Reboot into the new kernel if updated.
+  kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/reboot.yml
+
   deploy_ceph
 
   deploy_seed_vault

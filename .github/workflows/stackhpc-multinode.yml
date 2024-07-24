@@ -1,0 +1,361 @@
+---
+# This reusable workflow deploys a multi-node test cluster on a cloud using
+# Terraform, then deploys OpenStack via Kayobe. Tempest is then used to test
+# the cloud.
+
+name: Multinode
+
+on:
+  workflow_call:
+    inputs:
+      multinode_name:
+        description: Multinode cluster name
+        type: string
+        required: true
+      multinode_controller_count:
+        description: Controller count
+        type: number
+        default: 3
+      multinode_compute_count:
+        description: Compute count
+        type: number
+        default: 2
+      multinode_storage_count:
+        description: Storage count
+        type: number
+        default: 3
+      os_distribution:
+        description: Host OS distribution
+        type: string
+        default: rocky
+      os_release:
+        description: Host OS release
+        type: string
+        default: '9'
+      ssh_username:
+        description: User for terraform to access the all-in-one VM
+        type: string
+        default: cloud-user
+      neutron_plugin:
+        description: Neutron ML2 plugin
+        type: string
+        default: ovn
+      stackhpc_kayobe_config_version:
+        description: stackhpc-kayobe-config version
+        type: string
+      stackhpc_kayobe_config_previous_version:
+        description: stackhpc-kayobe-config previous version
+        type: string
+      terraform_kayobe_multinode_version:
+        description: terraform-kayobe-multinode version
+        type: string
+        default: main
+      upgrade:
+        description: Whether to perform an upgrade
+        type: boolean
+        default: false
+      break_on:
+        description: When to break execution for manual interaction
+        type: string
+        default: never
+      break_duration:
+        description: How long to break execution for (minutes)
+        type: number
+        default: 60
+      ssh_key:
+        description: SSH public key to authorise on Ansible control host
+        type: string
+    secrets:
+      KAYOBE_VAULT_PASSWORD_CI_MULTINODE:
+        required: true
+      CLOUDS_YAML:
+        required: true
+      OS_APPLICATION_CREDENTIAL_ID:
+        required: true
+      OS_APPLICATION_CREDENTIAL_SECRET:
+        required: true
+
+jobs:
+  multinode:
+    name: Multinode
+    runs-on: arc-skc-aio-runner
+    environment: Leafcloud
+    permissions: {}
+    env:
+      ANSIBLE_FORCE_COLOR: True
+      KAYOBE_ENVIRONMENT: ci-multinode
+      KAYOBE_VAULT_PASSWORD: ${{ secrets.KAYOBE_VAULT_PASSWORD_CI_MULTINODE }}
+    steps:
+      - name: Fail if previous version is not defined
+        run: |
+          echo "StackHPC Kayobe Configuration previous version must be defined for upgrades"
+          exit 1
+        if: ${{ inputs.upgrade && inputs.stackhpc_kayobe_config_previous_version }}
+
+      - name: Install Package
+        uses: ConorMacBride/install-package@main
+        with:
+          apt: git unzip nodejs python3-pip python3-venv rsync
+
+      # If testing upgrade, checkout previous release, otherwise checkout current branch
+      - name: Checkout ${{ inputs.upgrade && 'previous release' || 'current' }} config
+        uses: actions/checkout@v4
+        with:
+          repository: stackhpc/stackhpc-kayobe-config
+          ref: ${{ inputs.upgrade && inputs.stackhpc_kayobe_config_previous_version || inputs.stackhpc_kayobe_config_version }}
+
+      - name: Checkout terraform-kayobe-multinode
+        uses: actions/checkout@v4
+        with:
+          repository: stackhpc/terraform-kayobe-multinode
+          ref: ${{ inputs.terraform_kayobe_multinode_version }}
+          path: terraform-kayobe-multinode
+
+      - name: Make sure dockerd is running and test Docker
+        run: |
+          docker ps
+
+      - name: Output image tag
+        id: image_tag
+        run: |
+          echo image_tag=$(grep stackhpc_${{ inputs.os_distribution }}_$(sed s/-/_/ <(echo "${{ inputs.os_release }}"))_overcloud_host_image_version: etc/kayobe/pulp-host-image-versions.yml | awk '{print $2}') >> $GITHUB_OUTPUT
+
+      # Use the image override if set, otherwise use overcloud-os_distribution-os_release-tag
+      - name: Output image name
+        id: image_name
+        run: |
+          if [ -z "${{ inputs.multinode_image_override }}" ]; then
+            echo image_name=overcloud-${{ inputs.os_distribution }}-${{ inputs.os_release }}-${{ steps.image_tag.outputs.image_tag }} >> $GITHUB_OUTPUT
+          else
+            echo image_name=${{ inputs.multinode_image_override }} >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+
+      - name: Setup Ansible
+        run: |
+          python3 -m venv venv &&
+          source venv/bin/activate &&
+          pip install -U pip &&
+          pip install ansible &&
+          mkdir -p ansible/{collections,roles} &&
+          ansible-galaxy role install -r ansible/requirements.yml -p ansible/roles &&
+          #sed -i -e '/terraform/a \    version: "<3"' ansible/requirements.yml &&
+          ansible-galaxy collection install -r ansible/requirements.yml -p ansible/collections
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+
+      - name: Generate SSH keypair
+        run: ssh-keygen -f id_rsa -N ''
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+
+      - name: Copy SSH keypair to .ssh/
+        run: |
+          install -d ~/.ssh -m 700 &&
+          cp id_rsa* ~/.ssh/
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+
+      - name: Generate clouds.yaml
+        run: |
+          cat << EOF > clouds.yaml
+          ${{ secrets.CLOUDS_YAML }}
+          EOF
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+
+      - name: Generate terraform.tfvars
+        run: |
+          cat << EOF > terraform.tfvars
+
+          prefix = "${{ env.MULTINODE_NAME }}"
+
+          ansible_control_vm_flavor = "${{ env.MULTINODE_ANSIBLE_CONTROL_VM_FLAVOR }}"
+          ansible_control_vm_name   = "ansible-control"
+          ansible_control_disk_size = 100
+
+          seed_vm_flavor = "${{ env.MULTINODE_SEED_VM_FLAVOR }}"
+          seed_disk_size = 100
+
+          multinode_flavor     = "${{ env.MULTINODE_FLAVOR }}"
+          multinode_image      = "${{ env.MULTINODE_IMAGE }}"
+          multinode_keypair    = "${{ env.MULTINODE_NAME }}"
+          multinode_vm_network = "${{ env.MULTINODE_NETWORK }}"
+          multinode_vm_subnet  = "${{ env.MULTINODE_SUBNET }}"
+          compute_count        = "${{ env.MULTINODE_COMPUTE_COUNT }}"
+          controller_count     = "${{ env.MULTINODE_CONTROLLER_COUNT }}"
+          compute_disk_size    = 100
+          controller_disk_size = 100
+
+          ssh_public_key = "id_rsa.pub"
+          ssh_user       = "${{ env.SSH_USERNAME }}"
+
+          storage_count     = "${{ env.MULTINODE_STORAGE_COUNT }}"
+          storage_flavor    = "${{ env.MULTINODE_STORAGE_FLAVOR }}"
+          storage_disk_size = 100
+
+          deploy_wazuh       = false
+          infra_vm_flavor    = "${{ env.MULTINODE_INFRA_VM_FLAVOR }}"
+          infra_vm_disk_size = 100
+          EOF
+
+          if [[ "${{ inputs.ssh_key }}" != "" ]]; then
+            cat << EOF >> terraform.tfvars
+          add_ansible_control_fip = true
+          ansible_control_fip_pool = "${{ env.MULTINODE_FIP_POOL }}"
+          EOF
+          fi
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+        env:
+          MULTINODE_NAME: "${{ inputs.multinode_name }}"
+          MULTINODE_ANSIBLE_CONTROL_VM_FLAVOR: ${{ vars.multinode_ansible_control_vm_flavor }} # en1.xsmall
+          MULTINODE_SEED_VM_FLAVOR: ${{ vars.multinode_seed_vm_flavor }} # en1.xsmall
+          MULTINODE_INFRA_VM_FLAVOR: ${{ vars.multinode_infra_vm_flavor }} # en1.xsmall
+          MULTINODE_FLAVOR: ${{ vars.multinode_flavor }} # en1.large
+          MULTINODE_STORAGE_FLAVOR: ${{ vars.multinode_storage_flavor }} # en1.medium
+          MULTINODE_COMPUTE_COUNT: "${{ inputs.multinode_compute_count }}"
+          MULTINODE_CONTROLLER_COUNT: "${{ inputs.multinode_controller_count }}"
+          MULTINODE_STORAGE_COUNT: "${{ inputs.multinode_storage_count }}"
+          MULTINODE_IMAGE: ${{ steps.image_name.outputs.image_name }}
+          MULTINODE_NETWORK: ${{ vars.multinode_network }}
+          MULTINODE_SUBNET: ${{ vars.multinode_subnet }}
+          MULTINODE_FIP_POOL: ${{ vars.multinode_fip_pool }}
+          SSH_USERNAME: "${{ inputs.ssh_username }}"
+
+      - name: Initialise terraform
+        run: terraform init
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+
+      - name: Validate terraform
+        id: tf_validate
+        run: terraform validate
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+
+      - name: Configure Ansible
+        run: |
+          echo '${{ env.KAYOBE_VAULT_PASSWORD }}' > vault-pw
+
+          cat << EOF >> ansible/vars/defaults.yml
+          kayobe_config_version: ${{ inputs.upgrade && inputs.stackhpc_kayobe_config_previous_version || inputs.stackhpc_kayobe_config_version }}
+          ssh_key_path: ${{ github.workspace }}/terraform-kayobe-multinode/id_rsa
+          vxlan_vni: 53299
+          vault_password_path: ${{ github.workspace }}/terraform-kayobe-multinode/vault-pw
+          kayobe_config_custom:
+            - path: zz-multinode.yml
+              block: |
+                os_distribution: ${{ env.OS_DISTRIBUTION }}
+                os_release: "${{ env.OS_RELEASE }}"
+                kolla_enable_ovn: ${{ env.ENABLE_OVN }}
+          EOF
+
+          if [[ "${{ env.SSH_KEY }}" != "" ]]; then
+            cat << EOF >> ansible/vars/defaults.yml
+          extra_ssh_public_keys:
+            - "${{ env.SSH_KEY }}"
+          EOF
+          fi
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+        env:
+          ENABLE_OVN: ${{ inputs.neutron_plugin == 'ovn' }}
+          OS_DISTRIBUTION: ${{ inputs.os_distribution }}
+          OS_RELEASE: ${{ inputs.os_release }}
+          SSH_KEY: ${{ inputs.ssh_key }}
+
+      - name: Terraform Plan
+        run: terraform plan -input=false
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+        env:
+          OS_CLOUD: ${{ vars.OS_CLOUD }}
+          OS_APPLICATION_CREDENTIAL_ID: ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
+          OS_APPLICATION_CREDENTIAL_SECRET: ${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}
+
+      - name: Terraform Apply
+        id: tf_apply
+        run: |
+          for attempt in $(seq 3); do
+              if terraform apply -auto-approve -input=false; then
+                  echo "Created infrastructure on attempt $attempt"
+                  exit 0
+              fi
+              echo "Failed to create infrastructure on attempt $attempt"
+              sleep 60
+          done
+          echo "Failed to create infrastructure after $attempt attempts"
+          exit 1
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+        env:
+          OS_CLOUD: ${{ vars.OS_CLOUD }}
+          OS_APPLICATION_CREDENTIAL_ID: ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
+          OS_APPLICATION_CREDENTIAL_SECRET: ${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}
+
+      - name: Configure Ansible control host
+        id: config_ach
+        run: |
+          source venv/bin/activate &&
+          ansible-playbook -v -i ansible/inventory.yml ansible/configure-hosts.yml
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+
+      - name: Deploy OpenStack
+        run: |
+          source venv/bin/activate &&
+          ansible-playbook -v -i ansible/inventory.yml ansible/deploy-openstack.yml
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+
+      - name: Upgrade Ansible control host
+        run: |
+          source venv/bin/activate &&
+          ansible-playbook -v -i ansible/inventory.yml ansible/deploy-openstack-config.yml -e upgrade=true -e kayobe_config_version=${{ inputs.stackhpc_kayobe_config_version }}
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+        if: inputs.upgrade
+
+      - name: Upgrade OpenStack
+        run: |
+          source venv/bin/activate &&
+          ansible-playbook -v -i ansible/inventory.yml ansible/deploy-openstack.yml -e multinode_command=upgrade_overcloud
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+        if: inputs.upgrade
+
+      - name: Run Tempest tests
+        run: |
+          source venv/bin/activate &&
+          ansible-playbook -v -i ansible/inventory.yml ansible/deploy-openstack.yml -e multinode_command=run_tempest
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+        if: inputs.upgrade
+
+      - name: Download deployment logs
+        run: |
+          mkdir -p ${{ github.workspace }}/logs &&
+          source venv/bin/activate &&
+          ansible-playbook -v -i ansible/inventory.yml ansible/fetch-logs.yml -e fetch_logs_dest=${{ github.workspace }}/logs
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+        if: ${{ always() && steps.config_ach.outcome == 'success' }}
+
+      # NOTE: The tmux log rename is due to GitHub Actions not accepting files with a colon as artifacts.
+      - name: Fix up deployment log filename
+        run: |
+          if [[ -f ${{ github.workspace }}/logs/tmux.kayobe:0.log ]]; then
+            mv ${{ github.workspace }}/logs/tmux.kayobe:0.log ${{ github.workspace }}/logs/tmux.kayobe.log
+          fi
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+        if: ${{ always() && steps.config_ach.outcome == 'success' }}
+
+      - name: Upload test result artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-multinode-${{ inputs.os_distribution }}-${{ inputs.os_release }}-${{ inputs.neutron_plugin }}${{ inputs.upgrade && '-upgrade' || '' }}
+          path: |
+            ${{ github.workspace }}/logs/
+        if: ${{ always() && steps.config_ach.outcome == 'success' }}
+
+      - name: Break on failure
+        run: sleep ${{ inputs.break_duration }}m
+        if: ${{ failure() && steps.config_ach.outcome == 'success' && inputs.break_on == 'failure' }}
+
+      - name: Destroy
+        run: terraform destroy -auto-approve -input=false
+        working-directory: ${{ github.workspace }}/terraform-kayobe-multinode
+        env:
+          OS_CLOUD: ${{ vars.OS_CLOUD }}
+          OS_APPLICATION_CREDENTIAL_ID: ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
+          OS_APPLICATION_CREDENTIAL_SECRET: ${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}
+        if: always() && steps.tf_validate.outcome == 'success'

@@ -19,6 +19,7 @@ kayobe_config_custom: []
 
 kayobe_repo: https://github.com/stackhpc/kayobe
 kayobe_version:
+kayobe_name: kayobe
 
 openstack_config_repo: https://github.com/stackhpc/openstack-config-multinode
 openstack_config_version: main

@@ -161,7 +161,7 @@ git -C $${config_directories[kayobe]} submodule init
 git -C $${config_directories[kayobe]} submodule update
 
 # Set base image for kayobe container. Use rocky 9 for zed+ CentOS otherwise
-if grep -Eq "(2023|zed)" $${config_directories[kayobe]}/.gitreview; then
+if grep -Eq "(2023|zed|yoga)" $${config_directories[kayobe]}/.gitreview; then
     export BASE_IMAGE=rockylinux:9
 else
     export BASE_IMAGE=quay.io/centos/centos:stream8

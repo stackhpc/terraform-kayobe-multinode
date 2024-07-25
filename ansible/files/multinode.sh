@@ -82,11 +82,33 @@ function decrypt_file() {
   ansible-vault decrypt --vault-password-file ~/vault.password $file
 }
 
+function workaround_ansible_rc13_bug() {
+  # Call this function in between long-running Ansible executions to attempt to
+  # work around an Ansible race condition.
+
+  # There is a race condition in Ansible that can result in this failure:
+  #   msg: |-
+  #   MODULE FAILURE
+  #   See stdout/stderr for the exact error
+  # rc: -13
+  # See https://github.com/ansible/ansible/issues/78344 and
+  # https://github.com/ansible/ansible/issues/81777.
+  # In https://github.com/stackhpc/stackhpc-kayobe-config/pull/1108 we applied
+  # a workaround to increase the ControlPersist timeout to 1 hour, but this
+  # does not always work.
+  # Try another workaround of removing the ControlPersist sockets.
+  rm -f ~/.ansible/cp/*
+}
+
 function deploy_seed() {
+  workaround_ansible_rc13_bug
+
   kayobe seed host configure
 }
 
 function deploy_seed_vault() {
+  workaround_ansible_rc13_bug
+
   # Deploy hashicorp vault to the seed
   kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-seed.yml
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/OS-TLS-INT.pem
@@ -117,6 +139,8 @@ function copy_ca_to_seed() {
 }
 
 function deploy_ceph() {
+  workaround_ansible_rc13_bug
+
   kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm-deploy.yml
   sleep 30
   kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm.yml
@@ -124,6 +148,8 @@ function deploy_ceph() {
 }
 
 function deploy_overcloud_vault() {
+  workaround_ansible_rc13_bug
+
   # NOTE: Previously it was necessary to first deploy HAProxy with TLS disabled.
   if [[ -f $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml ]]; then
     # Skip os_capacity deployment since it requires admin-openrc.sh which doesn't exist yet.
@@ -136,6 +162,8 @@ function deploy_overcloud_vault() {
 }
 
 function generate_overcloud_certs() {
+  workaround_ansible_rc13_bug
+
   # Generate external tls certificates
   if [[ -f $KAYOBE_CONFIG_PATH/ansible/vault-generate-test-external-tls.yml ]]; then
     kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-generate-test-external-tls.yml
@@ -172,7 +200,11 @@ function generate_barbican_secrets() {
 }
 
 function deploy_overcloud() {
+  workaround_ansible_rc13_bug
+
   kayobe overcloud host configure
+
+  workaround_ansible_rc13_bug
 
   # Update packages to latest available in release train repos.
   kayobe overcloud host package update --packages '*'
@@ -190,6 +222,8 @@ function deploy_overcloud() {
 
   generate_barbican_secrets
 
+  workaround_ansible_rc13_bug
+
   # Deploy all services
   kayobe overcloud service deploy
 
@@ -197,6 +231,8 @@ function deploy_overcloud() {
 }
 
 function deploy_wazuh() {
+  workaround_ansible_rc13_bug
+
   kayobe infra vm host configure
 
   # Deploy Wazuh
@@ -213,6 +249,8 @@ function create_resources() {
   set +x
   source ${KOLLA_CONFIG_PATH}/public-openrc.sh
   set -x
+
+  workaround_ansible_rc13_bug
 
   ~/src/openstack-config/tools/openstack-config
 
@@ -327,6 +365,8 @@ function run_stackhpc_openstack_tests() {
     mv $sot_results_dir $sot_results_backup
   fi
 
+  workaround_ansible_rc13_bug
+
   # Run StackHPC OpenStack tests
   kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/stackhpc-openstack-tests.yml
 
@@ -369,6 +409,8 @@ function deploy_full() {
 }
 
 function upgrade_overcloud() {
+  workaround_ansible_rc13_bug
+
   # Generate external tls certificates if it was previously disabled.
   if [[ -f $KAYOBE_CONFIG_PATH/ansible/vault-generate-test-external-tls.yml ]] && [[ ! -f $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy.pem ]]; then
     kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-generate-test-external-tls.yml

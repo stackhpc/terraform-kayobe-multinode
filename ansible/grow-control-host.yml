@@ -1,16 +1,10 @@
 ---
 - name: Grow Control Host
   hosts: ansible_control
-  gather_facts: false
+  gather_facts: true
   vars_files:
     - vars/defaults.yml
   tasks:
-    - name: Ensure hosts are reachable
-      ansible.builtin.wait_for_connection:
-
-    - name: Gather facts
-      setup:
-
     - name: Check LVM status
       shell:
         cmd: vgdisplay | grep -q lvm2

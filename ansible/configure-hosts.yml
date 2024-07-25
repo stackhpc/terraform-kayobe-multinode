@@ -1,4 +1,6 @@
 ---
+- import_playbook: wait-control-host.yml
+  tags: wait
 - import_playbook: grow-control-host.yml
   tags: lvm
 - import_playbook: deploy-openstack-config.yml

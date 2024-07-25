@@ -1,0 +1,21 @@
+---
+- name: Wait for Control Host to be reachable
+  hosts: ansible_control
+  gather_facts: false
+  vars_files:
+    - vars/defaults.yml
+  tasks:
+    - name: Ensure hosts are reachable
+      ansible.builtin.wait_for_connection:
+
+    # The cloud-final.service unit can run apt update, which acquires the dpkg
+    # lock and prevents other tasks from acquiring it. Wait for it to finish.
+    - name: Wait for cloud init to finish
+      community.general.cloud_init_data_facts:
+        filter: status
+      register: cloud_init_result
+      until:
+        - cloud_init_result.cloud_init_data_facts.status.v1.stage is defined
+        - not cloud_init_result.cloud_init_data_facts.status.v1.stage
+      retries: 72
+      delay: 5

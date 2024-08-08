@@ -25,6 +25,64 @@ This configuration is typically used with the `ci-multinode` environment in the
 <https://stackhpc-kayobe-config.readthedocs.io/en/stackhpc-2023.1/contributor/environments/ci-multinode.html>`__
 repository.
 
+What's in the box?
+==================
+
+This repository contains various items.
+
+Scripts
+-------
+
+* ``scripts/deploy.sh`` - end-to-end cluster deployment and testing.
+* ``scripts/tear-down.sh`` - tear down test cluster infrastructure.
+
+Terraform
+---------
+
+Terraform configuration deploys test cluster infrastructure on an OpenStack
+cloud. It provides outputs that can be used to populate Kayobe Configuration
+with the details of the test infrastructure.
+
+Ansible
+-------
+
+Ansible playbooks in the ``ansible/`` directory are provided to prepare and use
+the Ansible control host.
+
+#. ``configure-hosts.yml`` - sequentially executes 3 other playbooks:
+
+   #. ``wait-control-host.yml`` - Waits for the Ansible control host to become
+      accessible and ready for deployment. Tag: ``wait``
+   #. ``grow-control-host.yml`` - Applies LVM configuration to the control host
+      to ensure it has enough space to continue with the rest of the
+      deployment. Tag: ``lvm``
+   #. ``deploy-openstack-config.yml`` - Prepares the Ansible control host as a
+      Kayobe control host, cloning the Kayobe configuration and installing
+      virtual environments. Tag: ``deploy``
+
+   These playbooks are tagged so that they can be invoked or skipped using
+   `tags` or `--skip-tags` as required.
+
+#. ``deploy-openstack.yml`` - runs the ``multinode.sh deploy_full`` command in
+   a `tmux` session on the Ansible control host. The session is logged to
+   ``~/tmux.kayobe\:0.log`` on the Ansible control host.  Use ``less -r
+   ~/tmux.kayobe\:0.log`` to view the logs in their original colourful glory.
+
+#. ``fetch-logs.yml`` - fetches logs, diagnostics and tests results from the
+   cluster to the host runnin the playbook..
+
+Configuration variables for these playbooks are in
+``ansible/vars/defaults.yml``.
+
+multinode.sh
+------------
+
+The ``multinode.sh`` script is installed in ``/usr/local/bin/`` on the Ansible
+control host. It provides high-level automation of various aspects of OpenStack
+deployment, operations and testing. It accepts a single argument which is the
+command to perform. The supported commands may be listed by running it without
+arguments.
+
 Prerequisites
 =============
 
@@ -63,7 +121,7 @@ Initialise Terraform:
    terraform init
 
 Generate an SSH keypair. Note that `ED25519 keys are not currently supported by RHEL
-<https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/securing_networks/index#making-openssh-more-secure_assembly_using-secure-communications-between-two-systems-with-openssh>`__ 
+<https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/securing_networks/index#making-openssh-more-secure_assembly_using-secure-communications-between-two-systems-with-openssh>`__
 when using the FIPS security standard (as enabled by the CIS benchmark hardening
 scripts in kayobe-config). The public key will be registered in OpenStack as a
 keypair and authorised by the instances deployed by Terraform. The private and
@@ -187,7 +245,7 @@ access to the control host.
 Configure Ansible variables
 ===========================
 
-Review the vars defined within `ansible/vars/defaults.yml`. In here you can customise the version of kayobe, kayobe-config or openstack-config. 
+Review the vars defined within `ansible/vars/defaults.yml`. In here you can customise the version of kayobe, kayobe-config or openstack-config.
 Make sure to define `ssh_key_path` to point to the location of the SSH key in use by the nodes and also `vxlan_vni` which should be unique value between 1 to 100,000.
 VNI should be much smaller than the officially supported limit of 16,777,215 as we encounter errors when attempting to bring interfaces up that use a high VNI.
 You must set `vault_password_path`; this should be set to the path to a file containing the Ansible vault password.
@@ -201,7 +259,7 @@ Tempest testing without user interaction. Any errors encountered will be
 reported and halt the deployment.
 
 This script makes use of the `ansible/deploy-openstack.yml` Ansible playbook
-that runs the `deploy-openstack.sh` script in a `tmux` session on the Ansible
+that runs the `multinode.sh deploy_full` command in a `tmux` session on the Ansible
 control host. The session is logged to `~/tmux.kayobe\:0.log` on the Ansible
 control host. Use `less -r ~/tmux.kayobe\:0.log` to view the logs in their
 original colourful glory.
@@ -255,30 +313,24 @@ Run the configure-hosts.yml playbook to configure the Ansible control host.
 
    ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml
 
-This playbook sequentially executes 2 other playbooks:
-
-#. ``grow-control-host.yml`` - Applies LVM configuration to the control host to ensure it has enough space to continue with the rest of the deployment. Tag: ``lvm`` 
-#. ``deploy-openstack-config.yml`` - Prepares the Ansible control host as a Kayobe control host, cloning the Kayobe configuration and installing virtual environments. Tag: ``deploy``
-
-These playbooks are tagged so that they can be invoked or skipped using `tags` or `--skip-tags` as required.
-
 Deploy OpenStack
 ----------------
 
 Once the Ansible control host has been configured with a Kayobe/OpenStack configuration you can then begin the process of deploying OpenStack.
-This can be achieved by either manually running the various commands to configure the hosts and deploy the services or automated by using the generated `deploy-openstack.sh` script.
-`deploy-openstack.sh` should be available within the home directory on your Ansible control host provided you ran `deploy-openstack-config.yml` earlier.
+This can be achieved by either manually running the various commands to configure the hosts and deploy the services or automated by using the ``multinode.sh deploy_full`` command.
+``multinode.sh`` should be available within ``/usr/local/bin/`` on your Ansible control host provided you ran `deploy-openstack-config.yml` earlier.
 This script will go through the process of performing the following tasks:
 
    * kayobe control host bootstrap
    * kayobe seed host configure
    * kayobe overcloud host configure
    * cephadm deployment
+   * HashiCorp Vault deployment & certificate generation
    * kayobe overcloud service deploy
-   * openstack configuration
-   * tempest testing
+   * OpenStack configuration
+   * Tempest testing
 
-Tempest test results will be written to `~/tempest-artifacts`.
+Tempest test results will be written to ``~/tempest-artifacts``.
 
 If you choose to opt for the automated method you must first SSH into your Ansible control host.
 
@@ -292,11 +344,11 @@ Start a `tmux` session to avoid halting the deployment if you are disconnected.
 
    tmux
 
-Run the `deploy-openstack.sh` script.
+Run the `multinode.sh` script.
 
 .. code-block:: console
 
-   ~/deploy-openstack.sh
+   multinode.sh deploy_full
 
 Accessing OpenStack
 ===================
@@ -308,7 +360,7 @@ Using software such as sshuttle will allow for easy access.
 
    sshuttle -r $(terraform output -raw ssh_user)@$(terraform output -raw seed_access_ip_v4) 192.168.39.0/24
 
-You may also use sshuttle to proxy DNS via the multinode environment. Useful if you are working with Designate. 
+You may also use sshuttle to proxy DNS via the multinode environment. Useful if you are working with Designate.
 Important to node this will proxy all DNS requests from your machine to the first controller within the multinode environment.
 
 .. code-block:: console

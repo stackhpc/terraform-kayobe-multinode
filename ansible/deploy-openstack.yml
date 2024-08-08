@@ -3,6 +3,7 @@
   hosts: ansible_control
   gather_facts: false
   vars:
+    multinode_command: "deploy_full"
     # 6 hours should be enough...
     deployment_timeout_s: "{{ 6 * 60 * 60 }}"
     lock_path: /tmp/deploy-openstack.lock
@@ -30,7 +31,7 @@
         pipe-pane -t {{ tmux_session }} -o 'cat >> ~/tmux.#S:#P.log'
       when: session_check.rc != 0
 
-    # deploy-openstack.sh uses a "lock" directory to ensure that only one
+    # multinode.sh uses a "lock" directory to ensure that only one
     # instance can run concurrently.
     - name: Check that no deployment is in progress
       stat:
@@ -45,9 +46,9 @@
           directory and run this playbook again.
       when: lock_stat.stat.exists
 
-    - name: Run deploy-openstack.sh in tmux window
+    - name: "Run multinode.sh {{ multinode_command }} in tmux window"
       command: >-
-        tmux send -t {{ tmux_session }}.0 './deploy-openstack.sh' ENTER
+        tmux send -t {{ tmux_session }}.0 'multinode.sh {{ multinode_command }}' ENTER
 
     - name: Show how to follow deployment progress
       debug:
@@ -57,11 +58,11 @@
 
           {{ connection_info }}
 
-    - name: Wait for deploy-openstack.sh to start
+    - name: "Wait for multinode.sh {{ multinode_command }} to start"
       pause:
         seconds: 30
 
-    - name: Wait for deployment to complete
+    - name: "Wait for multinode.sh {{ multinode_command }} to complete"
       stat:
         path: "{{ lock_path }}"
       register: lock_stat
@@ -70,13 +71,13 @@
       delay: 10
       failed_when: false
 
-    # deploy-openstack.sh writes an exit code to a file. 0 is success
-    - name: Check deployment result
+    # multinode.sh writes an exit code to a file. 0 is success
+    - name: "Check multinode.sh {{ multinode_command }} result"
       slurp:
         path: "{{ rc_path }}"
       register: rc_slurp
 
-    - name: Fail if deployment was unsuccessful
+    - name: "Fail if multinode.sh {{ multinode_command }} was unsuccessful"
       fail:
         msg: |
           Deployment or testing of OpenStack was unsuccessful.

@@ -61,20 +61,6 @@ resource "local_file" "openstack_inventory" {
   file_permission = "0644"
 }
 
-resource "local_file" "deploy_openstack" {
-  content = templatefile(
-    "${path.module}/templates/deploy-openstack.tpl",
-    {
-      seed_addr           = openstack_compute_instance_v2.seed.access_ip_v4,
-      ssh_user            = var.ssh_user,
-      deploy_wazuh        = var.deploy_wazuh
-      controller_hostname = openstack_compute_instance_v2.controller.*.name
-    }
-  )
-  filename        = "ansible/files/deploy-openstack.sh"
-  file_permission = "0755"
-}
-
 resource "ansible_host" "control_host" {
   name   = var.add_ansible_control_fip ? openstack_networking_floatingip_v2.ansible_control_fip[0].address : openstack_compute_instance_v2.ansible_control.access_ip_v4
   groups = ["ansible_control"]

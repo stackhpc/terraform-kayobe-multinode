@@ -2,6 +2,8 @@
 - name: Grow Control Host
   hosts: ansible_control
   gather_facts: true
+  vars:
+    growroot_ignore_lvm_check: false
   vars_files:
     - vars/defaults.yml
   tasks:

@@ -292,6 +292,7 @@
           source {{ src_directory }}/{{ kayobe_config_name }}/kayobe-env --environment {{ kayobe_config_environment }}
           export KAYOBE_VAULT_PASSWORD="$(cat ~/vault.password)"
           kayobe control host {% if upgrade | bool %}upgrade{% else %}bootstrap{% endif %}
+        executable: /bin/bash
 
     - name: Ensure OpenStack Config repository is present
       ansible.builtin.git:

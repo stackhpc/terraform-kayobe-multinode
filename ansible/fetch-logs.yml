@@ -34,6 +34,7 @@
           else
             echo "Missing diagnostics playbook - skipping"
           fi
+        executable: /bin/bash
       failed_when: false
       register: diagnostics_result
 

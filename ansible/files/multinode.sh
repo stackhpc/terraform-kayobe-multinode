@@ -336,6 +336,19 @@ function upgrade_overcloud() {
   kayobe overcloud service upgrade
 }
 
+function rabbit_migration() {
+  # Set quorum flag and execute RabbitMQ queue migration script.
+  if [[ -f $KAYOBE_CONFIG_PATH/../../tools/rabbitmq-quorum-migration.sh ]]; then
+    sed -i -e 's/om_enable_rabbitmq_high_availability: true/om_enable_rabbitmq_high_availability: false/' \
+        -e 's/om_enable_rabbitmq_quorum_queues: false/om_enable_rabbitmq_quorum_queues: true/' \
+        $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals.yml
+    $KAYOBE_CONFIG_PATH/../../tools/rabbitmq-quorum-migration.sh
+  else
+    echo "Migration script not found. Check Openstack Release"
+    return 1
+  fi
+}
+
 function usage() {
   set +x
 
@@ -351,6 +364,7 @@ function usage() {
   echo "  build_kayobe_image"
   echo "  run_tempest"
   echo "  upgrade_overcloud"
+  echo "  rabbit_migration"
 }
 
 function main() {
@@ -373,7 +387,7 @@ function main() {
       $cmd
       ;;
     # Standard commands.
-    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud)
+    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud|rabbit_migration)
       setup
       $cmd
       report_success

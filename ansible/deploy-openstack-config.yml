@@ -102,11 +102,30 @@
         dest: "{{ src_directory }}/{{ kayobe_config_name }}"
         update: "{{ upgrade | bool }}"
 
-    - name: Pop stashed Kayobe Config changes (upgrade)
-      ansible.builtin.command:
-        cmd: git stash pop
-        chdir: "{{ src_directory }}/{{ kayobe_config_name }}"
-      when: upgrade | bool
+    - when: upgrade
+      block:
+        - name: Pop stashed Kayobe Config changes (upgrade)
+          ansible.builtin.command:
+            cmd: git stash pop
+            chdir: "{{ src_directory }}/{{ kayobe_config_name }}"
+          register: pop_result
+          # NOTE: Fails when no stash exists
+          failed_when:
+            - pop_result is failure
+            - "'No stash entries found' not in pop_result.stderr"
+      rescue:
+        - name: Check Kayobe Config diff (upgrade)
+          ansible.builtin.command:
+            cmd: git diff
+            chdir: "{{ src_directory }}/{{ kayobe_config_name }}"
+          register: diff_result
+
+        - name: Fail on git stash pop failure
+          ansible.builtin.fail:
+            msg: |-
+              Failed to pop stashed changes after upgrade.
+
+              {{ diff_result.stdout }}
 
     - name: Replace TLS changes to avoid git conflicts (upgrade)
       ansible.builtin.shell:

@@ -118,6 +118,25 @@
       vars:
         kayobe_environment_path: "{{ src_directory }}/kayobe-config/etc/kayobe/environments/{{ kayobe_config_environment }}"
 
+    # WORKAROUND:
+    # There is a race condition in Ansible that can result in this failure:
+    #   msg: |-
+    #   MODULE FAILURE
+    #   See stdout/stderr for the exact error
+    # rc: -13
+    # See https://github.com/ansible/ansible/issues/78344 and
+    # https://github.com/ansible/ansible/issues/81777.
+    # In https://github.com/stackhpc/stackhpc-kayobe-config/pull/1108 we applied
+    # a workaround to increase the ControlPersist timeout to 1 hour, but this
+    # does not always work.
+    # Disabling SSH pipelining prevents the issue at the cost of Ansible
+    # execution duration.
+    - name: Disable SSH pipelining
+      ansible.builtin.replace:
+        path: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/ansible.cfg"
+        regexp: "^pipelining.*=.*"
+        replace: "pipelining = False"
+
     - name: Ensure hooks directory are present
       ansible.builtin.file:
         dest: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/hooks/{{ item }}"

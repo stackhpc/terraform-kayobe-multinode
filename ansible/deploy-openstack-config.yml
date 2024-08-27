@@ -57,9 +57,12 @@
         fail_msg: "FIPS policy does not currently support ed25519 SSH keys on RHEL family systems"
       when: ansible_facts['os_family'] == "RedHat"
 
-    - name: Ensure git is present
+    - name: Ensure required packages are present
       ansible.builtin.package:
-        name: git
+        name:
+          - git
+          - tmux
+          - vim
         state: present
       become: true
 

@@ -337,6 +337,14 @@ function upgrade_overcloud() {
 }
 
 function rabbit_migration() {
+  # Ensure RabbitMQ is upgraded to 3.13
+  if kayobe overcloud host command run -l controllers -b --command "docker exec rabbitmq rabbitmqctl --version | grep 3.11" --show-output; then
+    kayobe kolla ansible run "rabbitmq-upgrade 3.12"
+  fi
+  if kayobe overcloud host command run -l controllers -b --command "docker exec rabbitmq rabbitmqctl --version | grep 3.12" --show-output; then
+    kayobe kolla ansible run "rabbitmq-upgrade 3.13"
+  fi
+
   # Set quorum flag and execute RabbitMQ queue migration script.
   if [[ -f $KAYOBE_CONFIG_PATH/../../tools/rabbitmq-quorum-migration.sh ]]; then
     sed -i -e 's/om_enable_rabbitmq_high_availability: true/om_enable_rabbitmq_high_availability: false/' \

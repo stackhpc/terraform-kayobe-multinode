@@ -182,7 +182,12 @@ function generate_overcloud_certs() {
   # NOTE: Previously it was necessary to first deploy HAProxy with TLS disabled.
   if [[ -f $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml ]]; then
     sed -i 's/# kolla_enable_tls_internal: true/kolla_enable_tls_internal: true/g' $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla.yml
-    cat $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals.yml
+    # This condition provides some level of idempotency, as well as supporting
+    # the case where the content of globals-tls-config.yml has been added to
+    # globals.yml within a conditional check for internal TLS.
+    if ! grep kolla_copy_ca_into_containers $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml &>/dev/null; then
+      cat $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml >> $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals.yml
+    fi
   fi
 }
 

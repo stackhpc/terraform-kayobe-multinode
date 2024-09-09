@@ -85,6 +85,7 @@
           if [[ -f {{ kayobe_environment_path }}/kolla/globals-tls-config.yml ]]; then
             sed -i 's/^kolla_enable_tls_internal: true/# kolla_enable_tls_internal: true/g' {{ kayobe_environment_path }}/kolla.yml
           fi
+        executable: /bin/bash
       when: upgrade | bool
       vars:
         kayobe_environment_path: "{{ src_directory }}/kayobe-config/etc/kayobe/environments/{{ kayobe_config_environment }}"
@@ -133,6 +134,7 @@
           if [[ -f {{ kayobe_environment_path }}/kolla/globals-tls-config.yml ]]; then
             sed -i 's/# kolla_enable_tls_internal: true/kolla_enable_tls_internal: true/g' {{ kayobe_environment_path }}/kolla.yml
           fi
+        executable: /bin/bash
       when: upgrade | bool
       vars:
         kayobe_environment_path: "{{ src_directory }}/kayobe-config/etc/kayobe/environments/{{ kayobe_config_environment }}"
@@ -217,6 +219,7 @@
         cmd: >
           awk -F'=' '/defaultbranch/ {print $2}' {{ src_directory }}/{{ kayobe_config_name }}/.gitreview |
           sed -E "s,(stable|unmaintained)/,,"
+        executable: /bin/bash
       register: openstack_release
       changed_when: false
 

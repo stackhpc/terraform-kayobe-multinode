@@ -10,6 +10,7 @@
     - name: Check LVM status
       shell:
         cmd: vgdisplay | grep -q lvm2
+        executable: /bin/bash
       changed_when: false
       failed_when: false
       check_mode: false
@@ -20,6 +21,7 @@
         - name: Check if growpart is installed
           shell:
             cmd: type growpart
+            executable: /bin/bash
           changed_when: false
           failed_when: false
           check_mode: false

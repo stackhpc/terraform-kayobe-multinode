@@ -90,6 +90,18 @@
       vars:
         kayobe_environment_path: "{{ src_directory }}/kayobe-config/etc/kayobe/environments/{{ kayobe_config_environment }}"
 
+    - name: Revert RabbitMQ changes to avoid git conflicts (upgrade)
+      ansible.builtin.shell:
+        cmd: >-
+          if grep "om_enable_rabbitmq_high_availability: false" {{ kayobe_environment_path }}/kolla/globals.yml ; then
+            sed -i -e 's/om_enable_rabbitmq_high_availability: false/om_enable_rabbitmq_high_availability: true/' \
+              -e 's/om_enable_rabbitmq_quorum_queues: true/om_enable_rabbitmq_quorum_queues: false/' \
+              {{ kayobe_environment_path }}/kolla/globals.yml
+          fi
+      when: upgrade | bool
+      vars:
+        kayobe_environment_path: "{{ src_directory }}/kayobe-config/etc/kayobe/environments/{{ kayobe_config_environment }}"
+
     - name: Stash Kayobe Config changes (upgrade)
       ansible.builtin.command:
         cmd: git stash

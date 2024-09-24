@@ -368,6 +368,12 @@ function upgrade_overcloud() {
   run_kayobe overcloud service upgrade
 }
 
+function upgrade_prerequisites() {
+  # Run the upgrade prerequisites script if it exists.
+  workaround_ansible_rc13_bug
+  [[ ! -f $KAYOBE_CONFIG_ROOT/tools/upgrade-prerequisites.sh ]] || $KAYOBE_CONFIG_ROOT/tools/upgrade-prerequisites.sh
+}
+
 function usage() {
   set +x
 
@@ -383,6 +389,7 @@ function usage() {
   echo "  build_kayobe_image"
   echo "  run_tempest"
   echo "  upgrade_overcloud"
+  echo "  upgrade_prerequisites"
 }
 
 function main() {
@@ -405,7 +412,7 @@ function main() {
       $cmd
       ;;
     # Standard commands.
-    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud)
+    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud|upgrade_prerequisites)
       setup
       $cmd
       report_success

@@ -187,6 +187,14 @@
       tags:
         - multinode.sh
 
+    - name: Ensure env-vars.sh script is present
+      ansible.builtin.template:
+        src: "templates/env-vars.sh.j2"
+        dest: "{{ ansible_env.HOME }}/env-vars.sh"
+        mode: "0755"
+      tags:
+        - env-vars
+
     - name: Ensure root_domain is defined
       ansible.builtin.lineinfile:
         path: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/inventory/group_vars/all/main.yml"

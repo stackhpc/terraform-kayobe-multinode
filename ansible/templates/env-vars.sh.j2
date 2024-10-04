@@ -1,0 +1,6 @@
+#!/bin/bash
+export KAYOBE_VAULT_PASSWORD=$(cat {{ vault_password_path }})
+source {{ ansible_env.HOME }}/venvs/kayobe/bin/activate
+source {{ src_directory }}/{{ kayobe_config_name }}/kayobe-env --environment {{ kayobe_config_environment }}
+source <(kayobe complete)
+cd {{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/

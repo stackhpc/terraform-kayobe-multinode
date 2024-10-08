@@ -192,8 +192,6 @@
         src: "templates/env-vars.sh.j2"
         dest: "{{ ansible_env.HOME }}/env-vars.sh"
         mode: "0755"
-      tags:
-        - env-vars
 
     - name: Ensure root_domain is defined
       ansible.builtin.lineinfile:

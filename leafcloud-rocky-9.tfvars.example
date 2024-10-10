@@ -36,3 +36,5 @@ infra_vm_disk_size = 100
 
 add_ansible_control_fip = true
 ansible_control_fip_pool = "external"
+
+volume_type = ""

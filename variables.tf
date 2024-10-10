@@ -129,3 +129,9 @@ variable "ansible_control_fip_pool" {
   type = string
   default = ""
 }
+
+variable "volume_type" {
+  description = "Volume type to use for block storage. Set to empty string to use the default volume type."
+  type = string
+  default = ""
+}

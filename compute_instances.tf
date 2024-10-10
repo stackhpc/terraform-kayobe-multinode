@@ -36,6 +36,7 @@ resource "openstack_compute_instance_v2" "ansible_control" {
       boot_index            = 0
       destination_type      = "volume"
       delete_on_termination = true
+      var.volume_type == "" ? null : var.volume_type
     }
   }
   timeouts {
@@ -67,6 +68,7 @@ resource "openstack_compute_instance_v2" "seed" {
       boot_index            = 0
       destination_type      = "volume"
       delete_on_termination = true
+      var.volume_type == "" ? null : var.volume_type
     }
   }
   timeouts {
@@ -94,6 +96,7 @@ resource "openstack_compute_instance_v2" "compute" {
       boot_index            = 0
       destination_type      = "volume"
       delete_on_termination = true
+      var.volume_type == "" ? null : var.volume_type
     }
   }
   timeouts {
@@ -120,6 +123,7 @@ resource "openstack_compute_instance_v2" "controller" {
       boot_index            = 0
       destination_type      = "volume"
       delete_on_termination = true
+      var.volume_type == "" ? null : var.volume_type
     }
   }
   timeouts {
@@ -147,6 +151,7 @@ resource "openstack_compute_instance_v2" "storage" {
       boot_index            = 0
       destination_type      = "volume"
       delete_on_termination = true
+      var.volume_type == "" ? null : var.volume_type
     }
   }
   timeouts {
@@ -172,6 +177,7 @@ resource "openstack_compute_instance_v2" "wazuh_manager" {
     boot_index            = 0
     destination_type      = "volume"
     delete_on_termination = true
+    var.volume_type == "" ? null : var.volume_type
   }
   timeouts {
     create = "90m"

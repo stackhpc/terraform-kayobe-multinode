@@ -371,7 +371,7 @@ function upgrade_overcloud() {
 function upgrade_prerequisites() {
   # Run the upgrade prerequisites script if it exists.
   workaround_ansible_rc13_bug
-  [[ ! -f $KAYOBE_CONFIG_ROOT/tools/upgrade-prerequisites.sh ]] || $KAYOBE_CONFIG_ROOT/tools/upgrade-prerequisites.sh
+  [[ ! -f $KAYOBE_CONFIG_PATH/../../tools/upgrade-prerequisites.sh ]] || $KAYOBE_CONFIG_PATH/../../tools/upgrade-prerequisites.sh
 }
 
 function usage() {

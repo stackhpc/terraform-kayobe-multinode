@@ -2,16 +2,101 @@
 Terraform Kayobe Multinode
 ==========================
 
-This Terraform configuration deploys a requested amount of Instances on an OpenStack cloud, to be
-used as a Multinode Kayobe test environment.
+This Terraform configuration deploys a requested amount of instances on an OpenStack cloud, to be
+used as a Multinode Kayobe test environment. This includes:
 
-Usage
-=====
+* 1x Ansible control host
+* 1x seed host
+* controller hosts
+* compute hosts
+* Ceph storage hosts
+* Optional Wazuh manager host
+
+The high-level workflow to deploy a cluster is as follows:
+
+* Prerequisites
+* Configure Terraform and Ansible
+* Deploy infrastructure on OpenStack using Terraform
+* Configure Ansible control host using Ansible
+* Deploy multi-node OpenStack using Kayobe
+
+This configuration is typically used with the `ci-multinode` environment in the
+`StackHPC Kayobe Configuration
+<https://stackhpc-kayobe-config.readthedocs.io/en/stackhpc-2023.1/contributor/environments/ci-multinode.html>`__
+repository.
+
+What's in the box?
+==================
+
+This repository contains various items.
+
+Scripts
+-------
+
+* ``scripts/deploy.sh`` - end-to-end cluster deployment and testing.
+* ``scripts/tear-down.sh`` - tear down test cluster infrastructure.
+
+Terraform
+---------
+
+Terraform configuration deploys test cluster infrastructure on an OpenStack
+cloud. It provides outputs that can be used to populate Kayobe Configuration
+with the details of the test infrastructure.
+
+Ansible
+-------
+
+Ansible playbooks in the ``ansible/`` directory are provided to prepare and use
+the Ansible control host.
+
+#. ``configure-hosts.yml`` - sequentially executes 3 other playbooks:
+
+   #. ``wait-control-host.yml`` - Waits for the Ansible control host to become
+      accessible and ready for deployment. Tag: ``wait``
+   #. ``grow-control-host.yml`` - Applies LVM configuration to the control host
+      to ensure it has enough space to continue with the rest of the
+      deployment. Tag: ``lvm``
+   #. ``deploy-openstack-config.yml`` - Prepares the Ansible control host as a
+      Kayobe control host, cloning the Kayobe configuration and installing
+      virtual environments. Tag: ``deploy``
+
+   These playbooks are tagged so that they can be invoked or skipped using
+   `tags` or `--skip-tags` as required.
+
+#. ``deploy-openstack.yml`` - runs the ``multinode.sh deploy_full`` command in
+   a `tmux` session on the Ansible control host. The session is logged to
+   ``~/tmux.kayobe\:0.log`` on the Ansible control host.  Use ``less -r
+   ~/tmux.kayobe\:0.log`` to view the logs in their original colourful glory.
+
+#. ``fetch-logs.yml`` - fetches logs, diagnostics and tests results from the
+   cluster to the host runnin the playbook..
+
+Configuration variables for these playbooks are in
+``ansible/vars/defaults.yml``.
+
+multinode.sh
+------------
+
+The ``multinode.sh`` script is installed in ``/usr/local/bin/`` on the Ansible
+control host. It provides high-level automation of various aspects of OpenStack
+deployment, operations and testing. It accepts a single argument which is the
+command to perform. The supported commands may be listed by running it without
+arguments.
+
+Prerequisites
+=============
 
 These instructions show how to use this Terraform configuration manually. They
 assume you are running an Ubuntu host that will be used to run Terraform. The
-machine should have network access to the environment that will be created by this
-configuration.
+machine should have access to the API of the OpenStack cloud that will host the
+infrastructure, and network access to the Ansible control host once it has been
+deployed. This may be achieved by direct SSH access, a floating IP on the
+Ansible control host, or using an SSH bastion.
+
+The OpenStack cloud should have sufficient capacity to deploy the
+infrastructure, and a suitable image registered in Glance. Ideally the image
+should be one of the overcloud host images defined in StackHPC Kayobe
+configuration and available in `Ark <https://ark.stackhpc.com>`__.
 
 Install Terraform:
 
@@ -22,13 +107,12 @@ Install Terraform:
    sudo apt update
    sudo apt install git terraform
 
-Clone and initialise the Kayobe config:
+Clone and initialise this Terraform config repository:
 
 .. code-block:: console
 
    git clone https://github.com/stackhpc/terraform-kayobe-multinode
    cd terraform-kayobe-multinode
-
 
 Initialise Terraform:
 
@@ -36,11 +120,18 @@ Initialise Terraform:
 
    terraform init
 
-Generate an SSH keypair:
+Generate an SSH keypair. Note that `ED25519 keys are not currently supported by RHEL
+<https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/securing_networks/index#making-openssh-more-secure_assembly_using-secure-communications-between-two-systems-with-openssh>`__
+when using the FIPS security standard (as enabled by the CIS benchmark hardening
+scripts in kayobe-config). The public key will be registered in OpenStack as a
+keypair and authorised by the instances deployed by Terraform. The private and
+public keys will be transferred to the Ansible control host to allow it to
+connect to the other hosts. Note that password-protected keys are not currently
+supported.
 
 .. code-block:: console
 
-   ssh-keygen -f id_rsa -N ''
+   ssh-keygen -t rsa -f id_rsa -N ''
 
 Create an OpenStack clouds.yaml file with your credentials to access an
 OpenStack cloud. Alternatively, download and source an openrc file from Horizon.
@@ -94,89 +185,21 @@ Or you can source the provided `init.sh` script which shall initialise terraform
    OpenStack Cloud Name: sms-lab
    Password:
 
-Generate Terraform variables:
-
-.. code-block:: console
-
-   cat << EOF > terraform.tfvars
-   prefix = "changeme"
-
-   ansible_control_vm_flavor = "general.v1.small"
-   ansible_control_vm_name   = "ansible-control"
-   ansible_control_disk_size = 100
-
-   seed_vm_flavor = "general.v1.small"
-   seed_disk_size = 100
-
-   multinode_flavor     = "general.v1.medium"
-   multinode_image      = "Rocky9-lvm"
-   multinode_keypair    = "changeme"
-   multinode_vm_network = "stackhpc-ipv4-geneve"
-   multinode_vm_subnet  = "stackhpc-ipv4-geneve-subnet"
-   compute_count        = "2"
-   controller_count     = "3"
-   compute_disk_size    = 100
-   controller_disk_size = 100
-
-   ssh_public_key = "~/.ssh/changeme.pub"
-   ssh_user       = "cloud-user"
-
-   storage_count     = "3"
-   storage_flavor    = "general.v1.small"
-   storage_disk_size = 100
-
-   deploy_wazuh       = true
-   infra_vm_flavor    = "general.v1.small"
-   infra_vm_disk_size = 100
-
-   EOF
-
-You will need to set the `multinode_keypair`, `prefix`, and `ssh_public_key`.
-By default, Rocky Linux 9 will be used but Ubuntu Jammy is also supported by
-changing `multinode_image` to `Ubuntu-22.04-lvm` and `ssh_user` to `ubuntu`.
-Other LVM images should also work but are untested.
-
-The `multinode_flavor` will change the flavor used for controller and compute
-nodes. Both virtual machines and baremetal are supported, but the `*_disk_size`
-variables must be set to 0 when using baremetal host. This will stop a block
-device being allocated. When any baremetal hosts are deployed, the
-`multinode_vm_network` and `multinode_vm_subnet` should also be changed to
-`stackhpc-ipv4-vlan-v2` and `stackhpc-ipv4-vlan-subnet-v2` respectively.
-
-If `deploy_wazuh` is set to true, an infrastructure VM will be created that
-hosts the Wazuh manager. The Wazuh deployment playbooks will also be triggered
-automatically to deploy Wazuh agents to the overcloud hosts.
-
-Generate a plan:
-
-.. code-block:: console
-
-   terraform plan
-
-Apply the changes:
-
-.. code-block:: console
-
-   terraform apply -auto-approve
-
-You should have requested a number of resources spawned on Openstack, and an ansible_inventory file produced as output for Kayobe.
-
-Copy your generated id_rsa and id_rsa.pub to ~/.ssh/ on Ansible control host if you want Kayobe to automatically pick them up during bootstrap.
-
-Configure Ansible control host
-
-Using the `deploy-openstack-config.yml` playbook you can setup the Ansible control host to include the kayobe/kayobe-config repositories with `hosts` and `admin-oc-networks`.
-It shall also setup the kayobe virtual environment, allowing for immediate configuration and deployment of OpenStack.
-
-First you must ensure that you have `Ansible installed <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`_ on your local machine.
+You must ensure that you have `Ansible installed <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`_ on your local machine.
 
 .. code-block:: console
 
    pip install --user ansible
 
-Secondly if the machines are behind an SSH bastion you must ensure that your ssh config is setup appropriately with a proxy jump
+Install the Ansible galaxy requirements.
 
 .. code-block:: console
+
+   ansible-galaxy install -r ansible/requirements.yml
+
+If the deployed instances are behind an SSH bastion you must ensure that your SSH config is setup appropriately with a proxy jump.
+
+.. code-block::
 
    Host lab-bastion
       HostName BastionIPAddr
@@ -190,60 +213,145 @@ Secondly if the machines are behind an SSH bastion you must ensure that your ssh
       UserKnownHostsFile /dev/null
       StrictHostKeyChecking no
 
-Install the ansible requirements.
+Configure Terraform variables
+=============================
+
+Populate Terraform variables in `terraform.tfvars`. Examples are provided in
+files named `*.tfvars.example`. The available variables are defined in
+`variables.tf` along with their type, description, and optional default.
+
+You will need to set the `multinode_keypair`, `prefix`, and `ssh_public_key`.
+By default, Rocky Linux 9 will be used but Ubuntu Jammy is also supported by
+changing `multinode_image` to `overcloud-ubuntu-jammy-<release>-<datetime>` and
+`ssh_user` to `ubuntu`.
+
+The `multinode_flavor` will change the flavor used for controller and compute
+nodes. Both virtual machines and baremetal are supported, but the `*_disk_size`
+variables must be set to 0 when using baremetal host. This will stop a block
+device being allocated. When any baremetal hosts are deployed, the
+`multinode_vm_network` and `multinode_vm_subnet` should also be changed to
+a VLAN network and associated subnet.
+
+If `deploy_wazuh` is set to true, an infrastructure VM will be created that
+hosts the Wazuh manager. The Wazuh deployment playbooks will also be triggered
+automatically to deploy Wazuh agents to the overcloud hosts.
+
+If `add_ansible_control_fip` is set to `true`, a floating IP will be created
+and attached to the Ansible control host. In that case
+`ansible_control_fip_pool` should be set to the name of the pool (network) from
+which to allocate the floating IP, and the floating IP will be used for SSH
+access to the control host.
+
+Configure Ansible variables
+===========================
+
+Review the vars defined within `ansible/vars/defaults.yml`. In here you can customise the version of kayobe, kayobe-config or openstack-config.
+Make sure to define `ssh_key_path` to point to the location of the SSH key in use by the nodes and also `vxlan_vni` which should be unique value between 1 to 100,000.
+VNI should be much smaller than the officially supported limit of 16,777,215 as we encounter errors when attempting to bring interfaces up that use a high VNI.
+You must set `vault_password_path`; this should be set to the path to a file containing the Ansible vault password.
+
+Deployment: The fast(er) way
+============================
+
+The `scripts/deploy.sh` script provides a fully automated deployment method
+that can be used to perform all steps from infrastructure deployment through to
+Tempest testing without user interaction. Any errors encountered will be
+reported and halt the deployment.
+
+This script makes use of the `ansible/deploy-openstack.yml` Ansible playbook
+that runs the `multinode.sh deploy_full` command in a `tmux` session on the Ansible
+control host. The session is logged to `~/tmux.kayobe\:0.log` on the Ansible
+control host. Use `less -r ~/tmux.kayobe\:0.log` to view the logs in their
+original colourful glory.
+
+Note that this approach requires all Terraform, Ansible, Kayobe and OpenStack
+configuration to be provided in advance. For Kayobe and OpenStack
+configuration, this may be achieved by providing suitable branches for the
+kayobe-config and openstack-config repositories and referencing them in
+`ansible/vars/defaults.yml`.
+
+To tear down the cluster immediately after a successful deployment, combine
+with the `scripts/tear-down.sh` script.
 
 .. code-block:: console
 
-   ansible-galaxy install -r ansible/requirements.yml
+   ./scripts/deploy.sh && ./scripts/tear-down.sh -a -k
 
-Review the vars defined within `ansible/vars/defaults.yml`. In here you can customise the version of kayobe, kayobe-config or openstack-config. 
-However, make sure to define `ssh_key_path` to point to the location of the SSH key in use amongst the nodes and also `vxlan_vni` which should be unique value between 1 to 100,000.
-VNI should be much smaller than the officially supported limit of 16,777,215 as we encounter errors when attempting to bring interfaces up that use a high VNI. You must set``vault_password_path``; this should be set to the path to a file containing the Ansible vault password.
+Note that this will not tear down the cluster if deployment fails, allowing for
+debugging the issue and/or retrying.
 
-Finally, run the configure-hosts playbook.
+Deployment: The slow(er) way
+============================
+
+This section describes a more hands-on, interactive deployment method. It may
+be useful to gain a better understanding of how the deployment works, modify
+the deployment process in some way, or iterate on configuration.
+
+Terraform Deploy infrastructure using Terraform
+-----------------------------------------------
+
+Generate a plan:
+
+.. code-block:: console
+
+   terraform plan
+
+Apply the changes:
+
+.. code-block:: console
+
+   terraform apply -auto-approve
+
+You should have requested a number of resources to be spawned on Openstack.
+
+Configure Ansible control host
+------------------------------
+
+Run the configure-hosts.yml playbook to configure the Ansible control host.
 
 .. code-block:: console
 
    ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml
 
-This playbook sequentially executes 4 other playbooks:
-
-#. ``fix-homedir-ownership.yml`` - Ensures the ``ansible_user`` owns their home directory. Tag: ``fix-homedir``
-#. ``add-fqdn.yml`` - Ensures FQDNs are added to ``/etc/hosts``. Tag: ``fqdn``
-#. ``grow-control-host.yml`` - Applies LVM configuration to the control host to ensure it has enough space to continue with the rest of the deployment. Tag: ``lvm`` 
-#. ``deploy-openstack-config.yml`` - Deploys the OpenStack configuration to the control host. Tag: ``deploy``
-
-These playbooks are tagged so that they can be invoked or skipped as required. For example, if designate is not being deployed, some time can be saved by skipping the FQDN playbook:
-
-.. code-block:: console
-
-   ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml --skip-tags fqdn
-
 Deploy OpenStack
 ----------------
 
 Once the Ansible control host has been configured with a Kayobe/OpenStack configuration you can then begin the process of deploying OpenStack.
-This can be achieved by either manually running the various commands to configures the hosts and deploy the services or automated by using `deploy-openstack.sh`,
-which should be available within the homedir on your Ansible control host provided you ran `deploy-openstack-config.yml` earlier.
+This can be achieved by either manually running the various commands to configure the hosts and deploy the services or automated by using the ``multinode.sh deploy_full`` command.
+``multinode.sh`` should be available within ``/usr/local/bin/`` on your Ansible control host provided you ran `deploy-openstack-config.yml` earlier.
+This script will go through the process of performing the following tasks:
 
-If you choose to opt for automated method you must first SSH into your Ansible control host and then run the `deploy-openstack.sh` script
-
-.. code-block:: console
-
-   ssh $(terraform output -raw ssh_user)@$(terraform output -raw ansible_control_access_ip_v4)
-   ~/deploy-openstack.sh
-
-This script will go through the process of performing the following tasks
    * kayobe control host bootstrap
    * kayobe seed host configure
    * kayobe overcloud host configure
    * cephadm deployment
+   * HashiCorp Vault deployment & certificate generation
    * kayobe overcloud service deploy
-   * openstack configuration
-   * tempest testing
+   * OpenStack configuration
+   * Tempest testing
+
+Tempest test results will be written to ``~/tempest-artifacts``.
+
+If you choose to opt for the automated method you must first SSH into your Ansible control host.
+
+.. code-block:: console
+
+   ssh $(terraform output -raw ssh_user)@$(terraform output -raw ansible_control_access_ip_v4)
+
+Start a `tmux` session to avoid halting the deployment if you are disconnected.
+
+.. code-block:: console
+
+   tmux
+
+Run the `multinode.sh` script.
+
+.. code-block:: console
+
+   multinode.sh deploy_full
 
 Accessing OpenStack
--------------------
+===================
 
 After a successful deployment of OpenStack you make access the OpenStack API and Horizon by proxying your connection via the seed node, as it has an interface on the public network (192.168.39.X).
 Using software such as sshuttle will allow for easy access.
@@ -252,7 +360,7 @@ Using software such as sshuttle will allow for easy access.
 
    sshuttle -r $(terraform output -raw ssh_user)@$(terraform output -raw seed_access_ip_v4) 192.168.39.0/24
 
-You may also use sshuttle to proxy DNS via the multinode environment. Useful if you are working with Designate. 
+You may also use sshuttle to proxy DNS via the multinode environment. Useful if you are working with Designate.
 Important to node this will proxy all DNS requests from your machine to the first controller within the multinode environment.
 
 .. code-block:: console
@@ -260,7 +368,7 @@ Important to node this will proxy all DNS requests from your machine to the firs
    sshuttle -r $(terraform output -raw ssh_user)@$(terraform output -raw seed_access_ip_v4) 192.168.39.0/24 --dns --to-ns 192.168.39.4
 
 Tear Down
----------
+=========
 
 After you are finished with the multinode environment please destroy the nodes to free up resources for others.
 This can acomplished by using the provided `scripts/tear-down.sh` which will destroy your controllers, compute, seed and storage nodes whilst leaving your Ansible control host and keypair intact.
@@ -268,7 +376,7 @@ This can acomplished by using the provided `scripts/tear-down.sh` which will des
 If you would like to delete your Ansible control host then you can pass the `-a` flag however if you would also like to remove your keypair then pass `-a -k`
 
 Issues & Fixes
---------------
+==============
 
 Sometimes a compute instance fails to be provisioned by Terraform or fails on boot for any reason.
 If this happens the solution is to mark the resource as tainted and perform terraform apply again which shall destroy and rebuild the failed instance.

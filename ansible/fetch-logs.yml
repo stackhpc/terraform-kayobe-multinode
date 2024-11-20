@@ -1,0 +1,80 @@
+---
+- name: Fetch logs
+  hosts: ansible_control
+  vars:
+    fetch_logs_dest: "{{ lookup('env', 'PWD') }}/logs"
+    diagnostics_path_control_host: "{{ ansible_facts.env.HOME }}/diagnostics"
+  tasks:
+    - name: Install rsync
+      ansible.builtin.package:
+        name: rsync
+      become: true
+
+    - name: Fetch Kayobe deployment logs
+      ansible.builtin.fetch:
+        src: "/home/{{ ansible_user }}/tmux.kayobe:0.log"
+        dest: "{{ fetch_logs_dest }}/"
+        fail_on_missing: false
+        flat: true
+
+    - name: Create diagnostics directory
+      ansible.builtin.file:
+        path: "{{ diagnostics_path_control_host }}"
+        state: directory
+
+    - name: Collect diagnostics
+      ansible.builtin.shell:
+        cmd: |-
+          set -euo pipefail
+          source ~/venvs/kayobe/bin/activate
+          source ~/src/kayobe-config/kayobe-env --environment ci-multinode
+          export KAYOBE_VAULT_PASSWORD=$(cat ~/vault.password)
+          if [[ -f $KAYOBE_CONFIG_PATH/ansible/diagnostics.yml ]]; then
+            kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/diagnostics.yml -e diagnostics_path_local={{ diagnostics_path_control_host }}
+          else
+            echo "Missing diagnostics playbook - skipping"
+          fi
+        executable: /bin/bash
+      failed_when: false
+      register: diagnostics_result
+
+    # NOTE: In Ansible 2.10 and lower the synchronize module does not respect
+    # SSH connection variables. This may result in Permission Denied issues if
+    # using an SSH key that is not in ~/.ssh.
+    - name: Fetch diagnostics
+      ansible.posix.synchronize:
+        src: "{{ diagnostics_path_control_host }}"
+        dest: "{{ fetch_logs_dest }}/"
+        mode: pull
+        archive: no
+        recursive: true
+        copy_links: true
+        verify_host: true
+        # For jump host
+        use_ssh_args: true
+      when: diagnostics_result is success
+
+    - name: Find Tempest results
+      ansible.builtin.find:
+        path: "/home/{{ ansible_user }}"
+        # Also include old backed up results.
+        patterns: "tempest-artifacts*"
+        file_type: "directory"
+        depth: 1
+      register: find_tempest_results
+
+    # NOTE: In Ansible 2.10 and lower the synchronize module does not respect
+    # SSH connection variables. This may result in Permission Denied issues if
+    # using an SSH key that is not in ~/.ssh.
+    - name: Fetch Tempest results
+      ansible.posix.synchronize:
+        src: "{{ item.path }}"
+        dest: "{{ fetch_logs_dest }}/"
+        mode: pull
+        archive: no
+        recursive: true
+        copy_links: true
+        verify_host: true
+        # For jump host
+        use_ssh_args: true
+      loop: "{{ find_tempest_results.files }}"

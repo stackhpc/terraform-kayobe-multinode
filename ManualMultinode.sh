@@ -20,27 +20,29 @@ echo '[openstack]' > inventory/hosts
 echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >> inventory/hosts
 
 # Create clouds.yaml file
-cat << EOF > clouds.yaml
-clouds:
-  sms-lab:
-    auth:
-      auth_url: https://api.sms-lab.cloud:5000
-      username: <set_OS_username>
-      project_name: <set_OS_project_name>
-      domain_name: default
-    interface: "public"
-    identity_api_version: 3
-    region_name: "RegionOne"
-EOF
+# cat << EOF > clouds.yaml
+# clouds:
+#   sms-lab:
+#     auth:
+#       auth_url: https://api.sms-lab.cloud:5000
+#       username: <set_OS_username>
+#       project_name: <set_OS_project_name>
+#       domain_name: default
+#     interface: "public"
+#     identity_api_version: 3
+#     region_name: "RegionOne"
+# EOF
 
 # Run init.sh
-export OS_CLOUD=sms-lab
-read -p OS_PASSWORD -s OS_PASSWORD
-export OS_PASSWORD
+# export OS_CLOUD=sms-lab
+# read -p OS_PASSWORD -s OS_PASSWORD
+# export OS_PASSWORD
+
+read -p "Path to your clouds.yaml:" OS_CLOUD_DIR
 
 export ssh_public_key_path="~/.ssh/id_rsa.pub"
 
 #Deploy terraform infrastructure via ansible
-ansible-playbook multinode-app.yml -i inventory -e manual_deployment=true -e ssh_public_key_path=$ssh_public_key_path -e OS_CLOUD=sms-lab -e OS_PASSWORD=$OS_PASSWORD -e OS_CLIENT_CONFIG_FILE=./clouds.yaml
+ansible-playbook multinode-app.yml -i inventory -e manual_deployment=true -e ssh_public_key_path=$ssh_public_key_path -e OS_CLOUD=openstack -e OS_CLIENT_CONFIG_FILE=$OS_CLOUD_DIR #./clouds.yaml
 
 

@@ -365,6 +365,7 @@ function upgrade_overcloud() {
 
   run_kayobe overcloud host upgrade
   run_kayobe overcloud host configure
+  run_kayobe overcloud database recover
   run_kayobe overcloud service upgrade
 }
 

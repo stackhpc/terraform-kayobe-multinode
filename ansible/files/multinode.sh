@@ -203,6 +203,31 @@ function generate_barbican_secrets() {
   rm /tmp/barbican-role-id
 }
 
+function reboot_compute() {
+  # Reboot a compute node
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/nova-compute-drain.yml --limit $1
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/nova-compute-disable.yml --limit $1
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/reboot.yml --limit $1
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/nova-compute-enable.yml --limit $1
+}
+
+function reboot_storage() {
+  # Reboot a storage node
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/ceph-enter-maintenance.yml --limit $1
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/reboot.yml --limit $1
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/ceph-exit-maintenance.yml --limit $1
+}
+
+function reboot_overcloud() {
+  # Reboot all overcloud nodes
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/reboot.yml --limit controllers
+  reboot_compute compute[0]
+  reboot_compute compute[1]
+  reboot_storage storage[0]
+  reboot_storage storage[1]
+  reboot_storage storage[2]
+}
+
 function deploy_overcloud() {
   run_kayobe overcloud host configure
 
@@ -378,6 +403,27 @@ function upgrade_prerequisites() {
   [[ ! -f $KAYOBE_CONFIG_PATH/../../tools/upgrade-prerequisites.sh ]] || $KAYOBE_CONFIG_PATH/../../tools/upgrade-prerequisites.sh
 }
 
+function minor_upgrade() {
+  # Perform a minor upgrade of the cloud, upgrading host packages and
+  # containers
+
+  # Upgrade Seed host packages
+  run_kayobe seed host configure
+  run_kayobe seed host package update --packages "*"
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/reboot.yml --limit seed
+  
+  # Upgrade Seed containers
+  run_kayobe seed service deploy
+
+  # Upgrade overcloud host packages
+  run_kayobe overcloud host configure
+  run_kayobe overcloud host package update --packages "*"
+  reboot_overcloud
+
+  # Upgrade overcloud containers
+  run_kayobe overcloud service deploy
+}
+
 function usage() {
   set +x
 
@@ -394,6 +440,7 @@ function usage() {
   echo "  run_tempest"
   echo "  upgrade_overcloud"
   echo "  upgrade_prerequisites"
+  echo "  minor_upgrade"
 }
 
 function main() {
@@ -416,7 +463,7 @@ function main() {
       $cmd
       ;;
     # Standard commands.
-    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud|upgrade_prerequisites)
+    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud|upgrade_prerequisites|minor_upgrade)
       setup
       $cmd
       report_success

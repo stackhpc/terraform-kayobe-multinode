@@ -365,6 +365,10 @@ function upgrade_overcloud() {
 
   run_kayobe overcloud host upgrade
   run_kayobe overcloud host configure
+  # FIXME: The overcloud host configure triggers parallel reboots due to an
+  # selinux state change. This breaks the database. This should be fixed by
+  # serialising the reboots inside kayobe.
+  run_kayobe overcloud database recover
   run_kayobe overcloud service upgrade
 }
 

@@ -286,7 +286,7 @@ function run_tempest() {
   set -x
 
   if [[ -d $tempest_dir ]]; then
-    tempest_backup=${tempest_dir}.$(date --iso-8601=minutes)
+    tempest_backup=${tempest_dir}-$(date +%Y%m%dT%H%M%S)
     echo "Found previous Tempest test results"
     echo "Moving to $tempest_backup"
     mv $tempest_dir $tempest_backup

@@ -203,31 +203,6 @@ function generate_barbican_secrets() {
   rm /tmp/barbican-role-id
 }
 
-function reboot_compute() {
-  # Reboot a compute node
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/nova-compute-drain.yml --limit $1
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/nova-compute-disable.yml --limit $1
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/reboot.yml --limit $1
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/nova-compute-enable.yml --limit $1
-}
-
-function reboot_storage() {
-  # Reboot a storage node
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/ceph-enter-maintenance.yml --limit $1
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/reboot.yml --limit $1
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/ceph-exit-maintenance.yml --limit $1
-}
-
-function reboot_overcloud() {
-  # Reboot all overcloud nodes
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/reboot.yml --limit controllers
-  reboot_compute compute[0]
-  reboot_compute compute[1]
-  reboot_storage storage[0]
-  reboot_storage storage[1]
-  reboot_storage storage[2]
-}
-
 function deploy_overcloud() {
   run_kayobe overcloud host configure
 
@@ -418,7 +393,7 @@ function minor_upgrade() {
   # Upgrade overcloud host packages
   run_kayobe overcloud host configure
   run_kayobe overcloud host package update --packages "*"
-  reboot_overcloud
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/reboot.yml --limit overcloud
 
   # Upgrade overcloud containers
   run_kayobe overcloud service deploy

@@ -361,7 +361,7 @@ Using software such as sshuttle will allow for easy access.
    sshuttle -r $(terraform output -raw ssh_user)@$(terraform output -raw seed_access_ip_v4) 192.168.39.0/24
 
 You may also use sshuttle to proxy DNS via the multinode environment. Useful if you are working with Designate.
-Important to node this will proxy all DNS requests from your machine to the first controller within the multinode environment.
+Important to note this will proxy all DNS requests from your machine to the first controller within the multinode environment.
 
 .. code-block:: console
 

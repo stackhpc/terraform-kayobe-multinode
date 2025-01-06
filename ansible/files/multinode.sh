@@ -286,7 +286,7 @@ function run_tempest() {
   set -x
 
   if [[ -d $tempest_dir ]]; then
-    tempest_backup=${tempest_dir}.$(date --iso-8601=minutes)
+    tempest_backup=${tempest_dir}-$(date +%Y%m%dT%H%M%S)
     echo "Found previous Tempest test results"
     echo "Moving to $tempest_backup"
     mv $tempest_dir $tempest_backup
@@ -365,6 +365,10 @@ function upgrade_overcloud() {
 
   run_kayobe overcloud host upgrade
   run_kayobe overcloud host configure
+  # FIXME: The overcloud host configure triggers parallel reboots due to an
+  # selinux state change. This breaks the database. This should be fixed by
+  # serialising the reboots inside kayobe.
+  run_kayobe overcloud database recover
   run_kayobe overcloud service upgrade
 }
 

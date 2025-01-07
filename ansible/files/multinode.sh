@@ -388,9 +388,6 @@ function minor_upgrade() {
   run_kayobe seed host package update --packages '*'
   set +f
   run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/reboot.yml --limit seed
-  
-  # Upgrade Seed containers
-  run_kayobe seed service deploy
 
   # Upgrade overcloud host packages
   run_kayobe overcloud host configure

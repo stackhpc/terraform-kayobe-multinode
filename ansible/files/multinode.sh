@@ -378,6 +378,28 @@ function upgrade_prerequisites() {
   [[ ! -f $KAYOBE_CONFIG_PATH/../../tools/upgrade-prerequisites.sh ]] || $KAYOBE_CONFIG_PATH/../../tools/upgrade-prerequisites.sh
 }
 
+function minor_upgrade() {
+  # Perform a minor upgrade of the cloud, upgrading host packages and
+  # containers
+
+  # Upgrade Seed host packages
+  run_kayobe seed host configure
+  set -f
+  run_kayobe seed host package update --packages '*'
+  set +f
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/reboot.yml --limit seed
+
+  # Upgrade overcloud host packages
+  run_kayobe overcloud host configure
+  set -f
+  run_kayobe overcloud host package update --packages '*'
+  set +f
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/reboot.yml --limit overcloud
+
+  # Upgrade overcloud containers
+  run_kayobe overcloud service deploy
+}
+
 function usage() {
   set +x
 
@@ -394,6 +416,7 @@ function usage() {
   echo "  run_tempest"
   echo "  upgrade_overcloud"
   echo "  upgrade_prerequisites"
+  echo "  minor_upgrade"
 }
 
 function main() {
@@ -416,7 +439,7 @@ function main() {
       $cmd
       ;;
     # Standard commands.
-    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud|upgrade_prerequisites)
+    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud|upgrade_prerequisites|minor_upgrade)
       setup
       $cmd
       report_success

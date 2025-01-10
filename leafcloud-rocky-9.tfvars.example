@@ -1,7 +1,7 @@
 # Example tfvars file for running on Leafcloud in the stackhpc-dev project.
 # - See variables.tf for variable descriptions
 # - Items commented out must be uncommented and changed
-# - Rocky Linux 9 image for Antelope (note that images need to be shared with the stackhpc-dev project)
+# - Rocky Linux 9 image for Caracal (note that images need to be shared with the stackhpc-dev project)
 # - Ansible control host uses a floating IP
 
 #prefix = "changeme"
@@ -14,7 +14,7 @@ seed_vm_flavor = "en1.xsmall"
 seed_disk_size = 100
 
 multinode_flavor     = "en1.large"
-multinode_image      = "overcloud-rocky-9-2023.1-20240126T093158"
+multinode_image      = "overcloud-rocky-9-2024.1-20240912T145502"
 #multinode_keypair    = "changeme"
 multinode_vm_network = "stackhpc-dev"
 multinode_vm_subnet  = "stackhpc-dev"

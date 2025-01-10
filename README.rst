@@ -22,7 +22,7 @@ The high-level workflow to deploy a cluster is as follows:
 
 This configuration is typically used with the `ci-multinode` environment in the
 `StackHPC Kayobe Configuration
-<https://stackhpc-kayobe-config.readthedocs.io/en/stackhpc-2023.1/contributor/environments/ci-multinode.html>`__
+<https://stackhpc-kayobe-config.readthedocs.io/en/stackhpc-2024.1/contributor/environments/ci-multinode.html>`__
 repository.
 
 What's in the box?

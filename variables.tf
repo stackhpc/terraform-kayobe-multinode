@@ -136,8 +136,8 @@ variable "volume_type" {
   default = ""
 }
 
-variable "compute_tags" {
-  description = "Set of tags to be applied to all compute instances"
+variable "instance_tags" {
+  description = "Set of tags to be applied to all instances"
   type = list(string)
   default = []
 }

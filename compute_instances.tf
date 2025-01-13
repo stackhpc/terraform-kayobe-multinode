@@ -47,6 +47,7 @@ resource "openstack_compute_instance_v2" "ansible_control" {
       user_data
     ]
   }
+  tags = var.compute_tags
 }
 
 resource "openstack_compute_instance_v2" "seed" {
@@ -74,6 +75,7 @@ resource "openstack_compute_instance_v2" "seed" {
   timeouts {
     create = "90m"
   }
+  tags = var.compute_tags
 }
 
 resource "openstack_compute_instance_v2" "compute" {
@@ -102,6 +104,7 @@ resource "openstack_compute_instance_v2" "compute" {
   timeouts {
     create = "90m"
   }
+  tags = var.compute_tags
 }
 resource "openstack_compute_instance_v2" "controller" {
   name         = format("%s-controller-%02d", var.prefix, count.index + 1)
@@ -129,6 +132,8 @@ resource "openstack_compute_instance_v2" "controller" {
   timeouts {
     create = "90m"
   }
+
+  tags = var.compute_tags
 }
 
 resource "openstack_compute_instance_v2" "storage" {
@@ -157,6 +162,7 @@ resource "openstack_compute_instance_v2" "storage" {
   timeouts {
     create = "90m"
   }
+  tags = var.compute_tags
 }
 
 resource "openstack_compute_instance_v2" "wazuh_manager" {
@@ -182,4 +188,5 @@ resource "openstack_compute_instance_v2" "wazuh_manager" {
   timeouts {
     create = "90m"
   }
+  tags = var.compute_tags
 }

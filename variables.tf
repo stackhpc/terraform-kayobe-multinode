@@ -135,3 +135,9 @@ variable "volume_type" {
   type = string
   default = ""
 }
+
+variable "instance_tags" {
+  description = "Set of tags to be applied to all instances"
+  type = list(string)
+  default = []
+}

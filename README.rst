@@ -212,6 +212,7 @@ If the deployed instances are behind an SSH bastion you must ensure that your SS
       IdentityFile ~/.ssh/key
       UserKnownHostsFile /dev/null
       StrictHostKeyChecking no
+      IdentitiesOnly yes
 
 Configure Terraform variables
 =============================

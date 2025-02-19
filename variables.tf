@@ -141,3 +141,9 @@ variable "instance_tags" {
   type = list(string)
   default = []
 }
+
+variable "security_group" {
+  description = "Set a list of chosen security group to apply to instances. Set to empty string to use the default security group."
+  type = list(string)
+  default = []
+}

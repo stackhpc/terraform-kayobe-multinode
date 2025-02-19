@@ -23,6 +23,7 @@ resource "openstack_compute_instance_v2" "ansible_control" {
   key_pair     = resource.openstack_compute_keypair_v2.keypair.name
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
+  security_groups = var.security_group
   network {
     port = resource.openstack_networking_port_v2.ansible_control_port.id
   }
@@ -56,6 +57,7 @@ resource "openstack_compute_instance_v2" "seed" {
   key_pair     = resource.openstack_compute_keypair_v2.keypair.name
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
+  security_groups = var.security_group
   network {
     name = var.multinode_vm_network
   }
@@ -86,6 +88,7 @@ resource "openstack_compute_instance_v2" "compute" {
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
   count        = var.compute_count
+  security_groups = var.security_group
   network {
     name = var.multinode_vm_network
   }
@@ -114,6 +117,7 @@ resource "openstack_compute_instance_v2" "controller" {
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
   count        = var.controller_count
+  security_groups = var.security_group
   network {
     name = var.multinode_vm_network
   }
@@ -144,6 +148,7 @@ resource "openstack_compute_instance_v2" "storage" {
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
   count        = var.storage_count
+  security_groups = var.security_group
   network {
     name = var.multinode_vm_network
   }
@@ -173,6 +178,7 @@ resource "openstack_compute_instance_v2" "wazuh_manager" {
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
   count        = var.deploy_wazuh ? 1 : 0
+  security_groups = var.security_group
   network {
     name = var.multinode_vm_network
   }

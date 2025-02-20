@@ -4,6 +4,11 @@ data "openstack_networking_network_v2" "multinode_network" {
 
 resource "openstack_networking_port_v2" "ansible_control_port" {
   network_id = data.openstack_networking_network_v2.multinode_network.id
+  security_group_ids = [data.openstack_networking_secgroup_v2.multinode_security_group.secgroup_id]
+}
+
+data "openstack_networking_secgroup_v2" "multinode_security_group" {
+  name = "var.security_group"
 }
 
 resource "openstack_networking_floatingip_v2" "ansible_control_fip" {
@@ -23,7 +28,6 @@ resource "openstack_compute_instance_v2" "ansible_control" {
   key_pair     = resource.openstack_compute_keypair_v2.keypair.name
   config_drive = true
   user_data    = file("templates/userdata.cfg.tpl")
-  security_groups = var.security_group
   network {
     port = resource.openstack_networking_port_v2.ansible_control_port.id
   }

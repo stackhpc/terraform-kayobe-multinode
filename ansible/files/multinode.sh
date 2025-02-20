@@ -251,7 +251,7 @@ function build_kayobe_image() {
   # Build a Kayobe container image.
 
   # Set base image for kayobe container. Use rocky 9 for yoga+ CentOS otherwise
-  if grep -Eq "(202|zed|yoga)" ${config_directories[kayobe]}/.gitreview; then
+  if grep -Eq "(master|202|zed|yoga)" ${config_directories[kayobe]}/.gitreview; then
       export BASE_IMAGE=rockylinux:9
   else
       export BASE_IMAGE=quay.io/centos/centos:stream8

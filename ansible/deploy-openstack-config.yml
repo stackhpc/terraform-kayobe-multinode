@@ -233,7 +233,19 @@
     # etc/kayobe/ansible/ to resolve correctly.
     - name: Set a fact about whether a Kayobe source checkout is required
       ansible.builtin.set_fact:
-        kayobe_src_required: "{{ openstack_release.stdout != 'zed' and not openstack_release.stdout.startswith('202') }}"
+        kayobe_src_required: "{{ openstack_release.stdout[:3] not in ['zed','202','mas'] }}"
+
+    - name: Debug - release
+      ansible.builtin.debug:
+        msg: "{{ openstack_release.stdout }}"
+
+    - name: Debug - release first chars
+      ansible.builtin.debug:
+        msg: "{{ openstack_release.stdout[:3] }}"
+
+    - name: Debug - kayobe_src_required
+      ansible.builtin.debug:
+        msg: "{{ openstack_release.stdout[:3] not in ['zed','202','mas'] }}"
 
     - name: Ensure Kayobe repository is present (Yoga & earlier)
       ansible.builtin.git:

@@ -147,3 +147,9 @@ variable "security_group" {
   type = list(string)
   default = []
 }
+
+variable "ansible_control_security_group" {
+  description = "Set a chosen security group for the ansible control host. Set to empty string to use the default security group."
+  type = string
+  default = ""
+}

@@ -4,7 +4,6 @@ data "openstack_networking_network_v2" "multinode_network" {
 
 resource "openstack_networking_port_v2" "ansible_control_port" {
   network_id = data.openstack_networking_network_v2.multinode_network.id
-  security_group_ids = [data.openstack_networking_secgroup_v2.multinode_security_group.secgroup_id]
 }
 
 data "openstack_networking_secgroup_v2" "multinode_security_group" {

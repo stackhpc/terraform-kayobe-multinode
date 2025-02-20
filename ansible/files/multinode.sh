@@ -143,6 +143,16 @@ function copy_ca_to_seed() {
   fi
 }
 
+function copy_ca_to_local_trust() {
+  if [[ $(grep '^ID=' /etc/os-release | cut -d= -f2) == "ubuntu" ]]; then
+    sudo cp vault.crt /usr/local/share/ca-certificates/OS-TLS-ROOT.crt
+    sudo update-ca-certificates
+  else
+    sudo cp vault.crt /etc/pki/ca-trust/source/anchors/OS-TLS-ROOT.crt
+    sudo update-ca-trust
+  fi
+}
+
 function deploy_ceph() {
   run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm-deploy.yml
   sleep 30
@@ -228,6 +238,8 @@ function deploy_overcloud() {
   run_kayobe overcloud service deploy
 
   copy_ca_to_seed
+
+  copy_ca_to_local_trust
 }
 
 function deploy_wazuh() {

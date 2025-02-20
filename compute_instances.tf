@@ -8,7 +8,7 @@ resource "openstack_networking_port_v2" "ansible_control_port" {
 }
 
 data "openstack_networking_secgroup_v2" "multinode_security_group" {
-  name = "var.security_group"
+  name = var.security_group
 }
 
 resource "openstack_networking_floatingip_v2" "ansible_control_fip" {

@@ -145,10 +145,10 @@ function copy_ca_to_seed() {
 
 function copy_ca_to_local_trust() {
   if [[ $(grep '^ID=' /etc/os-release | cut -d= -f2) == "ubuntu" ]]; then
-    sudo cp $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/ca/vault.crt /usr/local/share/ca-certificates/OS-TLS-ROOT.crt
+    sudo cp $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/ca/vault.crt /etc/ssl/certs/ca-certificates.crt
     sudo update-ca-certificates
   else
-    sudo cp $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/ca/vault.crt /etc/pki/ca-trust/source/anchors/OS-TLS-ROOT.crt
+    sudo cp $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/ca/vault.crt /etc/pki/tls/certs/ca-bundle.crt
     sudo update-ca-trust
   fi
 }

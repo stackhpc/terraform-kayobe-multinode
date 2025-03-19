@@ -1,7 +1,7 @@
 ---
 - name: Deploy OpenStack
   hosts: ansible_control
-  gather_facts: false
+  gather_facts: true
   vars:
     multinode_command: "deploy_full"
     # 6 hours should be enough...
@@ -20,6 +20,15 @@
   vars_files:
     - vars/defaults.yml
   tasks:
+    - name: Set default Ansible Python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: /usr/bin/python3
+
+    - name: Explicitly set Ansible interpreter to Python 3.12 if host is RedHat familiy
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: /usr/bin/python3.12
+      when: ansible_facts['os_family'] == "RedHat"
+
     - name: Check if tmux session exists
       command: tmux has-session -t {{ tmux_session }}
       failed_when: false

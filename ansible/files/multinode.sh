@@ -250,12 +250,8 @@ function create_resources() {
 function build_kayobe_image() {
   # Build a Kayobe container image.
 
-  # Set base image for kayobe container. Use rocky 9 for yoga+ CentOS otherwise
-  if grep -Eq "(202|zed|yoga)" ${config_directories[kayobe]}/.gitreview; then
-      export BASE_IMAGE=rockylinux:9
-  else
-      export BASE_IMAGE=quay.io/centos/centos:stream8
-  fi
+  # Set base image for kayobe container. Use rocky 9 by default
+  export BASE_IMAGE=rockylinux:9
 
   if [[ "$(sudo docker image ls)" == *"kayobe"* ]]; then
     echo "Image already exists skipping docker build"

@@ -203,6 +203,12 @@ function generate_barbican_secrets() {
   rm /tmp/barbican-role-id
 }
 
+function generate_amphora_secrets() {
+  run_kayobe kolla ansible run octavia-certificates
+  mkdir -p ${config_directories[kayobe]}/etc/kayobe/environments/ci-multinode/kolla/config/octavia
+  cp ${config_directories[kayobe]}/etc/kolla/config/octavia/* ${config_directories[kayobe]}/etc/kayobe/environments/ci-multinode/kolla/config/octavia
+}
+
 function deploy_overcloud() {
   run_kayobe overcloud host configure
 
@@ -215,6 +221,8 @@ function deploy_overcloud() {
   generate_overcloud_certs
 
   generate_barbican_secrets
+
+  generate_amphora_secrets
 
   # Deploy all services
   run_kayobe overcloud service deploy
@@ -245,6 +253,12 @@ function create_resources() {
   # Reactivate Kayobe environment.
   activate_virt_env "kayobe"
   activate_kayobe_env
+
+  set +x
+  source ${KOLLA_CONFIG_PATH}/octavia-openrc.sh
+  set -x
+
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/octavia-amphora-image-register.yml
 }
 
 function build_kayobe_image() {

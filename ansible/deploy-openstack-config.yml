@@ -262,11 +262,22 @@
       become: true
       when: ansible_facts['distribution'] == "Ubuntu"
 
+    - name: Set a fact about the Python binary to use
+      ansible.builtin.set_fact:
+        python_binary: "{{ '/usr/bin/python3.12' if ansible_facts['distribution'] == 'Rocky' and (openstack_release.stdout.startswith('master') or openstack_release.stdout.startswith('2025')) else '/usr/bin/python3' }}"
+
+    - name: Ensure python3.12 is installed (Rocky)
+      ansible.builtin.package:
+        name: python3.12
+        state: present
+      become: true
+      when: python_binary == '/usr/bin/python3.12'
+
     - name: Ensure the latest version of pip is installed
       ansible.builtin.pip:
         name: pip
         virtualenv: "{{ ansible_env.HOME }}/venvs/kayobe"
-        virtualenv_command: "/usr/bin/python3 -m venv"
+        virtualenv_command: "{{ python_binary }} -m venv"
         state: latest
 
     - name: Fix up `kayobe-config` requirements to point to requested version
@@ -280,7 +291,7 @@
       ansible.builtin.pip:
         requirements: "{{ src_directory }}/{{ kayobe_config_name }}/requirements.txt"
         virtualenv: "{{ ansible_env.HOME }}/venvs/kayobe"
-        virtualenv_command: "/usr/bin/python3 -m venv"
+        virtualenv_command: "{{ python_binary }} -m venv"
         state: present
 
     - name: Ensure `kayobe` is installed (Yoga & earlier)

@@ -3,5 +3,7 @@
   tags: wait
 - import_playbook: grow-control-host.yml
   tags: lvm
+- import_playbook: control-host-py312.yml
+  tags: python
 - import_playbook: deploy-openstack-config.yml
   tags: deploy

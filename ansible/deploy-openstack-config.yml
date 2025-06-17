@@ -5,6 +5,15 @@
   vars_files:
     - vars/defaults.yml
   tasks:
+    - name: Set default Ansible Python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: /usr/bin/python3
+
+    - name: Explicitly set Ansible interpreter to Python 3.12 if host is RedHat familiy
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: /usr/bin/python3.12
+      when: ansible_facts['os_family'] == "RedHat"
+
     - name: Verify ssh key path has been set
       ansible.builtin.assert:
         that:
@@ -266,7 +275,7 @@
       ansible.builtin.pip:
         name: pip
         virtualenv: "{{ ansible_env.HOME }}/venvs/kayobe"
-        virtualenv_command: "/usr/bin/python3 -m venv"
+        virtualenv_command: "{{ ansible_python_interpreter }} -m venv"
         state: latest
 
     - name: Fix up `kayobe-config` requirements to point to requested version
@@ -280,14 +289,14 @@
       ansible.builtin.pip:
         requirements: "{{ src_directory }}/{{ kayobe_config_name }}/requirements.txt"
         virtualenv: "{{ ansible_env.HOME }}/venvs/kayobe"
-        virtualenv_command: "/usr/bin/python3 -m venv"
+        virtualenv_command: "{{ ansible_python_interpreter }} -m venv"
         state: present
 
     - name: Ensure `kayobe` is installed (Yoga & earlier)
       ansible.builtin.pip:
         name: "{{ src_directory }}/{{ kayobe_name }}/"
         virtualenv: "{{ ansible_env.HOME }}/venvs/kayobe"
-        virtualenv_command: "/usr/bin/python3 -m venv"
+        virtualenv_command: "{{ ansible_python_interpreter }} -m venv"
         state: present
       when: kayobe_src_required
 
@@ -336,14 +345,14 @@
       ansible.builtin.pip:
         name: pip
         virtualenv: "{{ src_directory }}/{{ openstack_config_name }}/venv"
-        virtualenv_command: "/usr/bin/python3 -m venv"
+        virtualenv_command: "{{ ansible_python_interpreter }} -m venv"
         state: latest
 
     - name: Ensure `openstack` virtualenv is present
       ansible.builtin.pip:
         requirements: "{{ src_directory }}/{{ openstack_config_name }}/requirements.txt"
         virtualenv: "{{ src_directory }}/{{ openstack_config_name }}/venv"
-        virtualenv_command: "/usr/bin/python3 -m venv"
+        virtualenv_command: "{{ ansible_python_interpreter }} -m venv"
         state: present
 
     - name: Ensure `openstack` ansible role requirements are present

@@ -1,0 +1,26 @@
+- name: Ensure Python 3.12 is installed on ansible control host
+  hosts: all
+  tasks:
+    - name: Install Python 3.12
+      ansible.builtin.dnf:
+        name: python3.12
+        state: latest
+      when: ansible_facts['os_family'] == "RedHat"
+      become: true
+
+    - name: Get Python version
+      ansible.builtin.shell: python3.12 --version | awk '{print $2}'
+      register: python_version
+      changed_when: false
+
+    - name: Ensure Python version >= 3.12
+      ansible.builtin.assert:
+        that:
+          - python_version.stdout is version('3.12', 'ge')
+
+    - name: Ensure Python 3.12 pip is present
+      ansible.builtin.dnf:
+        name: python3.12-pip
+        state: latest
+      when: ansible_facts['os_family'] == "RedHat"
+      become: true

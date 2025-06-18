@@ -257,6 +257,7 @@ function build_kayobe_image() {
 
   # Set base image for kayobe container. Use rocky 9 by default
   export BASE_IMAGE=rockylinux:9
+  export USE_PYTHON_312=true
 
   if [[ "$(sudo docker image ls)" == *"kayobe"* ]]; then
     echo "Image already exists skipping docker build"
@@ -264,6 +265,7 @@ function build_kayobe_image() {
     sudo DOCKER_BUILDKIT=1 docker build \
       --network host \
       --build-arg BASE_IMAGE=$BASE_IMAGE \
+      --build-arg USE_PYTHON_312=$USE_PYTHON_312 \
       --file ${config_directories[kayobe]}/.automation/docker/kayobe/Dockerfile \
       --tag kayobe:latest \
       ${config_directories[kayobe]}

@@ -173,6 +173,11 @@ function generate_overcloud_certs() {
   run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/openbao-generate-internal-tls.yml
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy-internal.pem
 
+  # If ProxySQL certificate and key are generated, encrypt them
+  for proxysql_item in $(ls -1 $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/proxysql-*); do
+    encrypt_file $proxysql_item
+  done
+
   # Generate backend tls certificates
   run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/openbao-generate-backend-tls.yml
   for cert in $(ls -1 $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/*-key.pem); do

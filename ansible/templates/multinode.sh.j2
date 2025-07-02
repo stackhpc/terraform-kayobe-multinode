@@ -113,12 +113,12 @@ function deploy_seed() {
   run_kayobe seed host configure
 }
 
-function deploy_seed_vault() {
-  # Deploy hashicorp vault to the seed
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-seed.yml
-  encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/OS-TLS-INT.pem
-  encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/seed-vault-keys.json
-  encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/*.key
+function deploy_seed_{{ certificate_authority }}() {
+  # Deploy {{ certificate_authority }} to the seed
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/{{ certificate_authority }}-deploy-seed.yml
+  encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/{{ certificate_authority }}/OS-TLS-INT.pem
+  encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/{{ certificate_authority }}/seed-{{ certificate_authority }}-keys.json
+  encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/{{ certificate_authority }}/*.key
 }
 
 function get_seed_ssh() {
@@ -130,15 +130,15 @@ function get_seed_ssh() {
 }
 
 function copy_ca_to_seed() {
-  # Add the Vault CA to the trust store on the seed.
+  # Add the {{ certificate_authority }} CA to the trust store on the seed.
   seed_ssh=$(get_seed_ssh)
 
-  scp -oStrictHostKeyChecking=no $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/ca/vault.crt ${seed_ssh}:
+  scp -oStrictHostKeyChecking=no $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/ca/{{ certificate_authority }}.crt ${seed_ssh}:
   if [[ $(grep '^ID=' /etc/os-release | cut -d= -f2) == "ubuntu" ]]; then
-    ssh -oStrictHostKeyChecking=no ${seed_ssh} sudo cp vault.crt /usr/local/share/ca-certificates/OS-TLS-ROOT.crt
+    ssh -oStrictHostKeyChecking=no ${seed_ssh} sudo cp {{ certificate_authority }}.crt /usr/local/share/ca-certificates/OS-TLS-ROOT.crt
     ssh -oStrictHostKeyChecking=no ${seed_ssh} sudo update-ca-certificates
   else
-    ssh -oStrictHostKeyChecking=no ${seed_ssh} sudo cp vault.crt /etc/pki/ca-trust/source/anchors/OS-TLS-ROOT.crt
+    ssh -oStrictHostKeyChecking=no ${seed_ssh} sudo cp {{ certificate_authority }}.crt /etc/pki/ca-trust/source/anchors/OS-TLS-ROOT.crt
     ssh -oStrictHostKeyChecking=no ${seed_ssh} sudo update-ca-trust
   fi
 }
@@ -150,31 +150,31 @@ function deploy_ceph() {
   run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/cephadm-gather-keys.yml
 }
 
-function deploy_overcloud_vault() {
+function deploy_overcloud_{{ certificate_authority }}() {
   # NOTE: Previously it was necessary to first deploy HAProxy with TLS disabled.
   if [[ -f $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/globals-tls-config.yml ]]; then
     # Skip os_capacity deployment since it requires admin-openrc.sh which doesn't exist yet.
     run_kayobe overcloud service deploy --skip-tags os_capacity -kt haproxy
   fi
 
-  # Deploy hashicorp vault to the controllers
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-overcloud.yml
-  encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/overcloud-vault-keys.json
+  # Deploy {{ certificate_authority }} to the controllers
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/{{ certificate_authority }}-deploy-overcloud.yml
+  encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/{{ certificate_authority }}/overcloud-{{ certificate_authority }}-keys.json
 }
 
 function generate_overcloud_certs() {
   # Generate external tls certificates
-  if [[ -f $KAYOBE_CONFIG_PATH/ansible/vault-generate-test-external-tls.yml ]]; then
-    run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-generate-test-external-tls.yml
+  if [[ -f $KAYOBE_CONFIG_PATH/ansible/{{ certificate_authority }}-generate-test-external-tls.yml ]]; then
+    run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/{{ certificate_authority }}-generate-test-external-tls.yml
     encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy.pem
   fi
 
   # Generate internal tls certificates
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-generate-internal-tls.yml
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/{{ certificate_authority }}-generate-internal-tls.yml
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy-internal.pem
 
   # Generate backend tls certificates
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-generate-backend-tls.yml
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/{{ certificate_authority }}-generate-backend-tls.yml
   for cert in $(ls -1 $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/*-key.pem); do
     encrypt_file $cert
   done
@@ -192,11 +192,11 @@ function generate_overcloud_certs() {
 }
 
 function generate_barbican_secrets() {
-  # Create vault configuration for barbican
+  # Create {{ certificate_authority }} configuration for barbican
   decrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
   sed -i "s/secret_id:.*/secret_id: $(uuidgen)/g" $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-deploy-barbican.yml
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/{{ certificate_authority }}-deploy-barbican.yml
   decrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
   sed -i "s/role_id:.*/role_id: $(cat /tmp/barbican-role-id)/g" $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
@@ -208,9 +208,9 @@ function deploy_overcloud() {
 
   deploy_ceph
 
-  deploy_seed_vault
+  deploy_seed_{{ certificate_authority }}
 
-  deploy_overcloud_vault
+  deploy_overcloud_{{ certificate_authority }}
 
   generate_overcloud_certs
 
@@ -354,8 +354,8 @@ function deploy_full() {
 
 function upgrade_overcloud() {
   # Generate external tls certificates if it was previously disabled.
-  if [[ -f $KAYOBE_CONFIG_PATH/ansible/vault-generate-test-external-tls.yml ]] && [[ ! -f $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy.pem ]]; then
-    run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/vault-generate-test-external-tls.yml
+  if [[ -f $KAYOBE_CONFIG_PATH/ansible/{{ certificate_authority }}-generate-test-external-tls.yml ]] && [[ ! -f $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy.pem ]]; then
+    run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/{{ certificate_authority }}-generate-test-external-tls.yml
     encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy.pem
   fi
 

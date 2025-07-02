@@ -179,8 +179,8 @@
         mode: "0644"
 
     - name: Ensure multinode.sh script is present
-      ansible.builtin.copy:
-        src: "files/multinode.sh"
+      ansible.builtin.template:
+        src: "templates/multinode.sh.j2"
         dest: "/usr/local/bin/multinode.sh"
         mode: "0755"
       become: true

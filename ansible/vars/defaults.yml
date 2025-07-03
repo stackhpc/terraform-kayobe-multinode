@@ -95,3 +95,7 @@ pvresize_to_max: true
 
 # Whether to upgrade the Ansible control host.
 upgrade: false
+
+# Name of secret store to use as Certificate Authority.
+# Valid options are: openbao, vault
+certificate_authority: openbao

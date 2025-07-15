@@ -93,5 +93,9 @@ manage_lvm: true
 
 pvresize_to_max: true
 
+# Secret store to deploy as CA. Valid options are "openbao" and "vault".
+# Default is "openbao".
+ca_secret_store: openbao
+
 # Whether to upgrade the Ansible control host.
 upgrade: false

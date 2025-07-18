@@ -220,6 +220,14 @@
         create: true
       loop: "{{ kayobe_config_custom }}"
 
+    - name: Ensure CA secret store is selected
+      ansible.builtin.lineinfile:
+        path: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/stackhpc.yml"
+        line: "stackhpc_ca_secret_store: {{ ca_secret_store }}"
+        mode: "0644"
+        create: true
+      when: ca_secret_store is defined and ca_secret_store != "" and ca_secret_store != None
+
     - name: Determine OpenStack release
       ansible.builtin.shell:
         cmd: >

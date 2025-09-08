@@ -154,9 +154,8 @@ Export environment variables to use the correct cloud and provide a password (yo
 
 .. code-block:: console
 
-   export OS_CLOUD=sms-lab
-   read -p OS_PASSWORD -s OS_PASSWORD
-   export OS_PASSWORD
+   export OS_CLOUD=openstack
+   export OS_CLOUD_CONFIG_FILE=<path>/<to>/clouds.yml
 
 Or you can source the provided `init.sh` script which shall initialise terraform and export two variables.
 `OS_CLOUD` is a variable which is used by Terraform and must match an entry within `clouds.yml` (Not needed if you have sourced the openrc file).

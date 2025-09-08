@@ -141,7 +141,7 @@ OpenStack cloud. Alternatively, download and source an openrc file from Horizon.
    cat << EOF > clouds.yaml
    ---
    clouds:
-     sms-lab:
+     openstack:
        auth:
          auth_url: https://api.sms-lab.cloud:5000
          username: <username>

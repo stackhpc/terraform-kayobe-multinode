@@ -133,12 +133,12 @@ supported.
 
    ssh-keygen -t rsa -f id_rsa -N ''
 
-Create an OpenStack clouds.yaml file with your credentials to access an
+Create an OpenStack clouds.yml file with your credentials to access an
 OpenStack cloud. Alternatively, download and source an openrc file from Horizon.
 
 .. code-block:: console
 
-   cat << EOF > clouds.yaml
+   cat << EOF > clouds.yml
    ---
    clouds:
      openstack:
@@ -181,7 +181,7 @@ Or you can source the provided `init.sh` script which shall initialise terraform
    If you ever set or change modules or backend configuration for Terraform,
    rerun this command to reinitialize your working directory. If you forget, other
    commands will detect it and remind you to do so if necessary.
-   OpenStack Cloud Name: sms-lab
+   OpenStack Cloud Name: openstack
    Password:
 
 You must ensure that you have `Ansible installed <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`_ on your local machine.

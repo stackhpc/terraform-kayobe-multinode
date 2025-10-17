@@ -149,22 +149,32 @@
         - seed-host-configure/pre.d/
         - infra-vm-host-configure/pre.d/
 
+    - name: Check if custom playbooks are stored in separate directories
+      ansible.builtin.stat:
+        path: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/ansible/fixes"
+      register: kayobe_playbooks_dir
+
+    - name: Set custom playbook prefixes
+      ansible.builtin.set_fact:
+        fixes_prefix: "{{ fixes/ if kayobe_playbooks_dir.stat.exists else '' }}"
+        tools_prefix: "{{ tools/ if kayobe_playbooks_dir.stat.exists else '' }}"
+
     - name: Ensure Kayobe hooks are present
       ansible.builtin.file:
         src: '{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/ansible/{{ item.src }}'
         dest: '{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/hooks/{{ item.dest }}'
         state: link
       loop:
-        - { src: growroot.yml, dest: overcloud-host-configure/pre.d/5-growroot.yml }
-        - { src: fix-hostname.yml, dest: overcloud-host-configure/pre.d/10-fix-hostname.yml }
-        - { src: fix-networking.yml, dest: overcloud-host-configure/pre.d/15-fix-networking.yml }
-        - { src: configure-vxlan.yml, dest: overcloud-host-configure/pre.d/20-configure-vxlan.yml }
-        - { src: growroot.yml, dest: seed-host-configure/pre.d/5-growroot.yml }
-        - { src: fix-networking.yml, dest: seed-host-configure/pre.d/15-fix-networking.yml }
-        - { src: configure-vxlan.yml, dest: seed-host-configure/pre.d/20-configure-vxlan.yml }
-        - { src: growroot.yml, dest: infra-vm-host-configure/pre.d/5-growroot.yml }
-        - { src: fix-networking.yml, dest: infra-vm-host-configure/pre.d/15-fix-networking.yml }
-        - { src: configure-vxlan.yml, dest: infra-vm-host-configure/pre.d/20-configure-vxlan.yml }
+        - { src: "{{ tools_prefix }}growroot.yml", dest: overcloud-host-configure/pre.d/5-growroot.yml }
+        - { src: "{{ fixes_prefix }}fix-hostname.yml", dest: overcloud-host-configure/pre.d/10-fix-hostname.yml }
+        - { src: "{{ fixes_prefix }}fix-networking.yml", dest: overcloud-host-configure/pre.d/15-fix-networking.yml }
+        - { src: "{{ tools_prefix }}configure-vxlan.yml", dest: overcloud-host-configure/pre.d/20-configure-vxlan.yml }
+        - { src: "{{ tools_prefix }}growroot.yml", dest: seed-host-configure/pre.d/5-growroot.yml }
+        - { src: "{{ fixes_prefix }}fix-networking.yml", dest: seed-host-configure/pre.d/15-fix-networking.yml }
+        - { src: "{{ tools_prefix }}configure-vxlan.yml", dest: seed-host-configure/pre.d/20-configure-vxlan.yml }
+        - { src: "{{ tools_prefix }}growroot.yml", dest: infra-vm-host-configure/pre.d/5-growroot.yml }
+        - { src: "{{ fixes_prefix }}fix-networking.yml", dest: infra-vm-host-configure/pre.d/15-fix-networking.yml }
+        - { src: "{{ tools_prefix }}configure-vxlan.yml", dest: infra-vm-host-configure/pre.d/20-configure-vxlan.yml }
 
     - name: Ensure Admin Overcloud Network file is present
       ansible.builtin.copy:

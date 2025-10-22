@@ -156,8 +156,8 @@
 
     - name: Set custom playbook prefixes
       ansible.builtin.set_fact:
-        fixes_prefix: "{{ fixes/ if kayobe_playbooks_dir.stat.exists else '' }}"
-        tools_prefix: "{{ tools/ if kayobe_playbooks_dir.stat.exists else '' }}"
+        fixes_prefix: "{{ 'fixes/' if kayobe_playbooks_dir.stat.exists else '' }}"
+        tools_prefix: "{{ 'tools/' if kayobe_playbooks_dir.stat.exists else '' }}"
 
     - name: Ensure Kayobe hooks are present
       ansible.builtin.file:

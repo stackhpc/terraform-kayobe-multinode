@@ -119,13 +119,24 @@ function run_kayobe() {
   kayobe $*
 }
 
+function run_kayobe_playbook() {
+  # Usage: run_kayobe_playbook <category of playbook> <name of playbook>
+  local category=$1
+  local playbook=$2
+  if [[ -d $KAYOBE_CONFIG_PATH/ansible/$category ]]; then
+    run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/$category/$playbook "${@:3}"
+  else
+    run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/$playbook "${@:3}"
+  fi
+}
+
 function deploy_seed() {
   run_kayobe seed host configure
 }
 
 function deploy_seed_vault() {
   # Deploy hashicorp vault to the seed
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/secret-store/secret-store-deploy-seed.yml
+  run_kayobe_playbook secret-store secret-store-deploy-seed.yml
   # Encrypt either vault or openbao certificate keys
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/OS-TLS-INT.pem
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/seed-vault-keys.json
@@ -168,10 +179,10 @@ function copy_ca_to_seed() {
 }
 
 function deploy_ceph() {
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/ceph/cephadm-deploy.yml
+  run_kayobe_playbook ceph cephadm-deploy.yml
   sleep 30
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/ceph/cephadm.yml
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/ceph/cephadm-gather-keys.yml
+  run_kayobe_playbook ceph cephadm.yml
+  run_kayobe_playbook ceph cephadm-gather-keys.yml
 }
 
 function deploy_overcloud_vault() {
@@ -182,7 +193,7 @@ function deploy_overcloud_vault() {
   fi
 
   # Deploy hashicorp vault to the controllers
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/secret-store/secret-store-deploy-overcloud.yml
+  run_kayobe_playbook secret-store secret-store-deploy-overcloud.yml
   # Encrypt either vault or openbao certificate keys
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/vault/overcloud-vault-keys.json
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/openbao/overcloud-openbao-keys.json
@@ -190,13 +201,11 @@ function deploy_overcloud_vault() {
 
 function generate_overcloud_certs() {
   # Generate external tls certificates
-  if [[ -f $KAYOBE_CONFIG_PATH/ansible/secret-store/secret-store-generate-test-external-tls.yml ]]; then
-    run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/secret-store/secret-store-generate-test-external-tls.yml
-    encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy.pem
-  fi
+  run_kayobe_playbook secret-store secret-store-generate-test-external-tls.yml
+  encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy.pem
 
   # Generate internal tls certificates
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/secret-store/secret-store-generate-internal-tls.yml
+  run_kayobe_playbook secret-store secret-store-generate-internal-tls.yml
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy-internal.pem
 
   # If ProxySQL certificate and key are generated, encrypt them
@@ -205,7 +214,7 @@ function generate_overcloud_certs() {
   done
 
   # Generate backend tls certificates
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/secret-store/secret-store-generate-backend-tls.yml
+  run_kayobe_playbook secret-store secret-store-generate-backend-tls.yml
   for cert in $(ls -1 $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/*-key.pem); do
     encrypt_file $cert
   done
@@ -227,7 +236,7 @@ function generate_barbican_secrets() {
   decrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
   sed -i "s/secret_id:.*/secret_id: $(uuidgen)/g" $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/secret-store/secret-store-deploy-barbican.yml
+  run_kayobe_playbook secret-store secret-store-deploy-barbican.yml
   decrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
   sed -i "s/role_id:.*/role_id: $(cat /tmp/barbican-role-id)/g" $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/secrets.yml
@@ -257,10 +266,10 @@ function deploy_wazuh() {
   run_kayobe infra vm host configure
 
   # Deploy Wazuh
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/deployment/wazuh-secrets.yml
+  run_kayobe_playbook deployment wazuh-secrets.yml
   encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/wazuh-secrets.yml
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/deployment/wazuh-manager.yml
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/deployment/wazuh-agent.yml
+  run_kayobe_playbook deployment wazuh-manager.yml
+  run_kayobe_playbook deployment wazuh-agent.yml
 }
 
 function create_resources() {
@@ -387,8 +396,8 @@ function deploy_full() {
 
 function upgrade_overcloud() {
   # Generate external tls certificates if it was previously disabled.
-  if [[ -f $KAYOBE_CONFIG_PATH/ansible/secret-store/secret-store-generate-test-external-tls.yml ]] && [[ ! -f $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy.pem ]]; then
-    run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/secret-store/secret-store-generate-test-external-tls.yml
+  if [[ ! -f $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy.pem ]]; then
+    run_kayobe_playbook secret-store secret-store-generate-test-external-tls.yml
     encrypt_file $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/certificates/haproxy.pem
   fi
 
@@ -416,14 +425,14 @@ function minor_upgrade() {
   set -f
   run_kayobe seed host package update --packages '*'
   set +f
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/maintenance/reboot.yml --limit seed
+  run_kayobe_playbook maintenance reboot.yml --limit seed
 
   # Upgrade overcloud host packages
   run_kayobe overcloud host configure
   set -f
   run_kayobe overcloud host package update --packages '*'
   set +f
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/maintenance/reboot.yml --limit overcloud
+  run_kayobe_playbook maintenance reboot.yml --limit overcloud
 
   # Upgrade overcloud containers
   run_kayobe overcloud service deploy

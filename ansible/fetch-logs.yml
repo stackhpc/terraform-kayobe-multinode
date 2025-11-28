@@ -29,8 +29,8 @@
           source ~/venvs/kayobe/bin/activate
           source ~/src/kayobe-config/kayobe-env --environment ci-multinode
           export KAYOBE_VAULT_PASSWORD=$(cat ~/vault.password)
-          if [[ -f $KAYOBE_CONFIG_PATH/ansible/diagnostics.yml ]]; then
-            kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/diagnostics.yml -e diagnostics_path_local={{ diagnostics_path_control_host }}
+          if [[ -f $KAYOBE_CONFIG_PATH/ansible/tools/diagnostics.yml ]]; then
+            kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/tools/diagnostics.yml -e diagnostics_path_local={{ diagnostics_path_control_host }}
           else
             echo "Missing diagnostics playbook - skipping"
           fi

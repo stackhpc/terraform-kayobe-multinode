@@ -376,7 +376,9 @@ function run_tempest() {
 
 function run_tests() {
   rc=0
-  if ! run_tempest; then
+  if ! kayobe overcloud host command run -l controllers --command "! docker ps 2>&1| grep unhealthy"; then
+    rc=1
+  elif ! run_tempest; then
     rc=1
   fi
   return $rc

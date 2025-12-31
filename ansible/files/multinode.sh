@@ -454,6 +454,7 @@ function usage() {
   echo "  create_resources"
   echo "  build_kayobe_image"
   echo "  run_tempest"
+  echo "  run_tests (includes run_tempest)"
   echo "  upgrade_overcloud"
   echo "  upgrade_prerequisites"
   echo "  minor_upgrade"
@@ -479,7 +480,7 @@ function main() {
       $cmd
       ;;
     # Standard commands.
-    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud|upgrade_prerequisites|minor_upgrade)
+    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|run_tests|upgrade_overcloud|upgrade_prerequisites|minor_upgrade)
       setup
       $cmd
       report_success

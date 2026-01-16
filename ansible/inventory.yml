@@ -1,1 +1,2 @@
 plugin: cloud.terraform.terraform_provider
+binary_path: /usr/bin/tofu

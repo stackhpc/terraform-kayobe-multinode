@@ -1,6 +1,6 @@
 #!/bin/bash
-# This script is capable of destroying your multinode environment via Terraform in targeted manner.
-# As Terraform lacks a skip flag when destroying resources it means that you can only delete
+# This script is capable of destroying your multinode environment via OpenTofu in targeted manner.
+# As OpenTofu lacks a skip flag when destroying resources it means that you can only delete
 # everything or resources explicitly mentioned with the target flag.
 #
 # This is less than ideal within the multinode environment as we will want to keep intact the Ansible Control Host and keypair.
@@ -28,7 +28,7 @@ done
 
 if [ $ALL == true ]; then
     if [ $KEY == false ]; then
-      terraform destroy \
+      tofu destroy \
         -target=openstack_compute_instance_v2.ansible_control \
         -target=openstack_compute_instance_v2.controller \
         -target=openstack_compute_instance_v2.compute \
@@ -37,10 +37,10 @@ if [ $ALL == true ]; then
         -target=openstack_blockstorage_volume_v3.volumes \
         -target=openstack_compute_volume_attach_v2.attachments
     else
-      terraform destroy
+      tofu destroy
     fi
 else
-  terraform destroy -target=openstack_compute_instance_v2.controller \
+  tofu destroy -target=openstack_compute_instance_v2.controller \
     -target=openstack_compute_instance_v2.compute \
     -target=openstack_compute_instance_v2.seed \
     -target=openstack_compute_instance_v2.storage \

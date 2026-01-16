@@ -1,4 +1,5 @@
-terraform -chdir=$(dirname $0) init
+mydir=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+tofu -chdir="$mydir" init
 echo -n "OpenStack Cloud Name: "
 read OS_CLOUD
 export OS_CLOUD

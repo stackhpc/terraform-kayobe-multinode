@@ -48,15 +48,6 @@
         gather_subset:
           - user_dir
 
-    # TODO: Remove this when Red Hat FIPS policy has been updated to allow ed25519 keys.
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/367429#note_1840422075
-    - name: Verify ssh key is not ed25519
-      ansible.builtin.assert:
-        that:
-          - "'ssh-ed25519' not in lookup('ansible.builtin.file', (ssh_key_path ~ '.pub') | expanduser)"
-        fail_msg: "FIPS policy does not currently support ed25519 SSH keys on RHEL family systems"
-      when: ansible_facts['os_family'] == "RedHat"
-
     - name: Ensure required packages are present
       ansible.builtin.package:
         name:

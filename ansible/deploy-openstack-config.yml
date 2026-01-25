@@ -94,7 +94,7 @@
         dest: "{{ src_directory }}/{{ kayobe_config_name }}"
         update: "{{ upgrade | bool }}"
 
-    - when: upgrade
+    - when: upgrade | bool
       block:
         - name: Pop stashed Kayobe Config changes (upgrade)
           ansible.builtin.command:

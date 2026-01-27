@@ -275,9 +275,11 @@
       ansible.builtin.set_fact:
         python_binary: "{{ '/usr/bin/python3.12' if ansible_facts['distribution'] == 'Rocky' and (openstack_release.stdout.startswith('master') or openstack_release.stdout.startswith('2025')) else '/usr/bin/python3' }}"
 
-    - name: Ensure python3.12 is installed (Rocky)
+    - name: Ensure python3.12 and python3.12-pip are installed (Rocky)
       ansible.builtin.package:
-        name: python3.12
+        name:
+          - python3.12
+          - python3.12-pip
         state: present
       become: true
       when: python_binary == '/usr/bin/python3.12'

@@ -298,7 +298,7 @@ function create_resources() {
   source ${KOLLA_CONFIG_PATH}/octavia-openrc.sh
   set -x
 
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/octavia-amphora-image-register.yml
+  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/maintenance/octavia-amphora-image-register.yml
 }
 
 function build_kayobe_image() {

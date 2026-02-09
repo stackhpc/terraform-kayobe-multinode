@@ -1,7 +1,7 @@
-# This file is maintained automatically by "terraform init".
+# This file is maintained automatically by "tofu init".
 # Manual edits may be lost in future updates.
 
-provider "registry.terraform.io/ansible/ansible" {
+provider "registry.opentofu.org/ansible/ansible" {
   version     = "1.3.0"
   constraints = "1.3.0"
   hashes = [
@@ -21,36 +21,31 @@ provider "registry.terraform.io/ansible/ansible" {
     "zh:c73c81d669b5be4f6cc900277a42b14b73dc96ebd7bbc518ccd7984c26761c65",
     "zh:e9e76b2d86a96f90168b06e411281cae5b2b01b260cd6211b9d67923e8414072",
     "zh:f569b65999264a9416862bca5cd2a6177d94ccb0424f3a4ef424428912b9cb3c",
-    "zh:f63ed6016d237e177f5a7d2a6a485ef7094a97b44944cbdf9428b30b0c7c76b8",
   ]
 }
 
-provider "registry.terraform.io/hashicorp/local" {
+provider "registry.opentofu.org/hashicorp/local" {
   version = "2.4.0"
   hashes = [
-    "h1:R97FTYETo88sT2VHfMgkPU3lzCsZLunPftjSI5vfKe8=",
-    "h1:ZUEYUmm2t4vxwzxy1BvN1wL6SDWrDxfH7pxtzX8c6d0=",
-    "zh:53604cd29cb92538668fe09565c739358dc53ca56f9f11312b9d7de81e48fab9",
-    "zh:66a46e9c508716a1c98efbf793092f03d50049fa4a83cd6b2251e9a06aca2acf",
-    "zh:70a6f6a852dd83768d0778ce9817d81d4b3f073fab8fa570bff92dcb0824f732",
-    "zh:78d5eefdd9e494defcb3c68d282b8f96630502cac21d1ea161f53cfe9bb483b3",
-    "zh:82a803f2f484c8b766e2e9c32343e9c89b91997b9f8d2697f9f3837f62926b35",
-    "zh:9708a4e40d6cc4b8afd1352e5186e6e1502f6ae599867c120967aebe9d90ed04",
-    "zh:973f65ce0d67c585f4ec250c1e634c9b22d9c4288b484ee2a871d7fa1e317406",
-    "zh:c8fa0f98f9316e4cfef082aa9b785ba16e36ff754d6aba8b456dab9500e671c6",
-    "zh:cfa5342a5f5188b20db246c73ac823918c189468e1382cb3c48a9c0c08fc5bf7",
-    "zh:e0e2b477c7e899c63b06b38cd8684a893d834d6d0b5e9b033cedc06dd7ffe9e2",
-    "zh:f62d7d05ea1ee566f732505200ab38d94315a4add27947a60afa29860822d3fc",
-    "zh:fa7ce69dde358e172bd719014ad637634bbdabc49363104f4fca759b4b73f2ce",
+    "h1:pWJMQ+uRtVtHg97vU2zSCuYcZTuDQ7FJz+QanfSGMXM=",
+    "zh:184d6ec1f0e77713b37f0d9cf943b1371f2aa2f44c2c5a618978e897ce3dccab",
+    "zh:2205a7955a4051c2c25e69646a60746d9416b73001491808ae5d10620f7b7ac1",
+    "zh:256ddc56457f725819dc6be62f2d0bb3b9fee40a61771317bb32353df5b5c1a0",
+    "zh:70146e603f540523f6fa2251dd52c225db5a92bda8c07fd198ed51ae2b50176b",
+    "zh:8c3f9fe12ab8843e25ff7edabc26e01df4a0e8db204e432600a4c77a95ec0535",
+    "zh:b003e421f643d14247d31dcb7f0f6470c46f772d0e15a175a555a525ce344bf2",
+    "zh:b4c8ad7c5696aeb2a52adf6047d1e01943fafa57dc123d5192542527406ffd72",
+    "zh:c3b6fbfa431f3c085621c74596ee63681a278fd433a4758f33c627e8936d5cb3",
+    "zh:d2e57b19295b326d84ca5f39b797849d901170d5509aa7558f2a6545c9ce72a9",
+    "zh:e2307421b0b380eb0e8fcee008e0af98ae30fccbfc9e9a1d24d952489e9b0df9",
   ]
 }
 
-provider "registry.terraform.io/terraform-provider-openstack/openstack" {
+provider "registry.opentofu.org/terraform-provider-openstack/openstack" {
   version     = "1.49.0"
   constraints = "1.49.0"
   hashes = [
     "h1:6I8IFY2JDKc6ntkF3C5w1rgIATpbdmvgWrnV7kcRq5o=",
-    "h1:OW5PF9z5+VWzDmOUY2lefQBmU7+Ytb6XdbrcEBUvjRQ=",
     "zh:18b0a5d528fe3eb30060cf478db5a5efaed9d9837f4afb35ba58f0196ba6a51c",
     "zh:3cd7f28730ed216740a7bc62169a0d630f95ecdaee1162952aab67011fcf8831",
     "zh:60a827813523fd77e75d0145cd066cb4c2a89453083a5bd9e0712a8423bdc14a",

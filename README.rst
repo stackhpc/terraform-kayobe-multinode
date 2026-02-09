@@ -2,7 +2,7 @@
 Terraform Kayobe Multinode
 ==========================
 
-This Terraform configuration deploys a requested amount of instances on an OpenStack cloud, to be
+This OpenTofu configuration deploys a requested amount of instances on an OpenStack cloud, to be
 used as a Multinode Kayobe test environment. This includes:
 
 * 1x Ansible control host
@@ -15,8 +15,8 @@ used as a Multinode Kayobe test environment. This includes:
 The high-level workflow to deploy a cluster is as follows:
 
 * Prerequisites
-* Configure Terraform and Ansible
-* Deploy infrastructure on OpenStack using Terraform
+* Configure Terraform/OpenTofu and Ansible
+* Deploy infrastructure on OpenStack using Terraform/OpenTofu
 * Configure Ansible control host using Ansible
 * Deploy multi-node OpenStack using Kayobe
 
@@ -36,10 +36,10 @@ Scripts
 * ``scripts/deploy.sh`` - end-to-end cluster deployment and testing.
 * ``scripts/tear-down.sh`` - tear down test cluster infrastructure.
 
-Terraform
+OpenTofu
 ---------
 
-Terraform configuration deploys test cluster infrastructure on an OpenStack
+OpenTofu configuration deploys test cluster infrastructure on an OpenStack
 cloud. It provides outputs that can be used to populate Kayobe Configuration
 with the details of the test infrastructure.
 
@@ -86,45 +86,61 @@ arguments.
 Prerequisites
 =============
 
-These instructions show how to use this Terraform configuration manually. They
-assume you are running an Ubuntu host that will be used to run Terraform. The
-machine should have access to the API of the OpenStack cloud that will host the
-infrastructure, and network access to the Ansible control host once it has been
-deployed. This may be achieved by direct SSH access, a floating IP on the
-Ansible control host, or using an SSH bastion.
+These instructions show how to use this OpenTofu configuration manually. They
+assume you are running an Ubuntu or Fedora host that will be used to run
+OpenTofu. The machine should have access to the API of the OpenStack cloud that
+will host the infrastructure, and network access to the Ansible control host
+once it has been deployed. This may be achieved by direct SSH access, a floating
+IP on the Ansible control host, or using an SSH bastion.
 
 The OpenStack cloud should have sufficient capacity to deploy the
 infrastructure, and a suitable image registered in Glance. Ideally the image
 should be one of the overcloud host images defined in StackHPC Kayobe
 configuration and available in `Ark <https://ark.stackhpc.com>`__.
 
-Install Terraform:
+Install OpenTofu on Ubuntu Noble:
 
 .. code-block:: console
 
-   wget -qO - terraform.gpg https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/terraform-archive-keyring.gpg
-   sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/terraform-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/terraform.list
+   sudo apt-get update
+   sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
+   sudo install -m 0755 -d /usr/share/keyrings
+   curl -fsSL https://get.opentofu.org/opentofu.gpg | sudo tee /usr/share/keyrings/opentofu.gpg >/dev/null
+   curl -fsSL https://packages.opentofu.org/opentofu/tofu/gpgkey | sudo gpg --no-tty --batch --dearmor -o /usr/share/keyrings/opentofu-repo.gpg >/dev/null
+   sudo chmod a+r /usr/share/keyrings/opentofu.gpg /usr/share/keyrings/opentofu-repo.gpg
+   printf '%s\n%s' "deb [signed-by=/usr/share/keyrings/opentofu.gpg,/usr/share/keyrings/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main" \
+   "deb-src [signed-by=/usr/share/keyrings/opentofu.gpg,/usr/share/keyrings/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main" \
+    | sudo tee /etc/apt/sources.list.d/opentofu.list >/dev/null
+   sudo chmod a+r /etc/apt/sources.list.d/opentofu.list
    sudo apt update
-   sudo apt install git terraform
+   sudo apt install git tofu
 
-Clone and initialise this Terraform config repository:
+Install OpenTofu on Fedora 43
+
+.. code-block:: console
+
+   dnf check-update
+   sudo dnf install git opentofu
+
+
+Clone and initialise this OpenTofu config repository:
 
 .. code-block:: console
 
    git clone https://github.com/stackhpc/terraform-kayobe-multinode
    cd terraform-kayobe-multinode
 
-Initialise Terraform:
+Initialise OpenTofu:
 
 .. code-block:: console
 
-   terraform init
+   tofu init
 
 Generate an SSH keypair. Note that `ED25519 keys are not currently supported by RHEL
 <https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/securing_networks/index#making-openssh-more-secure_assembly_using-secure-communications-between-two-systems-with-openssh>`__
 when using the FIPS security standard (as enabled by the CIS benchmark hardening
 scripts in kayobe-config). The public key will be registered in OpenStack as a
-keypair and authorised by the instances deployed by Terraform. The private and
+keypair and authorised by the instances deployed by OpenTofu. The private and
 public keys will be transferred to the Ansible control host to allow it to
 connect to the other hosts. Note that password-protected keys are not currently
 supported.
@@ -157,32 +173,57 @@ Export environment variables to use the correct cloud and provide a password (yo
    export OS_CLOUD=openstack
    export OS_CLOUD_CONFIG_FILE=<path>/<to>/clouds.yml
 
-Or you can source the provided `init.sh` script which shall initialise terraform and export two variables.
-`OS_CLOUD` is a variable which is used by Terraform and must match an entry within `clouds.yml` (Not needed if you have sourced the openrc file).
+Or you can source the provided `init.sh` script which shall initialise OpenTofu and export two variables.
+`OS_CLOUD` is a variable which is used by OpenTofu and must match an entry within `clouds.yml` (Not needed if you have sourced the openrc file).
 `OS_PASSWORD` is the password used to authenticate when signing into OpenStack.
 
 .. code-block:: console
    source ./init.sh
 
-   Initializing the backend...
+	Initializing the backend...
 
-   Initializing provider plugins...
-   - Reusing previous version of terraform-provider-openstack/openstack from the dependency lock file
-   - Reusing previous version of hashicorp/local from the dependency lock file
-   - Using previously-installed terraform-provider-openstack/openstack v1.48.0
-   - Using previously-installed hashicorp/local v2.2.3
+	Successfully configured the backend "local"! OpenTofu will automatically
+	use this backend unless the backend configuration changes.
 
-   Terraform has been successfully initialized!
+	Initializing provider plugins...
+	- Finding terraform-provider-openstack/openstack versions matching "1.49.0"...
+	- Finding ansible/ansible versions matching "1.3.0"...
+	- Reusing previous version of hashicorp/local from the dependency lock file
+	- Installing hashicorp/local v2.4.0...
+	- Installed hashicorp/local v2.4.0 (signed, key ID 0C0AF313E5FD9F80)
+	- Installing terraform-provider-openstack/openstack v1.49.0...
+	- Installed terraform-provider-openstack/openstack v1.49.0 (signed, key ID 4F80527A391BEFD2)
+	- Installing ansible/ansible v1.3.0...
+	- Installed ansible/ansible v1.3.0. Signature validation was skipped due to the registry not containing GPG keys for this provider
 
-   You may now begin working with Terraform. Try running "terraform plan" to see
-   any changes that are required for your infrastructure. All Terraform commands
-   should now work.
+	Providers are signed by their developers.
+	If you'd like to know more about provider signing, you can read about it here:
+	https://opentofu.org/docs/cli/plugins/signing/
 
-   If you ever set or change modules or backend configuration for Terraform,
-   rerun this command to reinitialize your working directory. If you forget, other
-   commands will detect it and remind you to do so if necessary.
-   OpenStack Cloud Name: openstack
-   Password:
+	OpenTofu has made some changes to the provider dependency selections recorded
+	in the .terraform.lock.hcl file. Review those changes and commit them to your
+	version control system if they represent changes you intended to make.
+
+	╷
+	│ Warning: Dependency lock file entries automatically updated
+	│
+	│ OpenTofu automatically rewrote some entries in your dependency lock file:
+	│   - registry.terraform.io/hashicorp/local => registry.opentofu.org/hashicorp/local
+	│
+	│ The version selections were preserved, but the hashes were not because the OpenTofu project's provider releases are not byte-for-byte identical.
+	╵
+
+	OpenTofu has been successfully initialized!
+
+	You may now begin working with OpenTofu. Try running "tofu plan" to see
+	any changes that are required for your infrastructure. All OpenTofu commands
+	should now work.
+
+	If you ever set or change modules or backend configuration for OpenTofu,
+	rerun this command to reinitialize your working directory. If you forget, other
+	commands will detect it and remind you to do so if necessary.
+	OpenStack Cloud Name: openstack
+	Password:
 
 You must ensure that you have `Ansible installed <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`_ on your local machine.
 
@@ -213,10 +254,10 @@ If the deployed instances are behind an SSH bastion you must ensure that your SS
       StrictHostKeyChecking no
       IdentitiesOnly yes
 
-Configure Terraform variables
+Configure OpenTofu variables
 =============================
 
-Populate Terraform variables in `terraform.tfvars`. Examples are provided in
+Populate OpenTofu variables in `terraform.tfvars`. Examples are provided in
 files named `*.tfvars.example`. The available variables are defined in
 `variables.tf` along with their type, description, and optional default.
 
@@ -264,7 +305,7 @@ control host. The session is logged to `~/tmux.kayobe\:0.log` on the Ansible
 control host. Use `less -r ~/tmux.kayobe\:0.log` to view the logs in their
 original colourful glory.
 
-Note that this approach requires all Terraform, Ansible, Kayobe and OpenStack
+Note that this approach requires all OpenTofu, Ansible, Kayobe and OpenStack
 configuration to be provided in advance. For Kayobe and OpenStack
 configuration, this may be achieved by providing suitable branches for the
 kayobe-config and openstack-config repositories and referencing them in
@@ -287,20 +328,20 @@ This section describes a more hands-on, interactive deployment method. It may
 be useful to gain a better understanding of how the deployment works, modify
 the deployment process in some way, or iterate on configuration.
 
-Terraform Deploy infrastructure using Terraform
+Deploy infrastructure using OpenTofu
 -----------------------------------------------
 
 Generate a plan:
 
 .. code-block:: console
 
-   terraform plan
+   tofu plan
 
 Apply the changes:
 
 .. code-block:: console
 
-   terraform apply -auto-approve
+   tofu apply -auto-approve
 
 You should have requested a number of resources to be spawned on Openstack.
 
@@ -336,7 +377,7 @@ If you choose to opt for the automated method you must first SSH into your Ansib
 
 .. code-block:: console
 
-   ssh $(terraform output -raw ssh_user)@$(terraform output -raw ansible_control_access_ip_v4)
+   ssh $(tofu output -raw ssh_user)@$(tofu output -raw ansible_control_access_ip_v4)
 
 Start a `tmux` session to avoid halting the deployment if you are disconnected.
 
@@ -358,14 +399,14 @@ Using software such as sshuttle will allow for easy access.
 
 .. code-block:: console
 
-   sshuttle -r $(terraform output -raw ssh_user)@$(terraform output -raw seed_access_ip_v4) 192.168.39.0/24
+   sshuttle -r $(tofu output -raw ssh_user)@$(tofu output -raw seed_access_ip_v4) 192.168.39.0/24
 
 You may also use sshuttle to proxy DNS via the multinode environment. Useful if you are working with Designate.
 Important to note this will proxy all DNS requests from your machine to the first controller within the multinode environment.
 
 .. code-block:: console
 
-   sshuttle -r $(terraform output -raw ssh_user)@$(terraform output -raw seed_access_ip_v4) 192.168.39.0/24 --dns --to-ns 192.168.39.4
+   sshuttle -r $(tofu output -raw ssh_user)@$(tofu output -raw seed_access_ip_v4) 192.168.39.0/24 --dns --to-ns 192.168.39.4
 
 Tear Down
 =========
@@ -378,17 +419,17 @@ If you would like to delete your Ansible control host then you can pass the `-a`
 Issues & Fixes
 ==============
 
-Sometimes a compute instance fails to be provisioned by Terraform or fails on boot for any reason.
-If this happens the solution is to mark the resource as tainted and perform terraform apply again which shall destroy and rebuild the failed instance.
+Sometimes a compute instance fails to be provisioned by OpenTofu or fails on boot for any reason.
+If this happens the solution is to mark the resource as tainted and perform ``tofu apply`` again which shall destroy and rebuild the failed instance.
 
 .. code-block:: console
 
-   terraform taint 'openstack_compute_instance_v2.controller[2]'
-   terraform apply
+   tofu taint 'openstack_compute_instance_v2.controller[2]'
+   tofu apply
 
 Also sometimes the provider may fail to notice that some resources are functioning as expected due to timeouts or other network issues.
-If you can confirm via Horizon or via SSH that the resource is functioning as expected you may untaint the resource preventing Terraform from destroying on subsequent terraform apply.
+If you can confirm via Horizon or via SSH that the resource is functioning as expected you may untaint the resource preventing OpenTofu from destroying on subsequent ``tofu apply``.
 
 .. code-block:: console
 
-   terraform untaint 'openstack_compute_instance_v2.controller[2]'
+   tofu untaint 'openstack_compute_instance_v2.controller[2]'

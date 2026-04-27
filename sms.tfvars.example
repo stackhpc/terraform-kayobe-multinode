@@ -1,7 +1,7 @@
 # Example tfvars file for running on SMS in user projects.
 # - See variables.tf for variable descriptions
 # - Items commented out must be uncommented and changed
-# - Rocky Linux 9 image for Caracal
+# - Rocky Linux 9 image for Epoxy
 
 #prefix = "changeme"
 
@@ -13,7 +13,7 @@ seed_vm_flavor = "general.v1.tiny"
 seed_disk_size = 100
 
 multinode_flavor     = "general.v1.medium"
-multinode_image      = "overcloud-rocky-9-2024.1-20241209T151515"
+multinode_image      = "overcloud-rocky-9-2025.1-20260420T162634"
 #multinode_keypair    = "changeme"
 multinode_vm_network = "stackhpc-ipv4-geneve"
 multinode_vm_subnet  = "stackhpc-ipv4-geneve-subnet"

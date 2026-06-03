@@ -229,7 +229,7 @@ You must ensure that you have `Ansible installed <https://docs.ansible.com/ansib
 
 .. code-block:: console
 
-   pip install --user ansible
+   pip install --user -r ansible/requirements.txt
 
 Install the Ansible galaxy requirements.
 

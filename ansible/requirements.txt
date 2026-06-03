@@ -1,0 +1,2 @@
+# ansible 14 / ansible-core 2.21 breaks inventory plugins with 'required' removed from get_bin_path()
+ansible>13,<14

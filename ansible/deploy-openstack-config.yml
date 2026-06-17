@@ -273,16 +273,25 @@
 
     - name: Set a fact about the Python binary to use
       ansible.builtin.set_fact:
-        python_binary: "{{ '/usr/bin/python3.12' if ansible_facts['distribution'] == 'Rocky' and (openstack_release.stdout.startswith('master') or openstack_release.stdout.startswith('2025')) else '/usr/bin/python3' }}"
+        python_binary: "{{ '/usr/bin/python3.12' if ansible_facts['distribution'] == 'Rocky' and ansible_facts['distribution_major_version'] | int < 10 and (openstack_release.stdout.startswith('master') or openstack_release.stdout.startswith('2025')) else '/usr/bin/python3' }}"
 
-    - name: Ensure python3.12 and python3.12-pip are installed (Rocky)
+    - name: Ensure python3.12 and python3.12-pip are installed (Rocky 9)
       ansible.builtin.package:
         name:
           - python3.12
           - python3.12-pip
         state: present
       become: true
-      when: python_binary == '/usr/bin/python3.12'
+      when: python_binary == '/usr/bin/python3.12' and ansible_facts['distribution_major_version'] | int < 10
+
+    - name: Ensure python3-pip and python3-packaging are installed (Rocky 10)
+      ansible.builtin.package:
+        name: 
+        - python3-pip
+        - python3-packaging
+        state: present
+      become: true
+      when: ansible_facts['distribution'] == 'Rocky' and ansible_facts['distribution_major_version'] | int == 10
 
     - name: Ensure the latest version of pip is installed
       ansible.builtin.pip:

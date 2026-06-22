@@ -6,8 +6,8 @@ set -eux
 set -o pipefail
 
 # Check for dependencies
-if ! type terraform; then
-  echo "Unable to find Terraform"
+if ! type tofu; then
+  echo "Unable to find OpenTofu"
   exit 1
 fi
 if ! type ansible; then
@@ -15,9 +15,9 @@ if ! type ansible; then
   exit 1
 fi
 
-# Deploy infrastructure using Terraform.
-terraform plan
-terraform apply -auto-approve
+# Deploy infrastructure using OpenTofu.
+tofu plan
+tofu apply -auto-approve
 
 # Configure the Ansible control host.
 ansible-playbook -i ansible/inventory.yml ansible/configure-hosts.yml

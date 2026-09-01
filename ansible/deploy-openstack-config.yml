@@ -59,7 +59,7 @@
 
     - name: Ensure kernel-modules-extra is installed (Rocky)
       ansible.builtin.package:
-        name: kernel-modules-matched
+        name: kernel-modules-extra
         state: present
       become: true
       when: ansible_facts['distribution'] == "Rocky"

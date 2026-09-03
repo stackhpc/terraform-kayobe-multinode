@@ -46,6 +46,9 @@
           directory and run this playbook again.
       when: lock_stat.stat.exists
 
+    - name: Install extra kernel modules on all hosts
+      import_playbook: install-kernel-modules.yml
+
     - name: "Run multinode.sh {{ multinode_command }} in tmux window"
       command: >-
         tmux send -t {{ tmux_session }}.0 'multinode.sh {{ multinode_command }}' ENTER

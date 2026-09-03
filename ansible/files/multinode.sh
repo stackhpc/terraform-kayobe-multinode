@@ -45,15 +45,6 @@ function kayobe_env() {
 
 function setup() {
   
-  if $(which dnf >/dev/null 2>&1); then
-    sudo dnf -y install iptables kernel-modules-extra
-  fi
-
-  if $(which apt >/dev/null 2>&1); then
-    sudo apt update
-    sudo apt -y install iptables
-  fi
-  
   set -euxo pipefail
 
   lock_path=/tmp/deploy-openstack.lock

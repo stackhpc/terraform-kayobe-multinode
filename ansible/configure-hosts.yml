@@ -5,4 +5,3 @@
   tags: lvm
 - import_playbook: deploy-openstack-config.yml
   tags: deploy
-- import_playbook: install-kernel-modules.yml

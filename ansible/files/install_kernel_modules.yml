@@ -1,0 +1,13 @@
+---
+- name: Install extra kernel modules
+  hosts:
+    - seed
+    - compute
+    - controllers
+  gather_facts: false
+  tasks:
+    - name: Ensure required kernel modules are present
+      ansible.builtin.package:
+        name: "kernel-modules-extra-matched"
+        state: present
+      become: true

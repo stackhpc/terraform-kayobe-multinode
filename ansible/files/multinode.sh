@@ -394,7 +394,7 @@ function run_tests() {
 
 function deploy_full() {
   # End-to-end deployment and testing.
-
+  install_kernel_modules
   deploy_seed
   deploy_overcloud
   if run_kayobe configuration dump --host wazuh-manager --var-name group_names | grep wazuh-manager &>/dev/null; then
@@ -465,6 +465,10 @@ function usage() {
   echo "  upgrade_overcloud"
   echo "  upgrade_prerequisites"
   echo "  minor_upgrade"
+}
+
+function install_kernel_modules() {
+  kayobe playbook run install_kernel_modules.yml
 }
 
 function main() {

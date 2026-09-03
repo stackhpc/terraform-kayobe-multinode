@@ -54,7 +54,7 @@
           - git
           - tmux
           - vim
-          - kernel-modules-extra
+          - "kernel-modules-extra-matched"
         state: present
       become: true
 

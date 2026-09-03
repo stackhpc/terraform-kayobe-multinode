@@ -57,13 +57,6 @@
         state: present
       become: true
 
-    - name: Ensure kernel-modules-extra is installed (Rocky)
-      ansible.builtin.package:
-        name: kernel-modules-extra
-        state: present
-      become: true
-      when: ansible_facts['distribution'] == "Rocky"
-      
     - name: Ensure uuid-runtime is present (Ubuntu)
       ansible.builtin.package:
         name: uuid-runtime

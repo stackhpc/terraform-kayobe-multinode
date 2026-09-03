@@ -54,6 +54,7 @@
           - git
           - tmux
           - vim
+          - kernel-modules-extra
         state: present
       become: true
 

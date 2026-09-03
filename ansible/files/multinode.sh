@@ -62,15 +62,6 @@ function setup() {
   set +x
   kayobe_env
   set -x
-  
-  if $(which dnf >/dev/null 2>&1); then
-    sudo dnf -y install iptables kernel-modules-extra
-  fi
-
-  if $(which apt >/dev/null 2>&1); then
-    sudo apt update
-    sudo apt -y install iptables
-  fi
 }
 
 function report_success() {

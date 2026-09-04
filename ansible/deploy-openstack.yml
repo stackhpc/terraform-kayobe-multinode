@@ -1,6 +1,7 @@
 ---
 - name: Install extra kernel modules on all hosts
-  import_playbook: install-kernel-modules.yml
+  command: >- 
+    kayobe playbook run install-kernel-modules.yml
 
 - name: Deploy OpenStack
   hosts: ansible_control

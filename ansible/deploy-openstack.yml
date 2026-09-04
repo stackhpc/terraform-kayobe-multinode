@@ -1,4 +1,7 @@
 ---
+- name: Install extra kernel modules on all hosts
+  import_playbook: install-kernel-modules.yml
+
 - name: Deploy OpenStack
   hosts: ansible_control
   gather_facts: false
@@ -45,9 +48,6 @@
           If you are sure this is not the case, remove the {{ lock_path }}
           directory and run this playbook again.
       when: lock_stat.stat.exists
-
-    - name: Install extra kernel modules on all hosts
-      import_playbook: install-kernel-modules.yml
 
     - name: "Run multinode.sh {{ multinode_command }} in tmux window"
       command: >-

@@ -189,6 +189,12 @@
       tags:
         - multinode.sh
 
+    - name: Ensure install-kernel-modules.yml is present
+      ansible.builtin.copy:
+        src: "install-kernel-modules.yml"
+        dest: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/environments/{{ kayobe_config_environment }}/install-kernel-modules.yml"
+        mode: "0644"
+
     - name: Ensure env-vars.sh script is present
       ansible.builtin.template:
         src: "templates/env-vars.sh.j2"

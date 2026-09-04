@@ -44,7 +44,7 @@ function kayobe_env() {
 }
 
 function setup() {
-  
+
   set -euxo pipefail
 
   lock_path=/tmp/deploy-openstack.lock
@@ -132,6 +132,7 @@ function run_kayobe_playbook() {
 }
 
 function deploy_seed() {
+  run_kayobe playbook run install-kernel-modules.yml
   run_kayobe seed host configure
 }
 

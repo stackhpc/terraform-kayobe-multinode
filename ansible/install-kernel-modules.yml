@@ -1,7 +1,7 @@
 ---
 - name: Install extra kernel modules
   hosts:
-    - seed-hypervisor:seed
+    - seed
     - compute
     - controllers
   gather_facts: false

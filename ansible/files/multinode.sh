@@ -132,7 +132,7 @@ function run_kayobe_playbook() {
 }
 
 function deploy_seed() {
-  run_kayobe playbook run install-kernel-modules.yml
+  run_kayobe playbook run ~/src/kayobe-config/etc/kayobe/ansible/install-kernel-modules.yml
   run_kayobe seed host configure
 }
 

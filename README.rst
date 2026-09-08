@@ -246,7 +246,7 @@ If the deployed instances are behind an SSH bastion you must ensure that your SS
       User username
       IdentityFile ~/.ssh/key
 
-   Host 10.*
+   Host 172.16.*
       ProxyJump=lab-bastion
       ForwardAgent no
       IdentityFile ~/.ssh/key

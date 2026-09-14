@@ -36,6 +36,9 @@ ${ element }
 %{ endfor ~}
 
 [rgws]
+%{ for element in storage_hostname ~}
+${ element }
+%{ endfor ~}
 
 [monitoring:children]
 controllers

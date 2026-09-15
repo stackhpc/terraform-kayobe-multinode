@@ -54,7 +54,7 @@
           - git
           - tmux
           - vim
-          - "kernel-modules-extra-matched"
+          - "{{ 'kernel-modules-extra-matched' if ansible_facts.os_family == 'RedHat' else '' }}"
         state: present
       become: true
 

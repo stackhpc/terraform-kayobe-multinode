@@ -54,7 +54,7 @@
           - git
           - tmux
           - vim
-          - "kernel-modules-extra-matched"
+          - "{{ 'kernel-modules-extra-matched' if ansible_facts.distribution == 'Rocky' and ansible_facts.distribution_major_version == '10' }}"
         state: present
       become: true
 

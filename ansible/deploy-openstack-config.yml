@@ -54,9 +54,16 @@
           - git
           - tmux
           - vim
-          - "{{ 'kernel-modules-extra-matched' if ansible_facts.os_family == 'RedHat' and ansible_facts.distribution_major_version == '10' }}"
         state: present
       become: true
+    
+    - name: Install kernel-modules-extra-matched on Rocky 10
+      ansible.builtin.package:
+        name:
+          - 'kernel-modules-extra-matched'
+        state: present
+      become: true
+      when: ansible_facts.os_family == 'RedHat' and ansible_facts.distribution_major_version == '10'
 
     - name: Ensure uuid-runtime is present (Ubuntu)
       ansible.builtin.package:

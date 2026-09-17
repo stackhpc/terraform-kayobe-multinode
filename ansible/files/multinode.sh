@@ -403,10 +403,10 @@ function run_sct() {
   # Remove any previous kayobe_sct container
   sudo docker rm kayobe_sct || true
 
-  sudo docker run -t --rm \
+  sudo -E docker run -t --rm \
     --name kayobe_sct \
-    -v $(pwd):/stack/kayobe-automation-env/src/kayobe-config \
-    -v $(pwd)/sct-results:/stack/sct-results \
+    -v ${config_directories[kayobe]}:/stack/kayobe-automation-env/src/kayobe-config \
+    -v $sct_dir:/stack/sct-results \
     -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY \
     $KAYOBE_IMAGE \
     /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/playbook-run.sh '$KAYOBE_CONFIG_PATH/ansible/tools/stackhpc-cloud-tests.yml' \

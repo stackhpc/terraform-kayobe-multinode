@@ -403,7 +403,7 @@ function run_sct() {
   # Remove any previous kayobe_sct container
   sudo docker rm kayobe_sct || true
 
-  sudo -E docker run -t --rm \
+  sudo -E docker run -t \
     --name kayobe_sct \
     -v ${config_directories[kayobe]}:/stack/kayobe-automation-env/src/kayobe-config \
     -v $sct_dir:/stack/sct-results \

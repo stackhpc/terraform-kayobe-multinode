@@ -377,9 +377,73 @@ function run_tempest() {
   echo "Tempest testing successful"
 }
 
+function run_sct() {
+# Run SCT. Return non-zero if any tests failed.
+
+  sct_dir="$HOME/sct-results"
+
+  seed_ssh=$(get_seed_ssh)
+
+  git -C ${config_directories[kayobe]} submodule init
+  git -C ${config_directories[kayobe]} submodule update
+
+  build_kayobe_image
+
+  set +x
+  export KAYOBE_AUTOMATION_SSH_PRIVATE_KEY=$(cat ~/.ssh/id_rsa)
+  set -x
+
+  if [[ -d $sct_dir ]]; then
+    sct_backup=${sct_dir}-$(date +%Y%m%dT%H%M%S)
+    echo "Found previous SCT results"
+    echo "Moving to $sct_backup"
+    mv $sct_dir $sct_backup
+  fi
+
+  # Remove any previous kayobe_sct container
+  sudo docker rm kayobe_sct || true
+
+  sudo docker run -t --rm \
+    --name kayobe_sct \
+    -v $(pwd):/stack/kayobe-automation-env/src/kayobe-config \
+    -v $(pwd)/sct-results:/stack/sct-results \
+    -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY \
+    $KAYOBE_IMAGE \
+    /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/playbook-run.sh '$KAYOBE_CONFIG_PATH/ansible/tools/stackhpc-cloud-tests.yml' \
+    -e sct_version=0.2.0
+
+  if ! ssh -oStrictHostKeyChecking=no ${seed_ssh} 'sudo docker logs --follow sct'; then
+    echo "Failed to follow SCT container logs"
+    echo "Ignoring - this may or may not indicate an error"
+  fi
+
+  # Wait for Kayobe SCT pipeline to complete to ensure artifacts exist.
+  kayobe_sct_rc="$(sudo docker container wait kayobe_sct)"
+  if [[ $kayobe_sct_rc != "0" ]]; then
+    echo "Failed running kayobe_sct container. Output:"
+    sudo docker logs kayobe_sct
+  fi
+  sudo docker rm kayobe_sct
+
+  if [[ ! -f $sct_dir/failed-tests ]]; then
+    echo "Unable to find SCT results in $sct_dir/failed-tests"
+    return 1
+  fi
+
+  if [[ $(wc -l < $sct_dir/failed-tests) -ne 0 ]]; then
+    echo "Some SCT tests failed"
+    return 1
+  fi
+
+  echo "SCT testing successful"
+}
+
 function run_tests() {
   rc=0
   if ! run_tempest; then
+    rc=1
+  fi
+  if ! run_sct; then
     rc=1
   fi
   return $rc

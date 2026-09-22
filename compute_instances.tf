@@ -159,6 +159,15 @@ resource "openstack_compute_instance_v2" "storage" {
       volume_type = var.volume_type == "" ? null : var.volume_type
     }
   }
+  block_device {
+    uuid                  = null
+    source_type           = "blank"
+    destination_type      = "volume"
+    volume_size           = 40
+    boot_index            = -1
+    delete_on_termination = true
+    volume_type           = var.volume_type == "" ? null : var.volume_type
+  }
   timeouts {
     create = "90m"
   }

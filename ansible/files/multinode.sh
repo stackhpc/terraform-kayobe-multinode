@@ -377,9 +377,43 @@ function run_tempest() {
   echo "Tempest testing successful"
 }
 
+function run_sct() {
+  # Run SCT on the seed. Return non-zero if any tests failed.
+  cd
+  seed_ssh=$(get_seed_ssh)
+
+  # TODO: edit file paths to point to automation
+  # Copy kayobe config, SCT script, venvs and ssh keys to the seed.
+  scp -r ${config_directories[kayobe]}/ $seed_ssh:~/
+  scp $HOME/stackhpc-cloud-tests.sh $seed_ssh:~/
+  scp $HOME/setup-cloud-tests.sh $seed_ssh:~/
+  scp $HOME/.ssh/id_rsa* $seed_ssh:~/.ssh/
+  scp $HOME/vault.password $seed_ssh:~/
+  # Set file permissions
+  ssh $seed_ssh sudo chmod +x /home/stack/stackhpc-cloud-tests.sh /home/stack/setup-cloud-tests.sh
+  # Run SCT on the seed.
+  if ! ssh $seed_ssh /home/stack/setup-cloud-tests.sh; then
+    return 1
+  fi
+
+  # Clean up files that were copied over
+  if ! ssh $seed_ssh rm -rf /home/stack/kayobe-config/; then
+    echo "Kayobe config files could not be cleaned up!"
+    return 1
+  fi
+  if ! ssh $seed_ssh rm stackhpc-cloud-tests.sh setup-cloud-tests.sh; then
+    echo "SCT scripts could not be cleaned up!"
+    return 1
+  fi
+
+}
+
 function run_tests() {
   rc=0
   if ! run_tempest; then
+    rc=1
+  fi
+  if ! run_sct; then
     rc=1
   fi
   return $rc
@@ -455,6 +489,7 @@ function usage() {
   echo "  create_resources"
   echo "  build_kayobe_image"
   echo "  run_tempest"
+  echo "  run_sct"
   echo "  upgrade_overcloud"
   echo "  upgrade_prerequisites"
   echo "  minor_upgrade"
@@ -480,7 +515,7 @@ function main() {
       $cmd
       ;;
     # Standard commands.
-    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud|upgrade_prerequisites|minor_upgrade)
+    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|run_sct|upgrade_overcloud|upgrade_prerequisites|minor_upgrade)
       setup
       $cmd
       report_success

@@ -307,6 +307,75 @@ function build_kayobe_image() {
   fi
 }
 
+function run_tempest_manila() {
+  # Run Tempest tests for Manila. Return non-zero if any tests failed.
+  manila_tempest_dir="$HOME/manila-tempest-artifacts"
+
+  seed_ssh=$(get_seed_ssh)
+
+  git -C ${config_directories[kayobe]} submodule init
+  git -C ${config_directories[kayobe]} submodule update
+
+  build_kayobe_image
+
+  set +x
+  export KAYOBE_AUTOMATION_SSH_PRIVATE_KEY=$(cat ~/.ssh/id_rsa)
+  set -x
+
+  if [[ -d $manila_tempest_dir ]]; then
+    manila_tempest_backup=${manila_tempest_dir}-$(date +%Y%m%dT%H%M%S)
+    echo "Found previous Manila Tempest test results"
+    echo "Moving to $manila_tempest_backup"
+    mv $manila_tempest_dir $manila_tempest_backup
+  fi
+
+  # Remove any previous kayobe_manila_tempest container
+  sudo docker rm kayobe_manila_tempest || true
+  
+  # Set load list for manila tests
+  export KAYOBE_AUTOMATION_TEMPEST_LOADLIST=manila
+
+  # Run tempest
+  sudo -E docker run \
+    --name kayobe_manila_tempest \
+    --detach --network host \
+    -v ${config_directories[kayobe]}:/stack/kayobe-automation-env/src/kayobe-config \
+    -v $manila_tempest_dir:/stack/manila-tempest-artifacts \
+    -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY -e KAYOBE_AUTOMATION_TEMPEST_LOADLIST \
+    kayobe:latest \
+    /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/tempest.sh \
+    -e ansible_user=stack
+
+  # During the initial deployment the seed node must receive the `gwee/rally` image before we can follow the logs.
+  # Therefore, we must wait a reasonable amount time before attempting to do so.
+  sleep 360
+
+  if ! ssh -oStrictHostKeyChecking=no ${seed_ssh} 'sudo docker logs --follow tempest'; then
+    echo "Failed to follow Manila Tempest container logs after waiting 360 seconds"
+    echo "Ignoring - this may or may not indicate an error"
+  fi
+
+  # Wait for Kayobe Tempest pipeline to complete to ensure artifacts exist.
+  kayobe_manila_tempest_rc="$(sudo docker container wait kayobe_manila_tempest)"
+  if [[ $kayobe_manila_tempest_rc != "0" ]]; then
+    echo "Failed running kayobe_manila_tempest container. Output:"
+    sudo docker logs kayobe_manila_tempest
+  fi
+  sudo docker rm kayobe_manila_tempest
+
+  if [[ ! -f $manila_tempest_dir/failed-tests ]]; then
+    echo "Unable to find Manila Tempest test results in $manila_tempest_dir/failed-tests"
+    return 1
+  fi
+
+  if [[ $(wc -l < $manila_tempest_dir/failed-tests) -ne 0 ]]; then
+    echo "Some Manila Tempest tests failed"
+    return 1
+  fi
+
+  echo "Manila Tempest testing successful"
+}
+
 function run_tempest() {
   # Run Tempest test suite. Return non-zero if any tests failed.
 
@@ -391,6 +460,9 @@ function run_sct() {
 function run_tests() {
   rc=0
   if ! run_tempest; then
+    rc=1
+  fi
+  if ! run_tempest_manila; then
     rc=1
   fi
   if ! run_sct; then
@@ -495,7 +567,7 @@ function main() {
       $cmd
       ;;
     # Standard commands.
-    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|run_sct|upgrade_overcloud|upgrade_prerequisites|minor_upgrade)
+    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|run_tempest_manila|run_sct|upgrade_overcloud|upgrade_prerequisites|minor_upgrade)
       setup
       $cmd
       report_success

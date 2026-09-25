@@ -246,6 +246,15 @@ function generate_barbican_secrets() {
   rm /tmp/barbican-role-id
 }
 
+function deploy_manila_cephfs() {
+  # deploy manila with cephfs native backend on the overcloud
+  run_kayobe_playbook $KAYOBE_CONFIG_PATH/ansible/ceph/cephadm-pools.yml
+  run_kayobe_playbook $KAYOBE_CONFIG_PATH/ansible/ceph/cephadm-keys.yml
+  run_kayobe_playbook $KAYOBE_CONFIG_PATH/ansible/ceph/cephadm-commands-post.yml
+  run_kayobe_playbook $KAYOBE_CONFIG_PATH/ansible/ceph/cephadm-gather-keys.yml
+  run_kayobe seed host configure -t network,ip-allocation,snat
+}
+
 function deploy_overcloud() {
   run_kayobe overcloud host configure
 
@@ -258,6 +267,8 @@ function deploy_overcloud() {
   generate_overcloud_certs
 
   generate_barbican_secrets
+
+  deploy_manila_cephfs
 
   # Deploy all services
   run_kayobe overcloud service deploy

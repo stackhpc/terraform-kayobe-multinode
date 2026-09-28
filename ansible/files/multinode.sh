@@ -382,11 +382,14 @@ function run_sct() {
   cd
   seed_ssh=$(get_seed_ssh)
 
-  # TODO: edit file paths to point to automation
   # Copy kayobe config, SCT script, venvs and ssh keys to the seed.
+  git clone https://github.com/stackhpc/kayobe-automation.git
+  cd kayobe-automation
+  git checkout origin/stackhpc-cloud-tests
+  cd
   scp -r ${config_directories[kayobe]}/ $seed_ssh:~/
-  scp $HOME/stackhpc-cloud-tests.sh $seed_ssh:~/
-  scp $HOME/setup-cloud-tests.sh $seed_ssh:~/
+  scp $HOME/kayobe-automation/scripts/stackhpc-cloud-tests.sh $seed_ssh:~/
+  scp $HOME/kayobe-automation/scripts/setup-cloud-tests.sh $seed_ssh:~/
   scp $HOME/.ssh/id_rsa* $seed_ssh:~/.ssh/
   scp $HOME/vault.password $seed_ssh:~/
   # Set file permissions

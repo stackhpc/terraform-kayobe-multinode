@@ -441,6 +441,12 @@ function minor_upgrade() {
   run_kayobe overcloud service deploy
 }
 
+function oslo_config_validator() {
+    # Run the Oslo Config Validator, results are downloaded to the workflow runner and parsed to be sent as Github Checks.
+
+    run_kayobe overcloud service configuration validate --output-dir $HOME/oslo-config-validator-results
+}
+
 function usage() {
   set +x
 
@@ -480,7 +486,7 @@ function main() {
       $cmd
       ;;
     # Standard commands.
-    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud|upgrade_prerequisites|minor_upgrade)
+    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud|upgrade_prerequisites|minor_upgrade|oslo_config_validator)
       setup
       $cmd
       report_success

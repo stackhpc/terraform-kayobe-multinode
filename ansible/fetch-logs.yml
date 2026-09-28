@@ -78,3 +78,15 @@
         # For jump host
         use_ssh_args: true
       loop: "{{ find_tempest_results.files }}"
+
+    - name: Fetch oslo config validator results
+      ansible.posix.synchronize:
+        src: "/home/{{ ansible_user }}/oslo-config-validator-results"
+        dest: "{{ fetch_logs_dest }}/"
+        mode: pull
+        archive: no
+        recursive: true
+        copy_links: true
+        verify_host: true
+        # For jump host
+        use_ssh_args: true

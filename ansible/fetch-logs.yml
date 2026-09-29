@@ -80,6 +80,7 @@
       loop: "{{ find_tempest_results.files }}"
 
     - name: Fetch oslo config validator results
+      ignore_errors: true # Will fail if we skipped running oslo config validator because of a previous error
       ansible.posix.synchronize:
         src: "/home/{{ ansible_user }}/oslo-config-validator-results"
         dest: "{{ fetch_logs_dest }}/"

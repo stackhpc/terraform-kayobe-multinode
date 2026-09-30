@@ -246,6 +246,15 @@ function generate_barbican_secrets() {
   rm /tmp/barbican-role-id
 }
 
+function deploy_manila_cephfs() {
+  # deploy manila with cephfs native backend on the overcloud
+  run_kayobe_playbook ceph cephadm-pools.yml
+  run_kayobe_playbook ceph cephadm-keys.yml
+  run_kayobe_playbook ceph cephadm-commands-post.yml
+  run_kayobe_playbook ceph cephadm-gather-keys.yml
+  run_kayobe seed host configure -t network,ip-allocation,snat
+}
+
 function deploy_overcloud() {
   run_kayobe overcloud host configure
 
@@ -258,6 +267,8 @@ function deploy_overcloud() {
   generate_overcloud_certs
 
   generate_barbican_secrets
+
+  deploy_manila_cephfs
 
   # Deploy all services
   run_kayobe overcloud service deploy
@@ -307,6 +318,76 @@ function build_kayobe_image() {
       --file ${config_directories[kayobe]}/.automation/docker/kayobe/Dockerfile \
       --tag kayobe:latest \
       ${config_directories[kayobe]}
+  fi
+}
+
+function test_manila() {
+  # Test manila is working
+  activate_virt_env "openstack"
+
+  if ! $(wget https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img && \
+    openstack image create --container-format bare --disk-format qcow2 --file noble-server-cloudimg-amd64.img Ubuntu-24.04 --progress && \
+    openstack keypair create --private-key ~/.ssh/id_rsa id_rsa && \
+    openstack server create --flavor m1.small --image Ubuntu-24.04 --key-name id_rsa --network admin-tenant ubuntu-client-1 && \
+    openstack server create --flavor m1.small --image Ubuntu-24.04 --key-name id_rsa --network admin-tenant ubuntu-client-2); then
+    echo "Failed to create virtual machines."
+    return 1
+  fi
+
+  # wait until the vms are "active"
+  sleep 360
+  
+  floating_1 = $(openstack floating ip create external -f shell | grep floating_ip_address | awk -F'=' '{print $2}')
+  openstack server add floating ip ubuntu-client-1 ${floating_1}
+  
+  floating_2 = $(openstack floating ip create external -f shell | grep floating_ip_address | awk -F'=' '{print $2}')
+  openstack server add floating ip ubuntu-client-2 ${floating_2}
+  
+  if ! ssh ubuntu@${floating_1} 'sudo apt update && sudo apt install -y ceph-common'; then
+    echo "Failed to install ceph package on ubuntu-client-1"
+    return 1
+  fi
+  
+  if ! ssh ubuntu@${floating_2} 'sudo apt update && sudo apt install -y ceph-common'; then
+    echo "Failed to install ceph package on ubuntu-client-1"
+    return 1
+  fi
+
+  if ! pip install python-manilaclient; then
+    echo "Failed to install manila client package"
+    return 1
+  fi
+  
+  if $(openstack share type create cephfs-type false --public true; \
+    openstack share type set cephfs-type --extra-specs vendor_name=Ceph, storage_protocol=CEPHFS; \
+    openstack share create --name test-share --share-type cephfs-type --public true CephFS 2); then
+    echo "Failed to create ceph shares"
+    return 1
+  fi
+
+  # wait until share is "available"
+  sleep 360
+  
+  openstack share access create test-share cephx ubuntu
+  openstack share access create test-share cephx stack
+  
+  access_key = $(openstack share access list test-share -f shell | grep access_key | awk -F'=' '{print $2}')
+  
+  path = $(openstack share export location list test-share -f shell | grep path | awk -F'=' '{print $2}')
+  
+  if ! ssh ubuntu@${floating_1} 'mkdir testdir && sudo mount -t ceph ${path} -o name=ubuntu,secret=${access_key} testdir; && sudo touch testdir/testfile'; then
+    echo "Failed to mount and use ceph share"
+    return 1
+  fi
+  
+  if ! ssh ubuntu@${floating_2} 'mkdir testdir && sudo mount -t ceph ${path} -o name=stack,secret=${access_key} testdir'; then
+    echo "Failed to mount and use ceph share"
+    return 1
+  fi
+
+  if ! ssh ubuntu@${floating_2} 'ls testdir | grep testfile'; then
+    echo "Failed to access ceph share"
+    return 1
   fi
 }
 
@@ -395,6 +476,7 @@ function deploy_full() {
   fi
   create_resources
   run_tests
+  test_manila
 }
 
 function upgrade_overcloud() {

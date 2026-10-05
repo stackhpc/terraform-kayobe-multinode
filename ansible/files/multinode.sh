@@ -131,9 +131,6 @@ function run_kayobe_playbook() {
 }
 
 function deploy_seed() {
-  # Install extra kernel modules on hosts. TODO(rowan): this should be removed once fixes are done upstream
-  run_kayobe playbook run ~/venvs/kayobe/share/kayobe/ansible/ssh-known-host.yml
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/install-kernel-modules.yml
   run_kayobe seed host configure
 }
 

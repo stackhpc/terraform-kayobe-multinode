@@ -383,7 +383,7 @@ function run_sct() {
   seed_ssh=$(get_seed_ssh)
 
   # Set SCT runner group in inventory
-  sed -i "/\[sct_runner\]/a $(grep .*-controller-01 etc/kolla/inventory/overcloud/hosts | head -1)" $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/inventory/kayobe-automation
+  sed -i "/\[sct_runner\]/a $(grep .*-controller-01 ~/src/kayobe-config/etc/kolla/inventory/overcloud/hosts | head -1)" $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/inventory/kayobe-automation
 
   # Copy kayobe config, SCT script, venvs and ssh keys to the seed.
   git clone https://github.com/stackhpc/kayobe-automation.git

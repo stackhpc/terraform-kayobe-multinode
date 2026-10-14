@@ -243,6 +243,26 @@ function generate_barbican_secrets() {
   rm /tmp/barbican-role-id
 }
 
+function amphora_driver_enabled() {
+  # Skipped unless the amphora driver is in use.
+  ! run_kayobe configuration dump --var-name kolla_enable_ovn | grep -qi true
+}
+
+function generate_octavia_certs() {
+  # Octavia's control plane and the amphorae authenticate to each other with
+  # mutual TLS so the CA and client certificate must exist before service
+  # deploy copies them into the containers.
+  run_kayobe kolla ansible run octavia-certificates \
+    -ke node_custom_config="$KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/config"
+}
+
+function register_amphora_image() {
+  set +x
+  source $KOLLA_CONFIG_PATH/octavia-openrc.sh
+  set -x
+  run_kayobe_playbook maintenance octavia-amphora-image-register.yml
+}
+
 function deploy_overcloud() {
   run_kayobe overcloud host configure
 
@@ -254,10 +274,19 @@ function deploy_overcloud() {
 
   generate_overcloud_certs
 
+  if amphora_driver_enabled; then
+    generate_octavia_certs
+  fi
+
   generate_barbican_secrets
 
   # Deploy all services
   run_kayobe overcloud service deploy
+
+  # Glance and Keystone must be running to register the image.
+  if amphora_driver_enabled; then
+    register_amphora_image
+  fi
 
   copy_ca_to_seed
 }

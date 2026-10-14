@@ -243,6 +243,29 @@ function generate_barbican_secrets() {
   rm /tmp/barbican-role-id
 }
 
+function amphora_driver_enabled() {
+  # Skipped unless the amphora driver is in use.
+  local ovn
+  ovn=$(run_kayobe configuration dump --host controllers[0] --var-name kolla_enable_ovn) \
+    || { echo "Could not determine kolla_enable_ovn; skipping Octavia setup."; return 1; }
+  ! grep -qi true <<< "$ovn"
+}
+
+function generate_octavia_certs() {
+  # Octavia's control plane and the amphorae authenticate to each other with
+  # mutual TLS so the CA and client certificate must exist before service
+  # deploy copies them into the containers.
+  run_kayobe kolla ansible run octavia-certificates \
+    -ke node_custom_config="$KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/kolla/config"
+}
+
+function register_amphora_image() {
+  set +x
+  source $KOLLA_CONFIG_PATH/octavia-openrc.sh
+  set -x
+  run_kayobe_playbook maintenance octavia-amphora-image-register.yml
+}
+
 function deploy_overcloud() {
   run_kayobe overcloud host configure
 
@@ -254,10 +277,19 @@ function deploy_overcloud() {
 
   generate_overcloud_certs
 
+  if amphora_driver_enabled; then
+    generate_octavia_certs
+  fi
+
   generate_barbican_secrets
 
   # Deploy all services
   run_kayobe overcloud service deploy
+
+  # Glance and Keystone must be running to register the image.
+  if amphora_driver_enabled; then
+    register_amphora_image
+  fi
 
   copy_ca_to_seed
 }
@@ -309,8 +341,18 @@ function build_kayobe_image() {
 
 function run_tempest() {
   # Run Tempest test suite. Return non-zero if any tests failed.
+  # Usage: run_tempest [load list]
+
+  # "default" is the load list that config.sh falls back to, so 
+  # existing behaviour is preserved here
+  local loadlist=${1:-default}
+  export KAYOBE_AUTOMATION_TEMPEST_LOADLIST=$loadlist
 
   tempest_dir="$HOME/tempest-artifacts"
+  if [[ $loadlist != default ]]; then
+    # Keep each load list's results separate
+    tempest_dir="$tempest_dir-$loadlist"
+  fi
 
   seed_ssh=$(get_seed_ssh)
 
@@ -340,6 +382,7 @@ function run_tempest() {
     -v ${config_directories[kayobe]}:/stack/kayobe-automation-env/src/kayobe-config \
     -v $tempest_dir:/stack/tempest-artifacts \
     -e KAYOBE_ENVIRONMENT -e KAYOBE_VAULT_PASSWORD -e KAYOBE_AUTOMATION_SSH_PRIVATE_KEY \
+    -e KAYOBE_AUTOMATION_TEMPEST_LOADLIST \
     kayobe:latest \
     /stack/kayobe-automation-env/src/kayobe-config/.automation/pipeline/tempest.sh \
     -e ansible_user=stack
@@ -374,10 +417,23 @@ function run_tempest() {
   echo "Tempest testing successful"
 }
 
+function octavia_tempest_supported() {
+  # Only run the Octavia load list when the amphora driver is in use.
+  # Second check is for upgrade jobs where an older version might not have
+  # the tempest override file for Octavia
+  local overrides="${config_directories[kayobe]}/.automation.conf/tempest/tempest-${KAYOBE_ENVIRONMENT}-octavia-smoke.overrides.conf"
+  amphora_driver_enabled && [[ -f $overrides ]]
+}
+
 function run_tests() {
   rc=0
   if ! run_tempest; then
     rc=1
+  fi
+  if octavia_tempest_supported; then
+    if ! run_tempest octavia-smoke; then
+      rc=1
+    fi
   fi
   return $rc
 }

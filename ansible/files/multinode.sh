@@ -464,6 +464,7 @@ function usage() {
   echo "  upgrade_overcloud"
   echo "  upgrade_prerequisites"
   echo "  minor_upgrade"
+  echo "  oslo_config_validator"
 }
 
 function main() {

@@ -245,10 +245,10 @@ function generate_barbican_secrets() {
 
 function amphora_driver_enabled() {
   # Skipped unless the amphora driver is in use.
-  local ovn
-  ovn=$(run_kayobe configuration dump --host controllers[0] --var-name kolla_enable_ovn) \
-    || { echo "Could not determine kolla_enable_ovn; skipping Octavia setup."; return 1; }
-  ! grep -qi true <<< "$ovn"
+  local amphora
+  amphora=$(run_kayobe configuration dump --host controllers[0] --var-name octavia_amphora_driver_enabled) \
+    || { echo "Could not determine octavia_amphora_driver_enabled; skipping Octavia setup."; return 1; }
+  grep -qi true <<< "$amphora"
 }
 
 function generate_octavia_certs() {

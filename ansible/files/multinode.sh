@@ -131,9 +131,6 @@ function run_kayobe_playbook() {
 }
 
 function deploy_seed() {
-  # Install extra kernel modules on hosts. TODO(rowan): this should be removed once fixes are done upstream
-  run_kayobe playbook run ~/venvs/kayobe/share/kayobe/ansible/ssh-known-host.yml
-  run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/install-kernel-modules.yml
   run_kayobe seed host configure
 }
 
@@ -377,9 +374,26 @@ function run_tempest() {
   echo "Tempest testing successful"
 }
 
+function run_sct() {
+  # Run SCT. Return non-zero if any tests failed.
+
+  # Set SCT runner group in inventory (needs to be templated because each multinode cluster has a non-deterministic prefix)
+  sed -i "/\[sct_runner\]/a $(grep .*-controller-01 ~/src/kayobe-config/etc/kolla/inventory/overcloud/hosts | head -1)" $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/inventory/kayobe-automation
+  
+  if ! run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/tools/stackhpc-cloud-tests.yml -e sct_version=main -e skip_sct=ntp; then
+    echo "Cloud testing failed"
+    return 1
+  fi
+
+  echo "Cloud testing successful"
+}
+
 function run_tests() {
   rc=0
   if ! run_tempest; then
+    rc=1
+  fi
+  if ! run_sct; then
     rc=1
   fi
   return $rc
@@ -461,6 +475,7 @@ function usage() {
   echo "  create_resources"
   echo "  build_kayobe_image"
   echo "  run_tempest"
+  echo "  run_sct"
   echo "  upgrade_overcloud"
   echo "  upgrade_prerequisites"
   echo "  minor_upgrade"
@@ -487,7 +502,7 @@ function main() {
       $cmd
       ;;
     # Standard commands.
-    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|upgrade_overcloud|upgrade_prerequisites|minor_upgrade|oslo_config_validator)
+    (build_kayobe_image|deploy_full|deploy_seed|deploy_overcloud|deploy_wazuh|create_resources|run_tempest|run_sct|upgrade_overcloud|upgrade_prerequisites|minor_upgrade|oslo_config_validator)
       setup
       $cmd
       report_success

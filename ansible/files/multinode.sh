@@ -458,7 +458,7 @@ function minor_upgrade() {
 function oslo_config_validator() {
     # Run the Oslo Config Validator, results are downloaded to the workflow runner and parsed to be sent as Github Checks.
 
-    run_kayobe overcloud service configuration validate --output-dir $HOME/oslo-config-validator-results
+    run_kayobe overcloud service configuration validate --output-dir "$HOME/oslo-config-validator-results"
 }
 
 function usage() {

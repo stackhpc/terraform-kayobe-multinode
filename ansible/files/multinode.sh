@@ -418,11 +418,19 @@ function run_tempest() {
 }
 
 function octavia_tempest_supported() {
-  # Only run the Octavia load list when the amphora driver is in use.
-  # Second check is for upgrade jobs where an older version might not have
-  # the tempest override file for Octavia
-  local overrides="${config_directories[kayobe]}/.automation.conf/tempest/tempest-${KAYOBE_ENVIRONMENT}-octavia-smoke.overrides.conf"
-  amphora_driver_enabled && [[ -f $overrides ]]
+  # Upgrade jobs deploy the previous config first, which may predate the
+  # Octavia Tempest settings.
+  local overrides="${config_directories[kayobe]}/.automation.conf/tempest/tempest-${KAYOBE_ENVIRONMENT}.overrides.conf"
+  grep -q '^\[load_balancer\]' "$overrides" 2>/dev/null
+}
+
+function ovn_driver_enabled() {
+  # The OVN provider driver needs an OVN deployment. Mirrors the condition on
+  # octavia_provider_drivers, which is kolla passthrough and so cannot be dumped.
+  local ovn
+  ovn=$(run_kayobe configuration dump --host controllers[0] --var-name kolla_enable_ovn) \
+    || { echo "Could not determine kolla_enable_ovn; skipping Octavia OVN tests."; return 1; }
+  grep -qi true <<< "$ovn"
 }
 
 function run_sct() {
@@ -445,8 +453,17 @@ function run_tests() {
     rc=1
   fi
   if octavia_tempest_supported; then
-    if ! run_tempest octavia-smoke; then
-      rc=1
+    # One load list per enabled driver, because load_balancer.provider in the
+    # Tempest overrides takes a single value.
+    if amphora_driver_enabled; then
+      if ! run_tempest octavia-smoke; then
+        rc=1
+      fi
+    fi
+    if ovn_driver_enabled; then
+      if ! run_tempest octavia-ovn-smoke; then
+        rc=1
+      fi
     fi
   fi
   if ! run_sct; then

@@ -53,6 +53,12 @@ variable "ansible_control_vm_flavor" {
   type = string
 }
 
+variable "ansible_control_security_groups" {
+  description = "Security groups to apply to the Ansible control host port. Neutron only applies the default group when none are given, so list it explicitly to keep it."
+  type = list(string)
+  default = ["default"]
+}
+
 variable "multinode_flavor" {
   description = "OpenStack flavor to use for the controller and compute hosts"
   type = string

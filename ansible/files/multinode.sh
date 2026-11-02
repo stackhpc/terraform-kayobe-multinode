@@ -255,10 +255,10 @@ function configure_ceph_rgw() {
   # RGWs authenticate to Keystone over internal TLS, so they need the OpenStack
   # CA in their container trust store. The CA does not exist until the
   # certificates have been generated, which is after Ceph is deployed, so
-  # install it on the Ceph hosts now and re-run the post-deployment commands,
-  # which end by recreating the RGW daemons.
+  # install it on the Ceph hosts now and recreate the RGW daemons to pick it up.
+  # Only the redeploy is re-run
   run_kayobe_playbook deployment copy-ca-to-hosts.yml
-  run_kayobe_playbook ceph cephadm-commands-post.yml
+  run_kayobe_playbook ceph cephadm-commands-post.yml -e cephadm_commands_post='["orch redeploy rgw.myrgw"]'
 }
 
 function deploy_overcloud() {

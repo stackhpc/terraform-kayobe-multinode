@@ -243,6 +243,24 @@ function generate_barbican_secrets() {
   rm /tmp/barbican-role-id
 }
 
+function ceph_rgw_enabled() {
+  # Skipped unless Ceph RADOS Gateways are in use.
+  local rgw
+  rgw=$(run_kayobe configuration dump --host controllers[0] --var-name kolla_enable_ceph_rgw) \
+    || { echo "Could not determine kolla_enable_ceph_rgw; skipping RGW setup."; return 1; }
+  grep -qi true <<< "$rgw"
+}
+
+function configure_ceph_rgw() {
+  # RGWs authenticate to Keystone over internal TLS, so they need the OpenStack
+  # CA in their container trust store. The CA does not exist until the
+  # certificates have been generated, which is after Ceph is deployed, so
+  # install it on the Ceph hosts now and re-run the post-deployment commands,
+  # which end by recreating the RGW daemons.
+  run_kayobe_playbook deployment copy-ca-to-hosts.yml
+  run_kayobe_playbook ceph cephadm-commands-post.yml
+}
+
 function deploy_overcloud() {
   run_kayobe overcloud host configure
 
@@ -253,6 +271,10 @@ function deploy_overcloud() {
   deploy_overcloud_vault
 
   generate_overcloud_certs
+
+  if ceph_rgw_enabled; then
+    configure_ceph_rgw
+  fi
 
   generate_barbican_secrets
 

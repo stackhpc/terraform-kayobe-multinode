@@ -116,7 +116,9 @@ function workaround_ansible_rc13_bug() {
 
 function run_kayobe() {
   workaround_ansible_rc13_bug
-  kayobe $*
+  # Quoted, so that arguments containing spaces survive intact.
+  # 
+  kayobe "$@"
 }
 
 function run_kayobe_playbook() {
@@ -246,8 +248,7 @@ function generate_barbican_secrets() {
 function ceph_rgw_enabled() {
   # Skipped unless Ceph RADOS Gateways are in use.
   local rgw
-  rgw=$(run_kayobe configuration dump --host controllers[0] --var-name kolla_enable_ceph_rgw) \
-    || { echo "Could not determine kolla_enable_ceph_rgw; skipping RGW setup."; return 1; }
+  rgw=$(run_kayobe configuration dump --host controllers[0] --var-name kolla_enable_ceph_rgw) || { echo "Could not determine kolla_enable_ceph_rgw; skipping RGW setup."; return 1; }
   grep -qi true <<< "$rgw"
 }
 

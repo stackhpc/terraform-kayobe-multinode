@@ -4,8 +4,9 @@
   gather_facts: false
   vars:
     multinode_command: "deploy_full"
-    # 6 hours should be enough...
-    deployment_timeout_s: "{{ 6 * 60 * 60 }}"
+    # 6 hours possibly not enough with additional service testing added by default
+    # on a cloud without local access to Ark. Increased to 7
+    deployment_timeout_s: "{{ 7 * 60 * 60 }}"
     lock_path: /tmp/deploy-openstack.lock
     rc_path: /tmp/deploy-openstack.rc
     tmux_session: kayobe

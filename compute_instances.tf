@@ -2,8 +2,14 @@ data "openstack_networking_network_v2" "multinode_network" {
   name = var.multinode_vm_network
 }
 
+data "openstack_networking_secgroup_v2" "ansible_control" {
+  for_each = toset(var.ansible_control_security_groups)
+  name = each.value
+}
+
 resource "openstack_networking_port_v2" "ansible_control_port" {
   network_id = data.openstack_networking_network_v2.multinode_network.id
+  security_group_ids = [for sg in data.openstack_networking_secgroup_v2.ansible_control : sg.id]
 }
 
 resource "openstack_networking_floatingip_v2" "ansible_control_fip" {

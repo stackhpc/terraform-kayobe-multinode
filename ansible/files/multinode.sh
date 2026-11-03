@@ -257,9 +257,10 @@ function configure_ceph_rgw() {
   # CA in their container trust store. The CA does not exist until the
   # certificates have been generated, which is after Ceph is deployed, so
   # install it on the Ceph hosts now and recreate the RGW daemons to pick it up.
-  # Only the redeploy is re-run
+  # Only the redeploy is re-run, as the other post-deployment commands are potentially not
+  # all idempotent. JSON, because key=value extra vars are passed as strings.
   run_kayobe_playbook deployment copy-ca-to-hosts.yml
-  run_kayobe_playbook ceph cephadm-commands-post.yml -e cephadm_commands_post='["orch redeploy rgw.myrgw"]'
+  run_kayobe_playbook ceph cephadm-commands-post.yml -e '{"cephadm_commands_post": ["orch redeploy rgw.myrgw"]}'
 }
 
 function deploy_overcloud() {

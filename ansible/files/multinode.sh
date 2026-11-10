@@ -116,7 +116,9 @@ function workaround_ansible_rc13_bug() {
 
 function run_kayobe() {
   workaround_ansible_rc13_bug
-  kayobe $*
+  # Quoted, so that arguments containing spaces survive intact.
+  # 
+  kayobe "$@"
 }
 
 function run_kayobe_playbook() {
@@ -243,6 +245,21 @@ function generate_barbican_secrets() {
   rm /tmp/barbican-role-id
 }
 
+function ceph_rgw_enabled() {
+  # Skipped unless Ceph RADOS Gateways are in use.
+  local rgw
+  rgw=$(run_kayobe configuration dump --host controllers[0] --var-name kolla_enable_ceph_rgw) || { echo "Could not determine kolla_enable_ceph_rgw; skipping RGW setup."; return 1; }
+  grep -qi true <<< "$rgw"
+}
+
+function configure_ceph_rgw() {
+  # CA does not exist until the certificates have been generated, which is after 
+  # Ceph is deployed. Only the redeploy is re-run, as the other post-deployment
+  # commands are potentially not all idempotent
+  run_kayobe_playbook deployment copy-ca-to-hosts.yml
+  run_kayobe_playbook ceph cephadm-commands-post.yml -e '{"cephadm_commands_post": ["orch redeploy rgw.myrgw"]}'
+}
+
 function amphora_driver_enabled() {
   # Skipped unless the amphora driver is in use.
   local amphora
@@ -277,6 +294,10 @@ function deploy_overcloud() {
 
   generate_overcloud_certs
 
+  if ceph_rgw_enabled; then
+    configure_ceph_rgw
+  fi
+  
   if amphora_driver_enabled; then
     generate_octavia_certs
   fi

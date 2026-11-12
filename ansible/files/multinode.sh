@@ -377,10 +377,11 @@ function run_tempest() {
 function run_sct() {
   # Run SCT. Return non-zero if any tests failed.
 
-  # Set SCT runner group in inventory (needs to be templated because each multinode cluster has a non-deterministic prefix)
+  # Set SCT runner group in inventory (needs to be templated because each multinode cluster has a non-deterministic prefix).
   sed -i "/\[sct_runner\]/a $(grep .*-controller-01 ~/src/kayobe-config/etc/kolla/inventory/overcloud/hosts | head -1)" $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/inventory/kayobe-automation
   
-  if ! run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/tools/stackhpc-cloud-tests.yml -e sct_version=main -e skip_sct=ntp; then
+  # Skip NTP tests as they are not supported on multinode. Skip manila backend TLS tests as manila backend does not yet support TLS.
+  if ! run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/tools/stackhpc-cloud-tests.yml -e sct_version=main -e skip_sct=ntp -e skip_backends=manila_api_back,manila_api_external_back; then
     echo "Cloud testing failed"
     return 1
   fi

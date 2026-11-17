@@ -461,7 +461,7 @@ function run_sct() {
   sed -i "/\[sct_runner\]/a $(grep .*-controller-01 ~/src/kayobe-config/etc/kolla/inventory/overcloud/hosts | head -1)" $KAYOBE_CONFIG_PATH/environments/$KAYOBE_ENVIRONMENT/inventory/kayobe-automation
   
   # Skip NTP tests as they are not supported on multinode. Skip manila backend TLS tests as manila backend does not yet support TLS. Skip horizon redirect frontends as they use http.
-  if ! run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/tools/stackhpc-cloud-tests.yml -e sct_version=main -e skip_sct=ntp -e skip_backends=manila_api_back,manila_api_external_back -e skip_frontends=horizon_redirect_front,horizon_external_redirect_front; then
+  if ! run_kayobe playbook run $KAYOBE_CONFIG_PATH/ansible/tools/stackhpc-cloud-tests.yml -e sct_version=add-tls-testing -e skip_sct=ntp -e skip_backends=manila_api_back,manila_api_external_back -e skip_frontends=horizon_redirect_front,horizon_external_redirect_front; then
     echo "Cloud testing failed"
     return 1
   fi

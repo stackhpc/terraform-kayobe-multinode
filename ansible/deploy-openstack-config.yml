@@ -56,14 +56,6 @@
           - vim
         state: present
       become: true
-    
-    - name: Install kernel-modules-extra-matched on Rocky 10
-      ansible.builtin.package:
-        name:
-          - 'kernel-modules-extra-matched'
-        state: present
-      become: true
-      when: ansible_facts.os_family == 'RedHat' and ansible_facts.distribution_major_version == '10'
 
     - name: Ensure uuid-runtime is present (Ubuntu)
       ansible.builtin.package:
@@ -410,6 +402,20 @@
         src: files/openstack-inventory
         dest: "{{ src_directory }}/{{ openstack_config_name }}/ansible/inventory"
         mode: 0644
+
+    - name: Include vars of stuff.yaml into the 'stuff' variable (2.2).
+      ansible.builtin.include_vars: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/pulp.yml"
+      when: ansible_facts.os_family == 'RedHat' and ansible_facts.distribution_major_version == '10'
+
+    # Required for docker
+    - name: Install kernel-modules-extra-matched on Rocky 10
+      ansible.builtin.dnf:
+        name:
+          - 'kernel-modules-extra-matched'
+        state: present
+        releasever: "{{ stackhpc_pulp_repo_rocky_10_minor_version }}"
+      become: true
+      when: ansible_facts.os_family == 'RedHat' and ansible_facts.distribution_major_version == '10'
 
     - name: Ensure docker repository is present
       ansible.builtin.command:

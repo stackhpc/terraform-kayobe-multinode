@@ -403,7 +403,7 @@
         dest: "{{ src_directory }}/{{ openstack_config_name }}/ansible/inventory"
         mode: 0644
 
-    - name: Include vars of stuff.yaml into the 'stuff' variable (2.2).
+    - name: Include vars of pulp.yaml required for next task
       ansible.builtin.include_vars: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/pulp.yml"
       when: ansible_facts.os_family == 'RedHat' and ansible_facts.distribution_major_version == '10'
 

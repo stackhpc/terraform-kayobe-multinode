@@ -411,6 +411,20 @@
         dest: "{{ src_directory }}/{{ openstack_config_name }}/ansible/inventory"
         mode: 0644
 
+    - name: Include vars of pulp.yaml required for next task
+      ansible.builtin.include_vars: "{{ src_directory }}/{{ kayobe_config_name }}/etc/kayobe/pulp.yml"
+      when: ansible_facts.os_family == 'RedHat' and ansible_facts.distribution_major_version == '10'
+
+    # Required for docker
+    - name: Install kernel-modules-extra-matched on Rocky 10
+      ansible.builtin.dnf:
+        name:
+          - 'kernel-modules-extra-matched'
+        state: present
+        releasever: "{{ stackhpc_pulp_repo_rocky_10_minor_version }}"
+      become: true
+      when: ansible_facts.os_family == 'RedHat' and ansible_facts.distribution_major_version == '10'
+
     - name: Ensure docker repository is present
       ansible.builtin.command:
         cmd: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo

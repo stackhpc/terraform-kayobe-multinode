@@ -3,7 +3,5 @@
   tags: wait
 - import_playbook: grow-control-host.yml
   tags: lvm
-- import_playbook: reset-bls-entries.yml
-  tags: reset-bls-entries
 - import_playbook: deploy-openstack-config.yml
   tags: deploy
